@@ -1,0 +1,82 @@
+name: central-do-brasil
+
+source:
+  image: refs/dora-josue.png
+  crop: null                        # o enquadramento da foto já é o da arte
+
+text:
+  file: text/central-do-brasil.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 70                 # imagem deitada (1539x1022)
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150                   # -> página 119 x 93 cm (paisagem)
+
+titles:
+  title: "CENTRAL DO BRASIL"
+  subtitle: "WALTER SALLES · 1998 · DORA E JOSUÉ"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: true
+  color: "#A83A22"                  # o caminhão vermelho ao longe
+
+mask:
+  enabled: true
+  lum_threshold: 0.35               # ver notes: 0.56 traria o chão inteiro junto
+
+landscape:
+  enabled: true                     # a caatinga no horizonte, em contorno fino
+  band: [0.30, 0.70]
+  band_ramp: [0.06, 0.08]
+  edge_gain: 5.5
+  floor: 0.25
+
+style_preset: magalenha
+style_overrides:
+  font:
+    family: Bradley Hand ITC        # manuscrito: o filme é sobre cartas escritas à mão
+    base_line_mm: 5.4
+    size_min_mm: 2.4
+    size_max_ratio: 2.4
+  layout:
+    row_step_ratio: 0.72            # ver notes: compactar em vez de diminuir a letra
+    advance_factor: 0.86
+  mask:
+    interior_fill_min: 0.40
+  accent:
+    red_min: 40
+    red_delta: 15
+    central_x: [0.65, 0.90]
+    hit_threshold: 0.25
+
+notes: |
+  Das artes que fizemos, esta é a que mais se parece com o magalenha em
+  estrutura: duas figuras isoladas, fundo branco de verdade, paisagem em
+  contorno e um ponto de cor. As três camadas do motor trabalhando juntas.
+
+  `lum_threshold: 0.35` e não o default 0.56. Medi a foto: as silhuetas em
+  contraluz estão em lum 0.02-0.06, mas a estrada de terra está em 0.54 — com
+  o limiar default o chão inteiro entrava na máscara e as figuras perdiam o
+  recorte. Em 0.35 entram só as silhuetas, as sombras no chão (0.23) e o
+  caminhão (0.16). O chão fica branco.
+
+  Accent: o caminhão é escuro (r=56) e a terra da estrada é MUITO mais
+  "vermelha" pela regra (r-g=48 contra 20 do caminhão). Nenhum limiar de cor
+  separa os dois. Quem separa é a MÁSCARA: a estrada tem lum 0.54, fica fora,
+  e por isso fora do accent. Foi preciso baixar `red_min` para 40 (o caminhão
+  é escuro) e usar `central_x` para o lado direito.
+
+  Fonte manuscrita, como planejado — e funcionou: dá para ler as frases das
+  cartas dentro das silhuetas. Mas a Bradley Hand é uma fonte FINA, e no
+  primeiro teste as figuras saíram claras demais. A correção não foi diminuir
+  a letra (o Gustavo pediu letra maior): foi COMPACTAR — `row_step_ratio` de
+  0.9 para 0.72 e `advance_factor` de 0.98 para 0.86, mais
+  `size_max_ratio: 2.4`. Mesma letra, linhas mais juntas, mancha mais fechada.
+  Vale como receita geral para fontes leves.
+
+  Falas: vieram de agregador de citações, NÃO de transcrição do roteiro.
+  Conferir contra o filme antes de imprimir. Fonte:
+  https://queridojeito.com/frases/filmes/central-do-brasil

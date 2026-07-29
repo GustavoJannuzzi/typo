@@ -1,0 +1,10 @@
+# Ave Maria — oracao catolica tradicional.
+# Origem: arquivo fornecido pelo Gustavo (texto oracao.txt).
+# Uma frase por linha; linhas com # sao ignoradas pelo motor.
+Avé Maria, cheia de graça, 
+o Senhor é convosco, 
+bendita sois vós entre as mulheres 
+e bendito é o fruto do vosso ventre, Jesus. 
+Santa Maria, Mãe de Deus, 
+rogai por nós pecadores, 
+agora e na hora da nossa morte. Ámen

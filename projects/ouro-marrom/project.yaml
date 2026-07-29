@@ -1,0 +1,58 @@
+name: ouro-marrom
+
+source:
+  image: refs/capa.jpg
+  crop: [110, 160, 560, 640]        # tira o letreiro do álbum, mantém o halo dourado
+
+text:
+  file: text/ouro-marrom.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150                   # -> página 96 x 111 cm
+
+titles:
+  title: "OURO MARROM"
+  subtitle: "JOTA.PÊ · SE O MEU PEITO FOSSE O MUNDO"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: true
+  color: "#7E4E17"                  # ouro escurecido: precisa ter peso, não brilhar
+
+landscape:
+  enabled: false                    # fundo chapado, não há contorno para ler
+
+style_preset: magalenha
+style_overrides:
+  font:
+    family: Bookman Old Style       # serifa redonda, capa de disco de soul dos anos 70
+    base_line_mm: 3.4
+    size_gamma: 0.95                # <1 de propósito: levanta o meio-tom
+    bold_threshold: 0.55
+  mask:
+    interior_fill_min: 0.30
+  accent:
+    red_min: 70                     # a pele é escura: o limiar default (105) não pega
+    red_delta: 22
+    central_x: [0.28, 0.72]
+    hit_threshold: 0.35
+
+notes: |
+  Retrato do jota.pê na capa de "Se o meu peito fosse o mundo".
+
+  Ideia: o chapéu vira uma massa preta sólida (o halo), e a PELE é o accent —
+  "que essa pele marrom / suba o tom se for preciso". Por isso o accent não é
+  um detalhe de roupa como no magalenha: ele cobre o rosto e o pescoço inteiros.
+
+  Duas decisões contra-intuitivas:
+  - `size_gamma: 0.95` (menor que 1). O rosto é mais claro que o chapéu, então
+    com gamma alto ele recebia as menores letras e sumia. Gamma < 1 levanta o
+    meio-tom e devolve peso ao rosto.
+  - `accent.red_min: 70`. O default 105 foi calibrado para um vestido vermelho
+    saturado; pele escura não passa nesse limiar.
+
+  Paisagem desligada: o fundo é um círculo dourado chapado, não há contorno.

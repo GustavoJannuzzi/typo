@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# artes geradas — pesadas, e sempre reproduzíveis a partir do project.yaml
+projects/*/output/*
+!projects/*/output/.gitkeep
+
+# landing page (site/) — instalado via npm, buildado via vite
+site/node_modules/
+site/dist/
+site/.vite/
+

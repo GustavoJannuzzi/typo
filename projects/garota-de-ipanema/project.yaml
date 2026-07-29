@@ -1,0 +1,73 @@
+name: garota-de-ipanema
+
+source:
+  image: refs/ipanema.png
+  crop: [180, 480, 1000, 1310]      # exclui sobra de céu e areia vazia
+
+text:
+  file: text/garota-de-ipanema.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150
+
+titles:
+  title: "GAROTA DE IPANEMA"
+  subtitle: "TOM JOBIM · VINICIUS DE MORAES · 1962"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: true
+  color: "#C4452F"                  # o maiô laranja-tijolo
+
+mask:
+  enabled: true
+  lum_threshold: 0.42
+  interior_fill_min: 0.40
+
+landscape:
+  enabled: true                     # o Dois Irmãos em contorno fino
+  band: [0.03, 0.42]
+  band_ramp: [0.04, 0.07]
+  edge_gain: 9.0
+  floor: 0.14
+  shade_light: 185
+  shade_dark: 105
+
+style_preset: magalenha
+style_overrides:
+  font:
+    family: Tw Cen MT               # geométrica de 1937, "a Futura da mesa"
+    base_line_mm: 4.8               # letra grande, a pedido — ver notes
+    size_min_mm: 1.9
+    size_max_ratio: 2.0
+  accent:
+    red_min: 100
+    red_delta: 50
+    central_x: [0.30, 0.80]
+    hit_threshold: 0.25
+
+notes: |
+  Imagem: a garota andando de costas rumo ao mar, o morro Dois Irmãos ao
+  fundo — exatamente o par figura-isolada + paisagem-em-contorno que o motor
+  faz melhor. `lum_threshold: 0.42` separa a figura (lum 0.14-0.30) do morro
+  (lum 0.52-0.55) e do céu/areia (0.89-0.95) com folga — foi a máscara mais
+  limpa da fila até agora, sem precisar de ajuste fino.
+
+  CROP: o primeiro corte deixava muita areia vazia sobrando embaixo (a foto
+  tem bastante praia à frente dela) e um vão grande entre o morro e a figura.
+  Fechei duas vezes até o vão virar RESPIRO intencional em vez de espaço
+  morto — ela caminha para o vazio, o que conversa com "que também passa
+  sozinha" da letra. Se achar que ainda sobra areia embaixo, aperte o crop
+  em uns 40-60px no y1.
+
+  FONTE MAIOR (a pedido do Gustavo, aplicado nas três desta leva): 4.8mm de
+  altura de linha, contra os 3.8mm que eu tinha planejado inicialmente. Custa
+  definição da silhueta (menos linhas para descrever o contorno do corpo) mas
+  ganha legibilidade da letra — dá pra ler a letra da música de perto.
+
+  Accent no maiô. `red_min: 100` porque o laranja do maiô é bem saturado
+  (r-g=57), então não precisou baixar tanto quanto nas outras peles.

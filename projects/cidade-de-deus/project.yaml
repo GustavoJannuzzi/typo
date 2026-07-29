@@ -1,0 +1,86 @@
+name: cidade-de-deus
+
+source:
+  image: refs/buscape_sem_kanji.png # ver notes: kanji removido, resto preservado
+  crop: null
+
+text:
+  file: text/cidade-de-deus.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150
+
+titles:
+  title: ""                         # ver notes: o título já está DENTRO da arte
+  subtitle: "FERNANDO MEIRELLES · KÁTIA LUND · 2002"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: false                    # a arte é preto e branco puro, sem pixel colorido
+
+mask:
+  enabled: true
+  lum_threshold: 0.56               # imagem bitonal: qualquer limiar no meio serve
+
+landscape:
+  enabled: false
+
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: "#151311"
+  font:
+    family: Franklin Gothic Demi Cond   # grotesca condensada, peso de manchete
+    base_line_mm: 4.4                   # letra grande, a pedido
+    size_min_mm: 2.2
+    size_max_ratio: 1.9
+    bold_threshold: 0.42
+  mask:
+    interior_fill_min: 0.48
+
+notes: |
+  DECISÃO DE CROP: fiquei em dúvida entre recortar só a foto ou usar a
+  composição inteira. Testei as duas — a composição inteira (`crop: null`)
+  venceu de forma clara: o letreiro gigante "CIDADE DE DEUS" da capa original
+  vira LETRA FEITA DE LETRA, as tipas enormes preenchidas por frases
+  minúsculas. É o conceito do projeto aplicado à própria tipografia.
+
+  AJUSTE (feedback do Gustavo): a coluna de escrita japonesa do lado direito
+  da capa original não combinava com o resto — ele pediu para tirar, mas
+  manter tudo o mais. Medi a imagem (perfil de coluna por faixa de linha) e
+  descobri que a coluna de kanji fica isolada: x=631-729, restrita às linhas
+  0-607 (só na área da foto). O título não passa de x=562 e o selo
+  "PARENTAL ADVISORY" mora em x=645-714 mas nas linhas 760-894 (bem mais
+  embaixo, fora da faixa do kanji). Ou seja, cortar a LARGURA da imagem para
+  tirar o kanji também cortaria o selo fora — que o Gustavo não pediu para
+  tirar.
+
+  Por isso, em vez de um crop retangular, criei `refs/buscape_sem_kanji.png`:
+  uma cópia com um retângulo branco pintado só sobre a região do kanji
+  (x 620-735, y 0-615, com folga pra pegar o antialiasing das bordas dos
+  caracteres). O resto do arquivo — foto, título, selo — é pixel-a-pixel
+  igual ao `buscape.jpg` original. Script usado:
+  scripts sao descartaveis, mas o retangulo foi: PIL.ImageDraw.rectangle(
+  [620, 0, 735, 615], fill=(255,255,255)) sobre uma copia RGB do jpg original.
+
+  `buscape.jpg` continua na pasta como o arquivo original, caso precise
+  refazer o recorte de outro jeito.
+
+  Por isso `titles.title: ""` — sem título separado no cabeçalho do poster.
+  O nome do filme já está dentro da arte, repetir seria redundante. Mantive
+  só o subtítulo (diretores/ano) e o rodapé de crédito.
+
+  Máscara: a arte que o Gustavo fez já vem posterizada, quase bitonal de
+  verdade (fundo ~0.95, figura/texto ~0.26-0.34). Foi a máscara mais fácil
+  da fila inteira — qualquer limiar entre 0.4 e 0.7 dá o mesmo recorte, sem
+  precisar afinar feito nas outras.
+
+  Accent desligado: não há um único pixel colorido na imagem (r=g=b em
+  tudo), a regra de accent por vermelho não tem o que pegar.
+
+  Falas: escolhidas pelo Gustavo, substituindo a lista que eu tinha
+  pesquisado no Wikiquote.

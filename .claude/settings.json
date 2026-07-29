@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(.venv/bin/python:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(scripts/run_ui.sh:*)",
+      "PowerShell(.\\.venv\\Scripts\\python.exe:*)",
+      "PowerShell(python:*)",
+      "Read(./**)",
+      "Edit(./src/**)",
+      "Edit(./app/**)",
+      "Edit(./scripts/**)",
+      "Edit(./tests/**)",
+      "Edit(./projects/**)",
+      "Edit(./skills/**)",
+      "Write(./projects/**)",
+      "Write(./src/**)",
+      "Write(./app/**)",
+      "Write(./tests/**)"
+    ],
+    "ask": [
+      "Bash(rm:*)",
+      "PowerShell(Remove-Item:*)",
+      "Edit(./print_v4.py)",
+      "Write(./print_v4.py)"
+    ],
+    "deny": [
+      "WebFetch",
+      "WebSearch",
+      "Read(./.venv/**)"
+    ]
+  },
+  "env": {
+    "GRADIO_ANALYTICS_ENABLED": "False",
+    "HF_HUB_DISABLE_TELEMETRY": "1",
+    "PYTHONIOENCODING": "utf-8"
+  }
+}

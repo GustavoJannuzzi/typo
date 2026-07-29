@@ -1,0 +1,77 @@
+name: nossa-senhora
+
+source:
+  image: refs/nossa-senhora.jpg
+  crop: null                        # o desenho já vem enquadrado
+
+text:
+  file: text/nossa-senhora.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150                   # -> página 73 x 111 cm
+
+titles:
+  title: "NOSSA SENHORA"
+  subtitle: "AVE MARIA · CHEIA DE GRAÇA"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: false                    # ver notes: desenho em escala de cinza
+
+mask:
+  enabled: true
+  lum_threshold: 0.72               # fundo 0.87 x halo 0.68: separação folgada
+  interior_fill_min: 0.18
+
+landscape:
+  enabled: false
+
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: "#141210"
+  font:
+    family: Palatino Linotype       # humanista renascentista — ver notes
+    base_line_mm: 4.2
+    size_min_mm: 1.8
+    size_max_ratio: 2.1
+    size_gamma: 0.85                # ver notes: <1 de propósito
+    bold_threshold: 0.5
+  layout:
+    row_step_ratio: 0.8
+
+notes: |
+  Desenho estilo tattoo flash: contorno grosso, sombreado chapado, fundo liso.
+  É o tipo de imagem que o motor faz melhor — a máscara acertou de primeira,
+  sem nenhuma rodada de ajuste. `lum_threshold: 0.72` separa com folga: fundo
+  em 0.87, halo (a parte mais clara da figura) em 0.68. Pegou halo, véu, rosto
+  e a rosa inteira.
+
+  FONTE — Palatino Linotype. Testei seis serifas nesta imagem (Goudy Old Style,
+  Palatino, Book Antiqua, Perpetua, Garamond, Copperplate Gothic Light). A
+  Perpetua e a Garamond, que seriam as escolhas "óbvias" para texto litúrgico,
+  saem finas demais no corpo pequeno e a mancha fica esburacada — mesmo
+  problema da Bodoni no dom-casmurro. A Copperplate dá um ar de placa gravada,
+  bonito, mas é caixa-alta e perde o desenho da palavra. A Palatino é a que
+  junta peso suficiente com desenho renascentista/caligráfico (o Zapf desenhou
+  ela olhando inscrições italianas do Renascimento), que é exatamente o
+  registro de uma imagem devocional.
+
+  `size_gamma: 0.85` (abaixo de 1) — mesma lição do ouro-marrom. A figura
+  inteira vive em meio-tom (rosto 0.56, véu 0.49, halo 0.68) e com gamma alto
+  quase tudo caía na letra mínima: a arte saía pálida e o rosto sumia. Gamma
+  < 1 levanta o meio-tom e devolve peso ao desenho. Com `interior_fill_min`
+  baixo (0.18) a faixa de mapeamento começa antes e o halo, que é a parte mais
+  clara, ainda recebe letra visível em vez de encostar no piso.
+
+  Accent desligado: o desenho é escala de cinza (r-g ≈ 4 em toda a imagem),
+  a regra de accent por vermelho não teria o que pegar. A rosa seria o alvo
+  natural se a referência fosse colorida.
+
+  Texto: Ave Maria, oração tradicional (domínio público), arquivo fornecido
+  pelo Gustavo. É curto, então repete bastante e fica muito legível de perto —
+  dá pra ler a oração inteira andando pelo cartaz.

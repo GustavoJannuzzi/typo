@@ -1,0 +1,38 @@
+name: magalenha
+
+source:
+  # A imagem original do print_v4.py vivia no sandbox antigo
+  # (/mnt/user-data/uploads/A5613A3C-...png) e nao veio junto com o script.
+  # Coloque o arquivo em refs/ com este nome (ou ajuste o caminho abaixo).
+  image: refs/brasileiro.png
+  crop: [600, 55, 1420, 782]        # as 3 figuras limpas
+
+text:
+  file: text/magalenha.txt
+  mode: phrases                     # phrases | words | chars
+
+page:
+  mode: from_art                    # tamanho derivado da altura das figuras
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150                   # -> pagina 113 x 111 cm
+
+titles:
+  title: "MAGALENHA"
+  subtitle: "SÉRGIO MENDES · BRASILEIRO"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: true
+  color: "#963A2A"                  # terracota do vestido
+
+style_preset: magalenha             # defaults = parametros do print_v4.py
+style_overrides: {}
+
+notes: |
+  Poster de referencia do projeto — e o teste de regressao do motor.
+  Rodar `python scripts/render.py projects/magalenha/project.yaml` tem que
+  reproduzir aproximadamente o MAGALENHA_Gustavo_113x111cm.pdf:
+  3 figuras preenchidas por letras, fundo branco de verdade, paisagem em
+  contorno fino no alto, accent terracota no vestido da figura central.
+  Qualquer mudanca no motor que altere este resultado e um bug, nao um refino.

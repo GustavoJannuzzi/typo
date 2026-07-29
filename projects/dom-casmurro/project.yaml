@@ -1,0 +1,71 @@
+name: dom-casmurro
+
+source:
+  image: refs/capitu.png
+  crop: null                        # a borda da placa de colódio faz parte da arte
+
+text:
+  file: text/dom-casmurro.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150                   # -> página 80 x 111 cm
+
+titles:
+  title: "OLHOS DE RESSACA"
+  subtitle: "MACHADO DE ASSIS · DOM CASMURRO · 1899"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: true
+  color: "#8C1C13"                  # vinho: a cor do rosto, não da fita
+
+mask:
+  enabled: false                    # ver notes
+
+landscape:
+  enabled: false
+
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: "#181410"                  # preto quente de placa de colódio
+  font:
+    family: Century Schoolbook      # serifa de livro impresso, generosa e legível
+    base_line_mm: 4.6
+    size_min_mm: 1.6
+    size_max_ratio: 2.0
+    size_gamma: 1.2
+  mask:
+    interior_fill_min: 0.05
+  accent:
+    red_min: 60
+    red_delta: 12
+    central_x: [0.30, 0.70]
+    hit_threshold: 0.3
+
+notes: |
+  Máscara DESLIGADA. Medi o fundo da foto e ele tem gradiente forte: 0.63 no
+  canto direito, 0.38 em cima à esquerda, 0.12 embaixo. Não existe um limiar
+  único que separe figura de fundo — qualquer corte pega metade do fundo junto.
+  Sem máscara, a placa inteira vira bloco de texto: a vinheta escura do colódio
+  vira uma moldura preta natural e o rosto emerge claro. É o comportamento
+  certo para um retrato de placa úmida, não uma limitação.
+
+  Accent: a ideia original era a FITA vermelha da gola. Não dá. Medi os dois:
+  a fita tem r-g=11 e r-b=10; a pele iluminada tem r-g=16 e r-b=36. Todo limiar
+  que pega a fita pega a pele junto, e a pele é área muito maior. Então inverti
+  a decisão de propósito: o accent é o ROSTO, em vinho, contra o cabelo e o
+  vestido em preto. Conceitualmente fica melhor — o livro é sobre aquele olhar,
+  não sobre a roupa.
+
+  Para o accent ser mesmo os OLHOS seria preciso uma regra de accent nova
+  (por matiz ou por polígono desenhado à mão). Hoje `accent.source_rule` só
+  aceita 'red'. É uma adição possível, não mexe no preset magalenha.
+
+  Texto em domínio público (Machado morreu em 1908). Se quiser mais densidade
+  de leitura, trocar as frases soltas pelo capítulo XXXII inteiro:
+  https://pt.wikisource.org/wiki/Dom_Casmurro/XXXII

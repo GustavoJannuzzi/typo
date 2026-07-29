@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "typo"
+version = "0.1.0"
+description = "Gerador local de arte tipografica (halftone com letras) — refatoracao do print_v4.py"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [{ name = "Gustavo Jannuzzi" }]
+dependencies = [
+    "pillow>=10.0",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "img2pdf>=0.5",
+    "gradio>=4.44",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+typo-render = "typo.cli:render_main"
+typo-new-project = "typo.cli:new_project_main"
+typo-ui = "app.ui:main"
+
+[tool.setuptools]
+package-dir = { "typo" = "src/typo", "app" = "app" }
+packages = ["typo", "app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

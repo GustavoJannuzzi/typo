@@ -1,0 +1,78 @@
+name: emicida
+
+source:
+  image: refs/capa.jpg
+  crop: [140, 0, 400, 400]          # exclui os dois blocos de texto da capa
+
+text:
+  file: text/levanta-e-anda.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150
+
+titles:
+  title: "O GLORIOSO RETORNO"
+  subtitle: "EMICIDA · LEVANTA E ANDA"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: false                    # ver notes: nada saturado o bastante na foto
+
+mask:
+  enabled: false                    # ver notes: halftone puro
+
+landscape:
+  enabled: false
+
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: "#181511"
+  font:
+    family: Century Gothic          # geométrica limpa, contraponto ao terno espinha-de-peixe
+    base_line_mm: 4.4               # letra grande, a pedido
+    size_min_mm: 2.0
+    size_max_ratio: 2.0
+    size_gamma: 1.7                 # ver notes: e o que separa terno/fundo aqui
+  mask:
+    interior_fill_min: 0.05
+
+notes: |
+  Esta foi a mais difícil de máscara da fila inteira. A gola/camisa branca e
+  o terno espinha-de-peixe têm luminância muito parecida com o fundo oliva
+  (0.37-0.52 os três), então nenhum limiar único separa figura de fundo.
+
+  Tentei duas saídas antes do halftone:
+  1. Máscara direto no limiar: o próprio tecido espinha-de-peixe (listras
+     claras/escuras) oscila acima e abaixo do limiar, e o resultado é um
+     contorno fractal serrilhado, não uma silhueta.
+  2. Pré-borrar a luminância só para a decisão de máscara (implementei
+     `mask.blur_sigma`, novo campo — ver CLAUDE.md e mask.py). Funcionou
+     para apagar a textura do tecido, mas essa foto tem luz direcional forte
+     (claro à esquerda, sombra à direita) na MESMA orientação da borda do
+     terno. Borrar o bastante para sumir com a textura também apaga a borda
+     da figura — a máscara passou a seguir o gradiente de luz, não a
+     silhueta. Ficou pior que sem blur.
+
+  Solução: halftone puro (`mask.enabled: false`), igual ao jotape. Sem
+  separação binária, a diferenciação vem só do CONTRASTE TONAL:
+  `size_gamma: 1.7` (alto) empurra os meios-tons para glifos pequenos e deixa
+  só as áreas realmente escuras (gravata, sombra do terno, cabelo) com peso —
+  é isso que faz a gola/camisa branca, a gravata escura e o terno de textura
+  se separarem visualmente na arte, mesmo sem máscara.
+
+  Accent desligado: não há nada saturado na foto (é tudo terno cinza e fundo
+  oliva neutro) — a regra de accent por vermelho não teria o que pegar.
+
+  Crop exclui os dois blocos de texto da capa original ("EMICIDA" e "O
+  GLORIOSO RETORNO...") — eles já estão reproduzidos no título/subtítulo do
+  poster, então não precisam entrar na arte também.
+
+  Título: usei a frase de capa ("O GLORIOSO RETORNO...") como título e o nome
+  do artista + música no subtítulo — o oposto do que fiz no jotape (lá o
+  título era o nome). Pareceu mais forte aqui porque a frase é a assinatura
+  visual da capa original.

@@ -1,0 +1,22 @@
+# Dom Casmurro — Machado de Assis (1899).
+# Obra em DOMÍNIO PÚBLICO no Brasil (autor morto em 1908), então o texto é livre.
+#
+# Frases do romance, conferidas em compilações de citações (ver notes: do
+# project.yaml). Se quiser trocar por um capítulo inteiro, o cap. XXXII
+# ("Olhos de ressaca") é o candidato natural — está no Wikisource.
+#
+# Uma frase por linha; linhas com # são ignoradas pelo motor.
+Olhos de ressaca
+Olhos de cigana oblíqua e dissimulada
+Talvez porque nenhuma tinha os olhos de ressaca
+Nem os de cigana oblíqua e dissimulada
+Uma força que arrastava para dentro
+Como a vaga que se retira da praia, nos dias de ressaca
+Prazos largos são fáceis de subscrever; a imaginação os faz infinitos
+Conhecia as regras do escrever, sem suspeitar as do amar
+A alma da gente é uma casa assim disposta
+Também as há fechadas e escuras, sem janelas
+O destino, como todos os dramaturgos, não anuncia as peripécias nem o desfecho
+Capitu
+Bentinho
+Não consultes dicionários

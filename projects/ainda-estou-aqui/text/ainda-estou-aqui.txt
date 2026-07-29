@@ -1,0 +1,15 @@
+# Ainda Estou Aqui (Walter Salles, 2024) — falas do filme.
+#
+# As falas abaixo sao citacoes curtas do filme, verificadas em materia de
+# imprensa (ver notes: no project.yaml). A frase da sessao de fotos da revista
+# Manchete — o fotografo pede semblante triste, Eunice manda todo mundo sorrir —
+# e o eixo da arte.
+#
+# Uma frase por linha; linhas com # sao ignoradas pelo motor.
+Ainda estou aqui
+Sim, nós vamos sorrir
+Sorriam, crianças
+Onde está o Rubens?
+Sentir alívio com um atestado de óbito
+Ainda estou aqui
+Sorriam

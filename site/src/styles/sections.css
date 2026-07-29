@@ -1,0 +1,278 @@
+section {
+  position: relative;
+}
+
+/* ------------------------------------------------------------------ */
+/* hero                                                                 */
+/* ------------------------------------------------------------------ */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero::after {
+  --frame-inset: 0.65rem;
+}
+
+.hero__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.hero__probe {
+  position: absolute;
+  z-index: 1;
+  padding: 0.3em 0.6em;
+  background: rgba(var(--paper-rgb), 0.88);
+  border: 1px solid var(--rule);
+  pointer-events: none;
+  transform: translate(-50%, -140%);
+  white-space: nowrap;
+}
+
+.hero__content {
+  padding-block: var(--space-5) var(--space-4);
+  width: 100%;
+}
+
+.hero__kicker {
+  margin-bottom: var(--space-2);
+}
+
+.hero__title {
+  font-size: var(--step-hero);
+  max-width: 20ch;
+}
+
+.hero__title .char {
+  will-change: transform;
+}
+
+.hero__lead {
+  font-size: var(--step-lead);
+  max-width: 34ch;
+  margin-top: var(--space-2);
+  color: var(--footer-grey);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: var(--space-3);
+}
+
+.hero__meta {
+  margin-top: var(--space-3);
+}
+
+.hero__scroll {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--grey);
+}
+
+.hero__scroll-line {
+  width: 1px;
+  height: 2.6rem;
+  background: linear-gradient(var(--rule), transparent);
+  overflow: hidden;
+  position: relative;
+}
+
+.hero__scroll-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: translateY(-100%);
+  animation: scroll-drip 1.8s var(--ease-in-out) infinite;
+}
+
+@keyframes scroll-drip {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@media (min-width: 40rem) {
+  .hero__scroll {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__scroll-line::after {
+    animation: none;
+    transform: translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* manifesto                                                           */
+/* ------------------------------------------------------------------ */
+.manifesto {
+  padding-block: var(--space-6) var(--space-5);
+  border-top: 1px solid var(--rule);
+}
+
+.manifesto__title {
+  font-size: var(--step-h1);
+  max-width: 18ch;
+  margin-top: var(--space-2);
+}
+
+.manifesto__body {
+  max-width: 52ch;
+  margin-top: var(--space-3);
+  color: var(--footer-grey);
+}
+
+/* ------------------------------------------------------------------ */
+/* colecao                                                              */
+/* ------------------------------------------------------------------ */
+.collection {
+  padding-block: var(--space-5) var(--space-4);
+  border-top: 1px solid var(--rule);
+}
+
+.collection__head {
+  margin-bottom: var(--space-3);
+}
+
+.collection__head h2 {
+  font-size: var(--step-h2);
+  margin-top: var(--space-2);
+}
+
+.collection__head .lead {
+  max-width: 46ch;
+  margin-top: var(--space-2);
+  color: var(--footer-grey);
+}
+
+/* ------------------------------------------------------------------ */
+/* como funciona                                                       */
+/* ------------------------------------------------------------------ */
+.how {
+  padding-block: var(--space-5) var(--space-6);
+  border-top: 1px solid var(--rule);
+}
+
+.how__head h2 {
+  font-size: var(--step-h2);
+  margin-top: var(--space-2);
+}
+
+.compare {
+  margin-top: var(--space-4);
+}
+
+/* ------------------------------------------------------------------ */
+/* preco                                                                */
+/* ------------------------------------------------------------------ */
+.pricing {
+  padding-block: var(--space-5) var(--space-6);
+  border-top: 1px solid var(--rule);
+  background: #fafaf8;
+}
+
+.pricing h2 {
+  font-size: var(--step-h2);
+  margin-top: var(--space-2);
+}
+
+.pricing__intro {
+  max-width: 58ch;
+  margin-top: var(--space-2);
+  color: var(--footer-grey);
+}
+
+.pricing__why {
+  max-width: 58ch;
+  color: var(--footer-grey);
+}
+
+/* ------------------------------------------------------------------ */
+/* pedido                                                               */
+/* ------------------------------------------------------------------ */
+.brief {
+  padding-block: var(--space-5) var(--space-6);
+  border-top: 1px solid var(--rule);
+}
+
+.brief h2 {
+  font-size: var(--step-h2);
+  margin-top: var(--space-2);
+}
+
+.brief .lead {
+  max-width: 52ch;
+  margin-top: var(--space-2);
+  color: var(--footer-grey);
+}
+
+/* ------------------------------------------------------------------ */
+/* rodape                                                               */
+/* ------------------------------------------------------------------ */
+.site-footer {
+  padding-block: var(--space-4) var(--space-3);
+  border-top: 1px solid var(--rule);
+}
+
+.site-footer__grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.site-footer__brand {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  margin: 0.5em 0 0.2em;
+}
+
+.site-footer__contact,
+.site-footer__nav {
+  display: grid;
+  gap: 0.5em;
+  align-content: start;
+}
+
+.site-footer__link,
+.site-footer__nav a {
+  text-decoration: none;
+  color: var(--footer-grey);
+  width: fit-content;
+}
+
+.site-footer__link:hover,
+.site-footer__nav a:hover {
+  color: var(--accent);
+}
+
+.site-footer__fine {
+  margin-top: var(--space-4);
+  letter-spacing: 0.08em;
+  color: var(--grey);
+}
+
+@media (min-width: 50rem) {
+  .site-footer__grid {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}

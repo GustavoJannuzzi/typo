@@ -1,0 +1,70 @@
+name: ainda-estou-aqui
+
+source:
+  image: refs/familia.jpg
+  crop: [55, 0, 1490, 840]          # a família inteira: a da ponta esquerda não pode sair
+
+text:
+  file: text/ainda-estou-aqui.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 64                 # foto deitada; 88 cm de altura daria 170 cm de largura
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150                   # -> página 123 x 87 cm (paisagem)
+
+titles:
+  title: "AINDA ESTOU AQUI"
+  subtitle: "WALTER SALLES · 2024 · EUNICE PAIVA"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: true
+  color: "#9B2C24"                  # o vestido vermelho da filha do meio
+
+mask:
+  enabled: false                    # halftone puro, ver notes
+
+landscape:
+  enabled: false
+
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: "#1B1A18"
+  font:
+    family: Courier New             # datilografia: o filme é feito de documentos
+    base_line_mm: 2.8
+    size_min_mm: 1.8
+    size_max_ratio: 2.0             # faixa tonal larga: sem isso a imagem sai chapada
+    size_gamma: 1.3
+    bold_threshold: 0.48
+  mask:
+    interior_fill_min: 0.05
+  accent:
+    red_min: 85                     # medido na foto: o vestido dá r-g=59, r=105
+    red_delta: 50
+    central_x: [0.35, 0.60]
+    hit_threshold: 0.3
+
+notes: |
+  A cena da foto de família para a revista Manchete. O fotógrafo pede semblante
+  triste, para casar com a matéria sobre o desaparecimento do Rubens; a Eunice
+  manda todo mundo sorrir. É esse gesto que a arte tenta guardar.
+
+  Fonte Courier New de propósito: o filme é atravessado por papel datilografado
+  — depoimentos, ofícios, o atestado de óbito que demora 25 anos para sair.
+  A arte é a foto reconstruída a partir de texto batido à máquina.
+
+  Máscara desligada: não há separação figura/fundo por luminância aqui — a casa,
+  as venezianas e a luz fazem parte da memória tanto quanto as pessoas. O quadro
+  inteiro vira texto.
+
+  A arte é clara de propósito. É uma fotografia desbotada, não um cartaz de alto
+  contraste; se quiser mais peso, baixe `size_gamma` para ~1.1 ou suba
+  `size_min_mm`.
+
+  Texto: falas curtas do filme, conferidas em imprensa —
+  https://artecult.com/ainda-estou-aqui-e-vamos-sorrir-e-celebrar-a-vida/ e
+  https://www.cnnbrasil.com.br/entretenimento/ainda-estou-aqui-por-que-veroca-e-a-unica-que-nao-sorri-na-foto/

@@ -1,0 +1,9 @@
+# Frases da musica usadas como textura da arte (LINES do print_v4.py).
+# Uma frase por linha; linhas iniciadas por # sao ignoradas.
+Vem, Magalenha Rojão
+Traz a lenha pro fogão
+Vem fazer armação
+Hoje é um dia de Sol
+Alegria de coió
+É curtir o verão
+Tchê tchê tchê-tchê-tchê

@@ -1,0 +1,36 @@
+name: demo
+
+# Projeto de exemplo com uma referencia SINTETICA (gerada por tests/fixtures.py),
+# nao uma foto. Serve para a UI ter algo renderavel de cara e para conferir que a
+# instalacao esta ok. Pode apagar a pasta inteira sem afetar nada.
+
+source:
+  image: refs/sintetica.png
+  crop: null                        # a imagem ja esta no enquadramento
+
+text:
+  file: text/demo.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 96                    # menor que o magalenha: export rapido
+
+titles:
+  title: "DEMO"
+  subtitle: "REFERÊNCIA SINTÉTICA · TESTE DE INSTALAÇÃO"
+  footer: "TYPO — MOTOR REFATORADO DO PRINT_V4"
+
+accent:
+  enabled: true
+  color: "#963A2A"
+
+style_preset: magalenha
+style_overrides: {}
+
+notes: |
+  Referencia sintetica: tres figuras escuras, uma faixa de montanhas no alto e
+  uma regiao vermelha na figura do meio. Use para testar sliders sem esperar o
+  export de 113x111 cm do magalenha.
