@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw  # noqa: E402
 
 from typo import engine, export as export_mod, fonts  # noqa: E402
 from typo.config import RenderConfig, hex_to_rgb  # noqa: E402
-from typo.image_prep import crop_size, open_source  # noqa: E402
+from typo.image_prep import crop_size, open_source, prepare  # noqa: E402
 from typo.project import PROJECTS_DIR, Project, list_projects, load_project  # noqa: E402
 
 OVERLAY_MAX_PX = 900
@@ -205,6 +205,39 @@ def mask_overlay(cfg: RenderConfig) -> Image.Image:
     return _fit(Image.fromarray(out))
 
 
+#: cores de diagnostico das regioes de texto, na ordem em que aparecem no YAML
+_REGION_COLORS = (
+    (220, 40, 40), (40, 120, 220), (40, 170, 90), (230, 150, 20),
+    (170, 60, 200), (0, 170, 190), (220, 90, 140), (130, 130, 60),
+)
+
+
+def regions_overlay(cfg: RenderConfig) -> Image.Image:
+    """Cada regiao de `text.regions` numa cor, sobre a imagem fonte.
+
+    E o unico jeito pratico de conferir poligono escrito a mao no YAML — a
+    fracao vira px so na hora do render.
+    """
+    from typo import regions as regions_mod
+
+    crop_w, crop_h = crop_size(cfg.source.image_path, cfg.source.crop)
+    dpi, _ = cfg.preview_dpi(crop_w, crop_h)
+    art_w, art_h = cfg.art_size(crop_w, crop_h, dpi)
+    prep = prepare(cfg.source.image_path, cfg.source.crop, art_w, art_h, dpi)
+
+    out = (np.asarray(prep.rgb) * 0.45 + 255 * 0.55).astype(np.uint8)
+    field = regions_mod.build_field(cfg.text, art_w, art_h)
+    if field.index is not None:
+        idx = np.frombuffer(field.index, dtype=np.uint8).reshape(art_h, art_w)
+        for i in range(1, len(field.streams)):
+            sel = idx == i
+            if not sel.any():
+                continue
+            tint = np.array(_REGION_COLORS[(i - 1) % len(_REGION_COLORS)], float)
+            out[sel] = (out[sel] * 0.55 + tint * 0.45).astype(np.uint8)
+    return _fit(Image.fromarray(out))
+
+
 def crop_overlay(cfg: RenderConfig) -> Image.Image:
     """Imagem inteira com o retangulo do crop desenhado."""
     full = open_source(cfg.source.image_path, None)
@@ -259,6 +292,21 @@ def do_mask_overlay(*args):
     try:
         cfg, _ = values_to_config(vals)
         return mask_overlay(cfg), "Mascara: cinza = figura, vermelho = contorno, azul = faixa da paisagem, cor = accent."
+    except Exception as exc:  # noqa: BLE001
+        return gr.update(), _error(exc)
+
+
+def do_regions_overlay(*args):
+    vals = _vals(args)
+    try:
+        cfg, _ = values_to_config(vals)
+        names = [n for n in cfg.text.regions] if cfg.text.regions else []
+        if not names:
+            return regions_overlay(cfg), "Este projeto nao usa `text.regions` (um stream so na arte inteira)."
+        labels = ", ".join(
+            f"{i}. {r.get('name') or '?'}" for i, r in enumerate(cfg.text.regions, 1)
+        )
+        return regions_overlay(cfg), f"Regioes de texto (ordem de pintura): {labels}."
     except Exception as exc:  # noqa: BLE001
         return gr.update(), _error(exc)
 
@@ -437,6 +485,7 @@ def build_ui() -> gr.Blocks:
                     preview_btn = gr.Button("Preview", variant="primary")
                     export_btn = gr.Button("Exportar PDF", variant="secondary")
                     mask_btn = gr.Button("Ver mascara")
+                    regions_btn = gr.Button("Ver regioes")
                     crop_btn = gr.Button("Ver crop")
                 image = gr.Image(label="Resultado", type="pil", height=680)
                 pdf_file = gr.File(label="PDF gerado", interactive=False)
@@ -446,6 +495,7 @@ def build_ui() -> gr.Blocks:
         preview_btn.click(do_preview, inputs=inputs, outputs=[image, status])
         export_btn.click(do_export, inputs=inputs, outputs=[image, status, pdf_file])
         mask_btn.click(do_mask_overlay, inputs=inputs, outputs=[image, status])
+        regions_btn.click(do_regions_overlay, inputs=inputs, outputs=[image, status])
         crop_btn.click(do_crop_overlay, inputs=inputs, outputs=[image, status])
 
         outs = inputs + [status]

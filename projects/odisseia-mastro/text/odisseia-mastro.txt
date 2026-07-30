@@ -1,0 +1,13 @@
+# Homero, Odisseia, Livro XII (Circe instrui Ulisses a se atar ao mastro
+# antes de passar pela ilha das sereias) — tradução de Manuel Odorico Mendes,
+# 1928, domínio público.
+# Fonte: Wikisource (pt.wikisource.org/wiki/Odysséa_de_Homero/XII).
+#
+# Uma frase por linha; linhas com # são ignoradas pelo motor.
+Surde avante
+As orelhas aos teus com cera tapes
+Eusurdeçam de todo. Ouvi-las podes
+Contanto que do mastro ao longo estejas
+De pés e mãos atado; e se, absorvido
+No prazer, ordenares que te soltem
+Liguem-te com mais força os companheiros

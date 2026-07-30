@@ -6,7 +6,9 @@
 Le `projects/*/output/*150dpi.png` + cada `project.yaml` e escreve:
 
     site/public/art/<slug>-full.webp     (arte pura, 1600px no lado maior —
-                                          sem titulo/margem/moldura do poster)
+                                          sem titulo/margem/moldura do poster;
+                                          nos projetos de layout `display` e a
+                                          PAGINA inteira, ver main())
     site/public/art/<slug>-thumb.webp    (800px)
     site/public/art/<slug>-detail.webp   (recorte 1:1 em resolucao nativa —
                                           e onde se ve que a imagem e feita de letras)
@@ -60,7 +62,7 @@ ORDER = [
     "central-do-brasil",
     "ainda-estou-aqui",
     "emicida",
-    "jotape",
+    "debret-antropofagia",
 ]
 
 GLYPHS = {
@@ -72,7 +74,7 @@ GLYPHS = {
     "central-do-brasil": 11029 + 1813,
     "ainda-estou-aqui": 109353,
     "emicida": 40413,
-    "jotape": 171724,
+    "debret-antropofagia": 188125,
 }
 
 BLURB = {
@@ -84,7 +86,7 @@ BLURB = {
     "central-do-brasil": "Caligrafia: o filme é sobre cartas escritas à mão.",
     "ainda-estou-aqui": "Datilografia — o filme é feito de papel timbrado.",
     "emicida": "Sem máscara: o contraste tonal separa terno, gola e fundo.",
-    "jotape": "Halftone puro. A pichação do trailer lê inteira.",
+    "debret-antropofagia": "TUPI em letra de 23 cm cercando a gravura colonial.",
 }
 
 STYLE_FAMILY = {
@@ -92,7 +94,7 @@ STYLE_FAMILY = {
     "nossa-senhora": "retrato",
     "dom-casmurro": "retrato",
     "cidade-de-deus": "estencil",
-    "jotape": "cena",
+    "debret-antropofagia": "cena",   # cena inteira, 15 figuras, halftone puro
     "emicida": "cena",
     "garota-de-ipanema": "paisagem",
     "central-do-brasil": "paisagem",
@@ -160,18 +162,28 @@ def main() -> int:
         project = load_project(slug)
         cfg = project.config()
 
+        bbox = art_bbox_px(cfg)
         with Image.open(pngs[0]) as raw:
             page = raw.convert("RGB")
-            x0, y0, x1, y1 = art_bbox_px(cfg)
-            art = page.crop((x0, y0, x1, y1))
+            if cfg.display.enabled:
+                # layout `display`: as letras gigantes vivem FORA do bbox da
+                # arte (sangram pela margem) e sao o assunto da peca. Recortar a
+                # arte pura aqui cortaria justamente elas — a peca e a pagina.
+                art = page.copy()
+            else:
+                art = page.crop(bbox)
+            # o detalhe sai SEMPRE da malha de letras: a busca pela janela mais
+            # densa, solta na pagina inteira, escolheria o bloco chapado de uma
+            # letra gigante — que nao mostra nada do que a peca e.
+            halftone = page.crop(bbox)
 
         art_w_px, art_h_px = art.size
         fit(art, FULL_PX).save(ART_DIR / f"{slug}-full.webp", quality=84, method=6)
         fit(art, THUMB_PX).save(ART_DIR / f"{slug}-thumb.webp", quality=80, method=6)
 
-        side = min(DETAIL_PX, art_w_px, art_h_px)
-        dx, dy = find_densest_window(art, side)
-        art.crop((dx, dy, dx + side, dy + side)).save(
+        side = min(DETAIL_PX, *halftone.size)
+        dx, dy = find_densest_window(halftone, side)
+        halftone.crop((dx, dy, dx + side, dy + side)).save(
             ART_DIR / f"{slug}-detail.webp", quality=88, method=6
         )
 
@@ -182,6 +194,8 @@ def main() -> int:
             print(f"  ok {slug}-before.webp  (par de comparacao)")
 
         w_cm, h_cm = cfg.page_cm(*cfg.art_size(*crop_size(cfg.source.image_path, cfg.source.crop), EXPORT_DPI), EXPORT_DPI)
+        if GLYPHS.get(slug) is None:
+            print(f"  ! {slug}: sem contagem de glifos em GLYPHS (works.json vai com null)")
         works.append(
             {
                 "slug": slug,

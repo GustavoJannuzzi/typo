@@ -28,8 +28,10 @@ _TOP_LEVEL_KEYS = {
     "page",
     "titles",
     "accent",
+    "palette",
     "landscape",
     "mask",
+    "display",
     "style_preset",
     "style_overrides",
     "notes",
@@ -126,6 +128,20 @@ class Project:
         for key in ("mode", "separator", "repeat"):
             if key in txt:
                 text[key] = txt[key]
+        if "regions" in txt:
+            # mesmo contrato do `text.file`: no YAML e `file` relativo ao
+            # projeto, na config e `text_path` absoluto.
+            regions = []
+            for i, raw in enumerate(txt["regions"] or []):
+                if not isinstance(raw, dict):
+                    raise ProjectError(
+                        f"{self.path}: text.regions[{i}] precisa ser um mapa"
+                    )
+                region = dict(raw)
+                if "file" in region:
+                    region["text_path"] = str(self.resolve(str(region.pop("file"))))
+                regions.append(region)
+            text["regions"] = regions
         if text:
             overrides["text"] = text
 
@@ -159,7 +175,7 @@ class Project:
         if blocks:
             overrides["text_blocks"] = blocks
 
-        for section in ("accent", "landscape", "mask"):
+        for section in ("accent", "palette", "landscape", "mask", "display"):
             value = d.get(section)
             if value:
                 overrides[section] = value

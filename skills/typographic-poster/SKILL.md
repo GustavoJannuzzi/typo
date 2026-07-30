@@ -139,6 +139,46 @@ accent:
 Outras regras (matiz/HSV, polígono desenhado) **não existem**: qualquer valor
 diferente de `red` levanta `NotImplementedError`.
 
+### 4b. Paleta — quando a arte tem várias cores
+
+O accent dá **uma** cor. Para referência colorida (arte vetorial chapada, capa,
+cartaz) use `palette`: uma tabela `(cor_na_fonte -> cor_da_tinta)`. Cada glifo
+pega a tinta do stop mais próximo do pixel no centro da sua sonda.
+
+```yaml
+accent:
+  enabled: false          # a paleta substitui o accent, não soma
+palette:
+  enabled: true
+  blur_sigma: 1.2         # achata ruído de JPEG antes de quantizar
+  stops:
+    - ["#020202", "#141414"]   # traço      -> tinta
+    - ["#EFE6C7", "#D6CBA6"]   # papel      -> creme claro
+    - ["#E2748F", "#FF2D78"]   # rosa medido -> rosa forte
+```
+
+Roteiro:
+
+1. **Meça as cores da referência**, não chute. Quantize a imagem e liste as
+   dominantes por área — as `from` têm que ser as cores que existem no arquivo.
+2. **Declare os neutros também** (traço, papel, branco). Não há limiar de
+   saturação: o que não estiver na tabela vai para o stop mais próximo, e um
+   neutro faltando vira cor aleatória no traço do desenho.
+3. **Escolha as `to`** — é aqui que está o projeto gráfico. Saturar as cores
+   medidas dá destaque; mandar os neutros para tons claros (não para a tinta)
+   preserva o papel como papel.
+
+| Sintoma | Ajuste |
+|---|---|
+| Cor certa, mas pastel/lavada | é densidade, não paleta: veja § 5 |
+| Cores pulando entre glifos vizinhos | suba `palette.blur_sigma` (1.5–2.5) |
+| Cor aleatória nas bordas do desenho | desça `palette.value_weight` (0.15) ou declare o neutro que falta |
+| Um bloco saiu com a cor do vizinho | os dois `from` estão perto demais; meça de novo |
+| Campo de ruído cinza onde era papel | mande o neutro para um tom claro, não para `colors.ink` |
+
+Os quadradinhos do cabeçalho passam a mostrar as cores cromáticas da paleta,
+na ordem dos stops — os neutros são omitidos.
+
 ---
 
 ## 5. Tipografia — só depois que máscara e crop estão bons
@@ -150,7 +190,7 @@ diferente de `red` levanta `NotImplementedError`.
 | `font.size_max_ratio` | 1.7 | teto = linha × ratio | quiser mais peso nas sombras |
 | `font.size_gamma` | 1.5 | contraste claro/escuro | a figura estiver chapada (2.0–2.5) |
 | `font.bold_threshold` | 0.5 | acima disso o glifo sai bold | ↓ para engrossar o conjunto |
-| `mask.interior_fill_min` | 0.30 | piso de preenchimento dentro da figura | ↑ para corpo mais sólido, ↓ para mais vazado |
+| `mask.interior_fill_min` | 0.30 | ponto de preto do mapeamento (ver abaixo) | ↓ para corpo mais sólido, ↑ para mais vazado |
 | `flow.flex` | 1.0 | multiplica ondulação + rotação | ↓ 0.3 para linhas quase retas |
 | `layout.advance_factor` | 0.98 | espaçamento horizontal | ↑ para texto mais arejado |
 | `layout.row_step_ratio` | 0.9 | passo entre linhas | ↓ para linhas mais coladas |
@@ -162,11 +202,34 @@ Diagnóstico rápido:
   (`size_max_ratio` 2.0), não suba `size_min_mm`. Em DPI alto as linhas se
   sobrepõem muito mais, então um piso alto de tamanho preenche tudo. Aconteceu
   no `projects/jotape`.
+- **Com paleta, o export sai mais CLARO que o preview** — o oposto do de cima.
+  Arte de cor chapada não tem textura fina para as linhas somarem em cima, e o
+  preview a ~40 dpi mostra a cor bem mais forte do que ela sai. Se a arte é
+  colorida, meça densidade **no export**, não no preview. Ver
+  `projects/turnstile`.
+- **Cor pastel quando devia ser forte** → o problema é cobertura de tinta, e
+  os blocos de cor são quase todos meio-tom. `size_gamma` **abaixo de 1**
+  (0.7–0.85), `size_max_ratio` 2.2, `interior_fill_min` 0.20+, e cole as letras
+  (`advance_factor` 0.84, `row_step_ratio` 0.74). Piso de preenchimento é piso
+  de saturação. Ver `projects/turnstile`.
 - **Retrato onde o rosto some** (rosto mais claro que o cabelo/chapéu) →
   `size_gamma` **abaixo de 1** (0.9–1.0). Gamma alto joga o meio-tom para a
   menor letra e apaga o rosto. Ver `projects/ouro-marrom`.
 - **Figura chapada, sem volume** → `size_gamma` 2.0–2.5 e `interior_fill_min` 0.20.
-- **Figura vazada, parece rendinha** → `interior_fill_min` 0.40, `bold_threshold` 0.4.
+- **Figura vazada, parece rendinha** → `interior_fill_min` 0.15, `bold_threshold` 0.4.
+
+**Cuidado com o nome de `mask.interior_fill_min`.** Não é um piso de
+preenchimento: é o **ponto de preto** do mapeamento tom → tamanho
+(`fs = size_min + span * (dark - fill_min) / (1 - fill_min)`). Subir esse valor
+**encolhe** o glifo em toda a faixa tonal — só o preto puro (`dark = 1`) fica
+igual —, porque comprime o resto contra o mínimo. Verificado numericamente com
+`size_min=8, size_max=34`: para `dark=0.5`, `fill_min` 0.05 dá fs 20.3, e 0.40
+dá fs 12.3.
+
+Consequência prática: **para mais corpo, DESÇA** `interior_fill_min` (é por isso
+que todos os projetos de halftone puro usam 0.05–0.15). Quem levanta as áreas
+claras é `font.size_min_mm`, não este parâmetro — são knobs diferentes e
+empurram para lados diferentes.
 - **Ilegível de perto** → `base_line_mm` 4.5–5.0 (menos letras, maiores).
 - **Muito rígido/geométrico** → `flow.flex` 1.2 + `jitter_px` 1.0.
 
@@ -193,6 +256,64 @@ page:
 - A margem superior grande existe para o bloco de título. Se mudar
   `margin_top_cm`, confira que o título não colide com a arte.
 - Sempre confira o **mediabox em cm** que o `scripts/render.py` imprime.
+
+---
+
+## 6b. Layout `display` — letras gigantes em cima da arte
+
+A ficha de espécime (`text_blocks`) põe título, quadradinhos e rodapé em faixas
+que nunca cruzam a arte. O layout `display` é o oposto: corpo de dezenas de cm
+atravessando a imagem, sangrando pela borda, com rótulo invertido no lugar do
+cabeçalho. Mesma informação, geometria de cartaz suíço.
+
+```yaml
+titles:
+  title: "TUPI OR NOT TUPI"          # continua valendo como METADADO (o site lê)
+  draw: false                        # mas a página não desenha a ficha
+
+display:
+  enabled: true
+  family: Bahnschrift                # '' = usa a mesma fonte da malha
+  marks:
+    - text: "T"
+      size_cm: 30
+      anchor: lt                     # borda de referência: l|c|r + t|c|b
+      x_cm: 3.5
+      y_cm: 4.5                      # NEGATIVO sangra pra fora do papel
+      variation: Bold Condensed      # instância de fonte variável
+      layer: over                    # over = chapada | under = atrás da malha
+    - text: "OBRA\nAUTOR"
+      size_mm: 9
+      anchor: ct
+      x_cm: 4
+      y_cm: 20
+      box: true                      # rótulo invertido: caixa de tinta, texto no fundo
+      pad_mm: 5
+    - text: "EXPERIMENTO TIPOGRÁFICO"
+      size_mm: 6
+      anchor: rt
+      x_cm: 1.5
+      y_cm: 2.2
+      rotate_deg: -90                # a linha vertical da lateral
+```
+
+Uma primitiva só, a `mark`: letra gigante, rótulo e linha vertical são todos a
+mesma coisa com valores diferentes. O que vale saber ao afinar:
+
+- **`x_cm`/`y_cm` é onde a TINTA começa**, não a caixa em do glifo — o motor
+  posiciona pelo bbox de tinta. Dá pra conferir com régua no papel.
+- **Não sangre pelo topo uma letra que precisa ser lida.** Um `T` com a barra
+  cortada lê como `I` e a palavra se desmancha. Sangre pelas laterais e por
+  baixo.
+- **`layer: under` só aparece se houver arte por cima.** A letra é desenhada
+  antes da passada de letras e a malha atravessa ela; onde a arte é branca, o
+  efeito é idêntico a `over` (e onde a tinta é a mesma, também). Escolha `under`
+  quando quiser que a letra pareça impressa por baixo da imagem.
+- **Fonte variável não vale pra malha**, só pra `display` (ver os Gotchas do
+  CLAUDE.md). Se quiser a mesma fonte nos dois corpos, use uma família com
+  regular e bold em arquivos separados.
+- Ajuste as posições sempre no **preview**: o corpo em cm não depende de dpi,
+  mas a largura da página depende do aspecto do crop.
 
 ---
 

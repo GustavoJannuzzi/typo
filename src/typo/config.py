@@ -28,7 +28,10 @@ def hex_to_rgb(value: str | tuple) -> tuple[int, int, int]:
         s = "".join(c * 2 for c in s)
     if len(s) != 6:
         raise ValueError(f"cor hex invalida: {value!r}")
-    return (int(s[0:2], 16), int(s[2:4], 16), int(s[4:6], 16))
+    try:
+        return (int(s[0:2], 16), int(s[2:4], 16), int(s[4:6], 16))
+    except ValueError:
+        raise ValueError(f"cor hex invalida: {value!r}") from None
 
 
 def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
@@ -74,7 +77,13 @@ class MaskCfg:
     min_component_frac: float = 0.0009
     close_iters: int = 2
     dilate_frac: float = 0.006  # x altura da arte (usada pela paisagem)
-    interior_fill_min: float = 0.30  # piso de preenchimento dentro da figura
+    #: PONTO DE PRETO do mapeamento tom -> tamanho, apesar do nome herdado do
+    #: print_v4.py. Entra como
+    #: `fs = size_min + span * (dark - fill_min) / (1 - fill_min)`, portanto
+    #: SUBIR encolhe o glifo em toda a faixa (so `dark == 1` fica igual) e
+    #: DESCER engorda tudo. Para mais corpo, desca. Quem levanta as areas
+    #: claras e `font.size_min_mm`.
+    interior_fill_min: float = 0.30
     #: borra a luminancia ANTES de aplicar lum_threshold (so para decidir
     #: dentro/fora da mascara; a nitidez do halftone continua vindo da
     #: luminancia original). 0 = desligado (default do preset magalenha,
@@ -93,6 +102,12 @@ class TextCfg:
     mode: Literal["phrases", "words", "chars"] = "phrases"
     separator: str = "   "
     repeat: int = 60
+    #: texto (e tinta) por REGIAO da arte. Vazio = o motor do print_v4.py, um
+    #: stream so varrendo a imagem inteira. Cada item e um mapa
+    #: `{name, file, ink, mode, separator, repeat, polygons, boxes}`, com a
+    #: geometria em fracao do tamanho da arte e a ordem da lista valendo como
+    #: ordem de pintura. Ver `typo/regions.py` e `projects/cadeirada-datena`.
+    regions: tuple[dict, ...] = ()
 
 
 @dataclass
@@ -153,6 +168,35 @@ class AccentCfg:
 
 
 @dataclass
+class PaletteCfg:
+    """Cor de cada glifo vinda da imagem fonte, por tabela de correspondencia.
+
+    O `accent` pinta *uma* cor onde uma regra booleana bate. Isto e o caso
+    geral: cada `stop` e um par `(cor_na_fonte, cor_da_tinta)`; o glifo e
+    pintado com a tinta do stop cuja cor de fonte estiver mais proxima do pixel
+    amostrado no centro da sonda.
+
+    Nao ha limiar escondido: neutros (traco preto, papel creme) tambem entram
+    como stops, apontando para a tinta. Se um pixel nao deveria virar cor,
+    declare o neutro dele na tabela. Lista vazia (default) = desligado, e o
+    motor volta ao caminho `ink` / `accent` do print_v4.py.
+
+    Feito para arte vetorial de cor chapada (o cartaz do Lucas Pereira em
+    projects/turnstile). Numa foto, use `blur_sigma` para achatar o ruido
+    antes da quantizacao — sem isso glifos vizinhos pulam de cor.
+    """
+
+    enabled: bool = False
+    #: ((cor_fonte, cor_tinta), ...) em hex; aceita listas do YAML
+    stops: tuple[tuple[str, str], ...] = ()
+    blur_sigma: float = 0.0  # borra o RGB da fonte antes de casar os stops
+    #: peso do eixo de brilho contra os de cor no casamento dos stops.
+    #: 1.0 se aproxima do euclidiano em RGB e faz as bordas do desenho
+    #: sortearem cores; 0.25 resolve borda como neutro. Ver typo/palette.py.
+    value_weight: float = 0.25
+
+
+@dataclass
 class LandscapeCfg:
     """Paisagem ao fundo, em contorno fino."""
 
@@ -180,6 +224,45 @@ class LandscapeCfg:
     rotation_wavelength_ratio: float = 0.3
     rotation_clamp_deg: float = 12.0
     baseline_offset_ratio: float = 0.7
+
+
+@dataclass
+class DisplayCfg:
+    """Letras gigantes e rotulos posicionados a mao sobre a arte.
+
+    O `text_blocks` desenha a ficha de especime (titulo em cima, arte com
+    moldura, rodape centralizado). Esta e a outra familia de layout: a linha de
+    display do especime *solta* em cima da arte — glifos em corpo de dezenas de
+    cm, sangrando pela borda, com um rotulo invertido nomeando a obra.
+
+    Uma unica primitiva, a `mark`. Cada item de `marks` e um mapa:
+
+        text          str, obrigatorio ('\\n' quebra linha)
+        size_cm       corpo da fonte em cm (ou `size_mm`; exatamente um dos dois)
+        x_cm, y_cm    recuo a partir da borda nomeada por `anchor`.
+                      NEGATIVO sangra pra fora da pagina.
+        anchor        2 chars: horizontal l|c|r + vertical t|c|b (default 'lt')
+        family        familia so desta marca ('' = `display.family`)
+        variation     instancia nomeada de fonte variavel, ex 'Bold Condensed'
+        weight        'bold' | 'regular' (default 'bold')
+        color         hex ('' = `colors.ink`, ou o fundo quando `box`)
+        box           bool — caixa chapada atras do texto (rotulo invertido)
+        box_color     hex da caixa ('' = `colors.ink`)
+        pad_mm        respiro da caixa
+        layer         'over' | 'under' — antes ou depois da passada de letras
+        rotate_deg    rotacao (a linha vertical da lateral e -90)
+        leading       entrelinha, x corpo
+        letter_spacing  espacos inseridos entre letras, como no subtitulo
+
+    Ver `typo/display.py` para a geometria e `projects/debret-antropofagia`
+    para o uso real.
+    """
+
+    enabled: bool = False
+    #: familia default das marcas. '' = usa `font.family` (a mesma da arte, que
+    #: e o que faz a pagina ler como especime: a fonte a 40 cm e a 3 mm).
+    family: str = ""
+    marks: tuple[dict, ...] = ()
 
 
 @dataclass
@@ -217,6 +300,12 @@ class TextBlocksCfg:
     footer: str = "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
     accent_squares: bool = True
     frame: bool = True
+    #: false = a pagina NAO desenha a ficha de especime (nem titulo, nem
+    #: subtitulo, nem quadradinhos, nem rodape, nem moldura), mas os textos
+    #: continuam valendo como metadado — o `scripts/build_site_assets.py` le
+    #: `title`/`subtitle` daqui para montar o works.json. E o que o layout
+    #: `display` usa: quem nomeia a obra na pagina e o rotulo invertido.
+    draw: bool = True
     # geometria (mm), tal como no print_v4.py
     title_size_mm: float = 32.0
     title_y_mm: float = 15.0
@@ -246,10 +335,12 @@ class RenderConfig:
     flow: FlowCfg = field(default_factory=FlowCfg)
     layout: LayoutCfg = field(default_factory=LayoutCfg)
     accent: AccentCfg = field(default_factory=AccentCfg)
+    palette: PaletteCfg = field(default_factory=PaletteCfg)
     landscape: LandscapeCfg = field(default_factory=LandscapeCfg)
     colors: ColorsCfg = field(default_factory=ColorsCfg)
     page: PageCfg = field(default_factory=PageCfg)
     text_blocks: TextBlocksCfg = field(default_factory=TextBlocksCfg)
+    display: DisplayCfg = field(default_factory=DisplayCfg)
     name: str = "magalenha"
 
     # ---------------------------------------------------------------- merge --
@@ -293,6 +384,14 @@ class RenderConfig:
             errs.append(f"text.mode invalido: {self.text.mode!r}")
         if self.text.repeat < 1:
             errs.append("text.repeat precisa ser >= 1")
+        if self.text.regions:
+            # import local: regions.py importa config.py (evita ciclo no topo)
+            from typo.regions import parse_regions
+
+            try:
+                parse_regions(self.text)
+            except ValueError as exc:
+                errs.append(str(exc))
         if self.font.base_line_mm <= 0:
             errs.append("font.base_line_mm precisa ser > 0")
         if self.font.size_min_mm <= 0:
@@ -316,6 +415,33 @@ class RenderConfig:
                 f"accent.source_rule={self.accent.source_rule!r} nao implementado "
                 "(apenas 'red'); veja typo/mask.py"
             )
+        if self.palette.enabled and not self.palette.stops:
+            errs.append(
+                "palette.enabled=true sem palette.stops: declare os pares "
+                "(cor_na_fonte, cor_da_tinta), incluindo os neutros"
+            )
+        if self.palette.value_weight < 0:
+            errs.append("palette.value_weight precisa ser >= 0")
+        for i, stop in enumerate(self.palette.stops):
+            if len(stop) != 2:
+                errs.append(
+                    f"palette.stops[{i}]={list(stop)!r} precisa ter 2 cores "
+                    "(fonte, tinta)"
+                )
+                continue
+            for slot, value in zip(("fonte", "tinta"), stop):
+                try:
+                    hex_to_rgb(value)
+                except ValueError as exc:
+                    errs.append(f"palette.stops[{i}] ({slot}): {exc}")
+        if self.display.enabled:
+            # import local: display.py importa config.py (evita ciclo no topo)
+            from typo.display import parse_marks
+
+            try:
+                parse_marks(self.display, self.colors)
+            except ValueError as exc:
+                errs.append(str(exc))
         for label, value in (
             ("colors.ink", self.colors.ink),
             ("colors.background", self.colors.background),
@@ -383,12 +509,19 @@ class RenderConfig:
 # --------------------------------------------------------------------------- #
 # merge / copy utilitarios
 # --------------------------------------------------------------------------- #
-_TUPLE_FIELDS = {"crop", "central_x", "band", "band_ramp", "size_mm"}
+_TUPLE_FIELDS = {"crop", "central_x", "band", "band_ramp", "size_mm", "marks", "regions"}
+#: campos que sao *sequencia de sequencias* — precisam congelar os dois niveis,
+#: senao o `repr()` usado na chave de cache da cena varia entre list e tuple.
+_NESTED_TUPLE_FIELDS = {"stops"}
 
 
 def _coerce(name: str, current: Any, value: Any) -> Any:
     if value is None:
         return None
+    if name in _NESTED_TUPLE_FIELDS and isinstance(value, (list, tuple)):
+        return tuple(
+            tuple(item) if isinstance(item, (list, tuple)) else item for item in value
+        )
     if name in _TUPLE_FIELDS and isinstance(value, (list, tuple)):
         return tuple(value)
     if isinstance(current, bool):
@@ -452,10 +585,12 @@ __all__ = [
     "FlowCfg",
     "LayoutCfg",
     "AccentCfg",
+    "PaletteCfg",
     "LandscapeCfg",
     "ColorsCfg",
     "PageCfg",
     "TextBlocksCfg",
+    "DisplayCfg",
     "Scale",
     "hex_to_rgb",
     "rgb_to_hex",

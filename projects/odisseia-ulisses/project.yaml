@@ -1,0 +1,82 @@
+name: odisseia-ulisses
+
+source:
+  image: refs/ulisses.jpg
+  crop: [0, 0, 955, 978]           # tira a faixa clara/artefato de borda no canto inferior direito
+
+text:
+  file: text/odisseia-ulisses.txt
+  mode: phrases                   # phrases | words | chars
+  repeat: 80
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150
+
+titles:
+  title: "ULISSES"
+  subtitle: "HOMERO · ODISSEIA"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: true
+  color: "#8C1C13"                 # vermelho-sangue: ecoa a crista do elmo, não a foto
+  central_x: [0.30, 0.80]
+  red_min: 105
+  red_delta: 30
+
+mask:
+  enabled: false                   # ver notes: fundo vermelho-escuro, halftone puro
+
+landscape:
+  enabled: false                   # anda junto com a mascara desligada
+
+style_preset: magalenha
+style_overrides:
+  font:
+    family: Cambria
+  colors:
+    ink: "#1A1210"
+
+notes: |
+  Retrato do próprio Ulisses: elmo de crista vermelha, capa, olhando o mar ao
+  fundo (lua/sol branco atrás da cabeça, ondas na faixa inferior). É o
+  "retrato do herói" da série — não uma cena narrativa específica — por isso
+  o texto é a invocação de abertura do poema (Livro I), que serve de
+  epígrafe para a figura inteira.
+
+  Medi luminância antes de decidir: fundo (cantos) com lum média 0.185,
+  centro (figura) 0.42 — mas isso é enganoso, porque o "centro" mistura o
+  círculo branco atrás da cabeça (lum ~1.0) com a armadura escura. O ponto
+  real é que o FUNDO é vermelho-escuro (lum < 0.56 em quase toda a moldura),
+  então `mask.lum_threshold` padrão pegaria o quadro inteiro, não só a
+  figura — o sintoma "fundo escuro entra na máscara" do SKILL.md. Halftone
+  puro (mask off), como em jotape.
+
+  Accent: sem máscara, a região de accent ainda funciona (mask.py usa a
+  janela de borda mesmo com mask.enabled=false). Medi a cor da crista do
+  elmo contra o fundo: com a regra default (red_min=105, red_delta=30) e
+  central_x em [0.30,0.80], 98% dos pixels que passam no filtro caem nos
+  20% superiores da imagem — exatamente a crista, quase nada do fundo
+  (que é vermelho mas mais escuro, r~100 fica abaixo do limiar). Não
+  precisei mexer nos defaults, só ajustei central_x pra cobrir a largura
+  da crista.
+
+  Crop: a imagem tem um artefato de borda (linha clara ~2px) no canto
+  inferior direito e um watermark bem fraco de geração de IA na mesma
+  região (dentro do padrão de ondas) — cortei o pixel de borda; o
+  watermark é baixo contraste demais pra aparecer como forma legível no
+  halftone e decidi não recortar a composição por causa dele.
+
+  Fonte: pré-selecionei pelas fontes serifadas instaladas no Windows com
+  bold de verdade (Cambria, Georgia, Goudy Old Style, Times New Roman) —
+  descartei Times por clichê/genérica demais, e Centaur (bonita, clássica
+  de verdade — revival do tipo veneziano de Jenson) por não ter peso bold,
+  o que achata o contraste em halftone puro. Rendi preview com as 3
+  finalistas e comparei um crop do rosto em 3x: Goudy Old Style saiu visi-
+  velmente mais clara/lavada, o rosto quase some. Cambria e Georgia ficaram
+  próximas; fiquei com Cambria pelo traço mais anguloso/entalhado (contraste
+  reto grosso/fino de serifa de transição), que combina mais com elmo e
+  armadura do que o traço mais redondo/humanista da Georgia.

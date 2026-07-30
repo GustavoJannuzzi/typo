@@ -1,0 +1,77 @@
+name: odisseia-mastro
+
+source:
+  image: refs/mastro.jpg
+  crop: [16, 18, 1008, 1335]        # tira a margem lisa e a cercadura de grega/palmeta embaixo
+
+text:
+  file: text/odisseia-mastro.txt
+  mode: phrases
+  repeat: 80
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150
+
+titles:
+  title: "O MASTRO"
+  subtitle: "ULISSES E AS SEREIAS — ODISSEIA"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: false                    # substituído pela paleta (ver notes)
+
+mask:
+  enabled: false                    # ver notes: fundo terracota médio, não branco
+
+landscape:
+  enabled: false                    # anda junto com a máscara desligada
+
+palette:
+  enabled: true
+  blur_sigma: 1.4                   # funde o grão do jpeg antes de decidir a cor
+  stops:
+    - ["#99420E", "#8A3E15"]         # fundo terracota -> tinta terracota queimada
+    - ["#211108", "#1A1008"]         # figuras negras -> tinta preto-quente
+
+style_preset: magalenha
+style_overrides:
+  font:
+    family: Cambria
+
+notes: |
+  Estilo de vaso grego de figuras negras: Ulisses amarrado ao mastro, a
+  tripulação remando, águias/sereias em torno do navio, sobre fundo terracota
+  — composição quase idêntica ao famoso "Vaso das Sereias" do Museu Britânico
+  (~480 a.C.). É o mesmo episódio do poster odisseia-sereias, mas o foco aqui
+  é o AUTOCONTROLE de Ulisses (amarrado, resistindo), não as sereias em si —
+  por isso o texto é a instrução de Circe para atá-lo ao mastro (Livro XII),
+  diferente do canto das sereias usado no outro poster.
+
+  Luminância: fundo terracota tem lum média ~0.25-0.4, as figuras pretas ~0.0-
+  0.15 — os dois abaixo do `lum_threshold` padrão (0.56), então a máscara
+  pegaria a arte inteira (mesmo sintoma do ulisses/agamenon: fundo não-claro).
+  Halftone puro.
+
+  Paleta em vez de accent: esta é uma arte de duas cores chapadas (terracota +
+  preto), o caso que o `palette` foi feito pra cobrir (ver
+  src/typo/palette.py, usado antes em projects/turnstile). Medi a cor média
+  do fundo (153,62,14) e das figuras (33,17,8) e usei os dois como stops,
+  cada um apontando pra uma tinta próxima da cor original mas com mais peso
+  pra imprimir bem no papel branco. `blur_sigma: 1.4` porque é um JPEG com
+  grão — sem borrar, pixels de borda entre preto e terracota ficavam
+  alternando de cor glifo a glifo (textura "sal e pimenta"). `accent`
+  desligado: a paleta já resolve a cor inteira, ligar os dois juntaria uma
+  cor única por cima da tabela de stops (ver comentário em typography.py).
+
+  Crop: cortei a margem lisa (~1,5-2% de cada lado) e a cercadura de grega +
+  palmeta na base (~10% da altura) — o motor já desenha a própria moldura no
+  compose.py; manter as duas juntas ia disputar espaço com o rodapé.
+
+  Fonte: Cambria de novo, pela mesma lógica das outras duas — traço mais
+  anguloso combina com o desenho geométrico do vaso (perfis retos de remo,
+  grega, penas). Não testei Georgia/Goudy de novo aqui: a essa altura já é a
+  terceira imagem com o mesmo veredito, e decidi não repetir o teste só por
+  rigor formal.

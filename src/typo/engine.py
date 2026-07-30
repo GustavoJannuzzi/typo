@@ -8,6 +8,10 @@ Ordem (identica ao `main()` do print_v4.py):
     4. typography  — passada principal de letras
     5. compose     — titulo, subtitulo, quadradinhos, rodape, moldura
 
+A camada `display` (letras gigantes / rotulo invertido, desligada por default)
+entra fora dessa ordem: as marcas `under` antes do passo 3 e as `over` depois
+do passo 5. Ver `typo/display.py`.
+
 O passo pesado (1-3) fica numa `Scene` memoizada por (imagem, crop, resolucao,
 params de mascara/accent/paisagem), de forma que mexer nos sliders de
 tipografia so re-roda o passo 4.
@@ -20,7 +24,16 @@ from typing import Literal
 
 from PIL import Image
 
-from typo import compose, landscape, mask as mask_mod, text_source, typography
+from typo import (
+    compose,
+    display as display_mod,
+    landscape,
+    mask as mask_mod,
+    palette as palette_mod,
+    regions as regions_mod,
+    text_source,
+    typography,
+)
 from typo.config import RenderConfig, Scale, hex_to_rgb
 from typo.fonts import FontPair, GlyphCache, resolve_family
 from typo.image_prep import Field, PreparedImage, crop_size, prepare
@@ -38,6 +51,7 @@ class Scene:
     lum: Field
     mask: Field
     accent: Field | None
+    palette: palette_mod.PaletteMap | None
     landscape_fields: landscape.LandscapeFields | None
 
 
@@ -55,6 +69,7 @@ def _scene_key(cfg: RenderConfig, art_w: int, art_h: int, dpi: float) -> tuple:
         round(dpi, 4),
         repr(cfg.mask),
         repr(cfg.accent),
+        repr(cfg.palette),
         repr(cfg.landscape),
     )
 
@@ -84,6 +99,7 @@ def build_scene(cfg: RenderConfig, art_w: int, art_h: int, dpi: float) -> Scene:
         lum=Field(prep.lum, use_sat),
         mask=Field(mask_result.mask, use_sat),
         accent=accent_field,
+        palette=palette_mod.build(prep, cfg.palette),
         landscape_fields=land,
     )
     _SCENE_CACHE[key] = scene
@@ -119,6 +135,30 @@ class RenderResult:
             f"glifos {self.stats.get('glyphs', 0)} (+{self.stats.get('landscape_glyphs', 0)} paisagem)  "
             f"tiles {self.stats.get('tiles', 0)}  {self.stats.get('seconds', 0):.1f}s"
         )
+
+
+#: abaixo desta amplitude (max - min dos canais) a cor e cinza, e um
+#: quadradinho cinza no cabecalho nao comunica nada
+_CHIP_MIN_CHROMA = 24
+
+
+def _chip_colors(
+    pmap: palette_mod.PaletteMap | None,
+) -> list[tuple[int, int, int]] | None:
+    """Cores *cromaticas* da paleta, na ordem dos stops e sem repetir.
+
+    Os neutros da tabela (traco, papel, branco) existem para manter o desenho
+    em tinta — nao sao a paleta da arte. A fileira do cabecalho mostra so as
+    cores, que e a informacao que ela carrega.
+    """
+    if pmap is None:
+        return None
+    chips: list[tuple[int, int, int]] = []
+    for color in pmap.colors:
+        if max(color) - min(color) < _CHIP_MIN_CHROMA or color in chips:
+            continue
+        chips.append(color)
+    return chips or None
 
 
 # --------------------------------------------------------------------------- #
@@ -158,12 +198,21 @@ def render_result(config: RenderConfig, mode: Mode = "preview") -> RenderResult:
     ox = (pw - art_w) // 2
     oy = int(scale.cm(config.page.margin_top_cm))
 
+    # a paisagem e contorno de FUNDO, fora da mascara: fica sempre no stream
+    # default, mesmo quando a arte esta dividida em regioes.
     stream = text_source.build_stream_cached(config.text)
+    text_field = regions_mod.build_field(config.text, art_w, art_h)
     pair = resolve_family(f.family)
     glyphs = GlyphCache(pair, config.flow.rotation_quantum_deg)
 
     ink = hex_to_rgb(config.colors.ink)
     accent_rgb = hex_to_rgb(config.accent.color)
+
+    # letras gigantes ATRAS da malha: a passada de letras desenha por cima e a
+    # mancha aparece pelos vaos de papel entre os glifos.
+    display_under = display_mod.draw(
+        canvas, config.display, config.colors, f.family, scale, layer="under"
+    )
 
     land_glyphs = 0
     if config.landscape.enabled and scene.landscape_fields is not None:
@@ -186,7 +235,8 @@ def render_result(config: RenderConfig, mode: Mode = "preview") -> RenderResult:
         mask=scene.mask,
         lum=scene.lum,
         accent=scene.accent,
-        stream=stream,
+        palette=scene.palette,
+        text_field=text_field,
         glyphs=glyphs,
         font_cfg=config.font,
         flow=config.flow,
@@ -213,6 +263,11 @@ def render_result(config: RenderConfig, mode: Mode = "preview") -> RenderResult:
         scale=scale,
         art_origin_x=ox,
         bottom_margin_cm=config.page.margin_bottom_cm,
+        chip_colors=_chip_colors(scene.palette),
+    )
+
+    display_over = display_mod.draw(
+        canvas, config.display, config.colors, f.family, scale, layer="over"
     )
 
     page_cm = (pw / dpi * 2.54, ph / dpi * 2.54)
@@ -234,6 +289,7 @@ def render_result(config: RenderConfig, mode: Mode = "preview") -> RenderResult:
             "probes": stats.probes,
             "rows": stats.rows,
             "landscape_glyphs": land_glyphs,
+            "display_marks": display_under + display_over,
             "tiles": len(glyphs),
             "seconds": time.perf_counter() - t0,
         },

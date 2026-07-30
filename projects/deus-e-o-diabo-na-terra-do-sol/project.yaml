@@ -1,0 +1,181 @@
+name: deus-e-o-diabo-na-terra-do-sol
+
+source:
+  image: refs/arte.png
+  crop: null                        # a releitura ja veio enquadrada (1132 x 1390)
+
+text:
+  file: text/frases.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150                   # -> pagina 85.7 x 111.5 cm
+
+titles:
+  title: "DEUS E O DIABO NA TERRA DO SOL"
+  subtitle: "GLAUBER ROCHA · 1964 · CINEMA NOVO"
+  footer: "RELEITURA TIPOGRÁFICA · O SERTÃO VAI VIRAR MAR E O MAR VIRAR SERTÃO"
+  title_size_mm: 34                 # 61.2 cm contra os 71.7 cm da arte
+  footer_size_mm: 7.0               # 36.6 cm
+
+mask:
+  enabled: false                    # cor chapada de ponta a ponta; halftone puro
+  border_frac: 0.01                 # o vermelho tem que chegar na borda
+  interior_fill_min: 0.10           # PONTO DE PRETO (nao piso) — ver notes
+
+landscape:
+  enabled: false                    # arte chapada nao tem contorno de paisagem
+
+accent:
+  enabled: false                    # substituido pela paleta
+
+palette:
+  enabled: true
+  blur_sigma: 1.0                   # achata o anti-aliasing antes de quantizar
+  # (cor MEDIDA no arquivo, com % de area) -> (tinta da releitura)
+  stops:
+    - ["#121617", "#0F0F0F"]        # preto  18.3% — chapeu, cabelo, barba
+    - ["#221E19", "#23170F"]        # espada  6.9% — tinta quase igual ao preto, ver notes
+    - ["#767166", "#4A4437"]        # cinza  15.0% — roupa -> oliva de couro, escurecido
+    - ["#830910", "#7A0A12"]        # fundo  38.4% — VERMELHO SANGUE
+    - ["#BC1063", "#A8005C"]        # raio    7.6% — magenta profundo
+    - ["#F69E05", "#DE8A00"]        # raio    7.1% — ouro/ambar (o amarelo do sol)
+    - ["#EDE6DA", "#EDE4CE"]        # disco   6.8% — quase papel: e o HALO, ver notes
+
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: "#14100C"                  # preto quente no titulo
+    subtitle: "#6E5A46"
+    footer: "#3E3228"
+    frame: "#C4B49A"
+  font:
+    family: Rockwell                # slab serif de tipo de madeira; ver notes
+    base_line_mm: 4.2               # granulometria, nao tamanho relativo — ver notes
+    size_min_mm: 2.4
+    size_max_ratio: 2.1
+    size_gamma: 0.85                # ABAIXO de 1: levanta o meio-tom, salva o sol
+    bold_threshold: 0.50            # divide o cartaz em dois registros, ver notes
+  layout:
+    advance_factor: 0.76            # aperto HORIZONTAL: e daqui que vem a cor
+    row_step_ratio: 0.82
+  flow:
+    flex: 0.5                       # ondulacao contida; nem reta seca nem onda cheia
+
+notes: |
+  Releitura tipografica de DEUS E O DIABO NA TERRA DO SOL (Glauber Rocha, 1964)
+  a partir do cartaz do Corisco com o sol de raios. A imagem em refs/arte.png
+  NAO e o cartaz original: e uma releitura serigrafica gerada a partir dele,
+  desenhada de proposito para este motor (cor chapada, espada como barra
+  solida, retrato reduzido a tres valores).
+
+  MASCARA DESLIGADA. Igual turnstile: cor chapada de ponta a ponta, nao existe
+  separacao figura/fundo por luminancia. `border_frac` desce para 0.01 porque a
+  rampa default de 0.03 comeria a faixa vermelha que fecha a arte.
+
+  PALETA. Sete stops, todos MEDIDOS no arquivo (mediana por regiao, com a % de
+  area anotada ao lado). As tintas seguem a regra do turnstile: mais fundas que
+  a cor de origem, porque um glifo entinta ~1/3 da propria caixa e tinta clara
+  sai lavada. As distancias no espaco de casamento estao folgadas entre os
+  cromaticos (vermelho x magenta = 92); os neutros e que ficam apertados.
+
+  A ESPADA. #221E19 esta a apenas 10.2 do preto #121617 no espaco de
+  casamento — 16% dos pixels dela caem no stop do preto. Nao adianta subir
+  `value_weight` (e a protecao contra as bordas sortearem cor, ver a docstring
+  de typo/palette.py). A saida foi dar a ela uma tinta quase identica ao preto
+  (#23170F contra #0F0F0F): o sorteio continua acontecendo e ninguem ve, e a
+  espada segue legivel pela FORMA — e uma barra vertical de 7% da imagem, o
+  olho le a silhueta, nao o matiz.
+
+  O FUNDO SAIU CHAPADO. O prompt pedia variacao suave de luminosidade dentro
+  do vermelho, e o gerador ignorou: #830910 identico nos quatro cantos e junto
+  ao sol, luminancia 0.181 em todos. Isso significa letra do MESMO tamanho em
+  38% da pagina. Mantive assim de proposito — o fundo vira um campo regular de
+  frases legiveis atras da figura, e quem carrega o volume e o retrato. Se um
+  dia quiser volume no fundo, o conserto e na imagem (gradiente radial de
+  brilho no mesmo matiz), nao no motor.
+
+  DOIS REGISTROS COM UMA FONTE SO. O motor usa uma familia na malha inteira,
+  entao "fonte diferente no fundo" nao existe. O que existe e `bold_threshold`:
+  como ele compara a escuridao JA elevada a `size_gamma`, a 0.50 o corte cai
+  entre o sol ocre (0.405) e a roupa cinza (0.608). Resultado:
+
+    tudo que e figura e fundo -> Rockwell BOLD
+    sol ocre e disco creme    -> Rockwell REGULAR
+
+  O sol e a unica coisa leve do cartaz, e e dai que sai a impressao de dois
+  estilos. As margens ate o corte (0.095 no ocre, 0.108 no cinza) sao o que
+  impede as duas regioes de piscarem entre bold e regular.
+
+  TAMANHOS (mm, com base_line 4.2 e row_step 3.44 mm):
+
+    preto 8.3 | espada 8.1 | vermelho 7.7 | magenta 6.9 | cinza 6.0 |
+    ocre 4.6 | creme 2.65
+
+  O desenho e esse: no vermelho e no preto a letra passa do dobro do passo de
+  linha e as fileiras se fecham em massa; no sol ela fica em 1.3x e ainda sobra
+  papel entre as linhas — e o que faz o sol respirar e o ouro ler como ouro em
+  vez de virar mancha. O disco creme fica quase no piso e funciona como HALO de
+  papel: e ele que recorta a cabeca, nao um contraste de densidade.
+
+  O HALO. Na primeira rodada o creme foi para #D8C9A8 (papel velho) e o disco
+  virou um campo de marcas ocre a 22% de cobertura — a cabeca preta perdeu o
+  recorte e a metade de cima da arte ficou sem ancora. Mesmo caso do papel vs
+  ceu do turnstile, e mesma solucao: a separacao nao e por densidade, e por
+  TINTA. Com #EDE4CE o disco desaparece como papel e a silhueta volta.
+
+  GRANULOMETRIA vs TAMANHO RELATIVO. `base_line_mm` desceu de 4.6 para 4.2
+  depois de medir. Nao e recuo do pedido de "letra maior no fundo": o tamanho
+  do glifo sai da escuridao local, entao o fundo vermelho continua sendo o
+  segundo maior corpo da pagina (7.7 mm contra 4.6 do sol). O que 4.6 estragava
+  era a granulometria — com a mesma cobertura, letra maior deixa BURACOS de
+  papel maiores, e a 1 m o campo vermelho lia como chuvisco em vez de campo.
+  Baixar a base fecha o campo sem mexer na hierarquia.
+
+  DENSIDADE MEDIDA no export de 150 dpi (cobertura = fracao de pixel entintado
+  dentro de cada regiao da paleta), com o turnstile de regua:
+
+    preto     65.0%   (turnstile traco    54.3%)
+    espada    67.2%
+    cinza     57.3%   (turnstile cinza    39.7%)
+    vermelho  64.0%   (turnstile vermelho 52.7%)
+    magenta   62.3%   (turnstile magenta  48.7%)
+    ocre      39.5%   (turnstile ouro     36.4%)
+    creme     18.7%   (halo: baixo de proposito)
+    TOTAL     58.5%   (turnstile          35.3%)
+
+  Esta mais denso que o turnstile de proposito — la 17.7% da area era papel
+  creme que devia sumir, aqui nao ha papel nenhum: a arte e cor de ponta a
+  ponta. A primeira rodada saiu em 37.1% total, com o sol em 20.4%, e o cartaz
+  inteiro leu lavado. O que consertou foi `size_gamma` 1.3 -> 0.85 (o sol e o
+  meio-tom que o gamma alto estava jogando pro piso), `advance_factor` 0.90 ->
+  0.76 e `row_step_ratio` 1.0 -> 0.82.
+
+  O LIMITE DO VERMELHO. A 64% de cobertura o campo mistura 36% de papel branco,
+  entao a tinta #7A0A12 le a ~1 m como um carmim (#AA6267), nao como o sangue
+  que ela e de perto. Isso e mistura optica, nao erro de paleta: escurecer mais
+  a tinta empurra o campo pro marrom em vez de pro vermelho. Para o fundo ler
+  mais fundo so ha um caminho de verdade, que e MAIS cobertura (apertar
+  `advance_factor` para ~0.70), e o preco e a legibilidade das frases, que hoje
+  se leem inteiras a 30 cm. Ficou do lado da legibilidade.
+
+  ROCKWELL. Slab serif geometrico (Monotype, 1934), a familia de tipo de
+  madeira de cartaz de feira e folheto de cordel — a cara "nordeste antigo" que
+  o Gustavo pediu, sem cair em fonte decorativa que morre a 3 mm. Escolhida
+  tambem por um motivo tecnico: tem regular e bold em ARQUIVOS SEPARADOS
+  (ROCK.TTF / ROCKB.TTF), entao o `bold_threshold` continua sendo alavanca de
+  densidade. A Playbill, que seria a opcao mais obvia de western/cordel, tem
+  `regular == bold` no Windows e zeraria esse efeito — mesma armadilha da
+  Bahnschrift descrita nos Gotchas do CLAUDE.md.
+
+  TEXTO. Frases do filme, uma por linha, em modo `phrases` para que pedacos
+  continuem legiveis dentro da massa. O rodape carrega a frase que nao esta no
+  arquivo de texto e e a que resume o filme: "o sertao vai virar mar e o mar
+  virar sertao".
+
+  AO AFINAR: esta arte e de cor chapada, entao vale o aviso do turnstile e nao
+  o da SKILL.md geral — o export sai mais CLARO que o preview. Meca densidade
+  no export de 150 dpi, nunca no preview.

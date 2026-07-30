@@ -1,0 +1,12 @@
+# Homero, Odisseia, Livro I (abertura) — tradução de Manuel Odorico Mendes,
+# 1928, "Odysséa de Homero" (Bibliotheca de Escriptores Maranhenses),
+# domínio público. Fonte: Wikisource (pt.wikisource.org/wiki/Odysséa_de_Homero/I).
+#
+# Uma frase por linha; linhas com # são ignoradas pelo motor.
+Canta, ó Musa, o varão que astucioso
+Rasa Ilion santa, errou de clima em clima
+Viu de muitas nações costumes varios
+Mil transes padeceu no equoreo ponto
+Por segurar a vida e aos seus a volta
+Baldo afã! pereceram, tendo insanos
+Tudo, ó prole Dial, me aponta e lembra

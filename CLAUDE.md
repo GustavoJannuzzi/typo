@@ -39,9 +39,11 @@ src/typo/
   text_source.py  .txt -> stream de caracteres (phrases | words | chars)
   image_prep.py   load + crop + resize + luminância + Field (sondagem O(1))
   mask.py         máscara das figuras + região de accent
+  palette.py      mapa de cor por glifo (tabela fonte -> tinta)
   landscape.py    campos (edge/janela) + passada da paisagem
   typography.py   passada principal de letras
   compose.py      título / subtítulo / quadradinhos / rodapé / moldura
+  display.py      letras gigantes + rótulo invertido (layout `display`)
   engine.py       Scene (precompute cacheado) + render(config, mode)
   export.py       PNG com dpi + PDF via img2pdf no tamanho físico
   project.py      project.yaml -> RenderConfig + scaffold
@@ -65,16 +67,35 @@ app/ui.py         interface Gradio
 4. **typography** — varredura por linhas com baseline ondulada; em cada posição
    sonda a escuridão local dentro da máscara, mapeia para o tamanho da fonte
    (`size_min..size_max` via `size_gamma`), aplica bold acima de
-   `bold_threshold`, rotaciona o glifo pelo fluxo, pinta com accent ou tinta.
-5. **compose** — título, subtítulo, quadradinhos, rodapé, moldura.
+   `bold_threshold`, rotaciona o glifo pelo fluxo, pinta com a paleta, o accent
+   ou a tinta.
+5. **compose** — título, subtítulo, quadradinhos, rodapé, moldura. Com
+   `text_blocks.draw: false` não desenha nada (os textos seguem valendo como
+   metadado: é de lá que o site lê título/subtítulo).
 6. **export** (só no modo export) — PNG com dpi + PDF com `img2pdf` no tamanho
    físico exato.
+
+A camada **display** entra fora dessa ordem: as marcas `layer: under` antes do
+passo 3 e as `layer: over` depois do passo 5.
+
+### Duas famílias de layout
+
+- **ficha de espécime** (`text_blocks`, default) — título em cima, arte com
+  moldura, rodapé centralizado. Nada se cruza. É o `print_v4.py`.
+- **display** (`display`, desligada por default) — a linha de espécime *solta*
+  em cima da arte: glifos em corpo de dezenas de cm sangrando pela borda,
+  rótulo invertido nomeando a obra, linha vertical na lateral. Uma primitiva
+  só, a `mark` (letra gigante, rótulo e linha vertical são todos marks), com
+  posição em cm a partir da borda que o `anchor` nomeia — **negativo sangra
+  pra fora do papel**. Posiciona pelo **bbox de tinta**, não pelas métricas da
+  fonte: num corpo de 40 cm o vazio de ascender passa de 10 cm e toda medida
+  pareceria errada. Ver `typo/display.py` e `projects/debret-antropofagia`.
 
 ### Config
 
 `RenderConfig` é a **única** fonte de parâmetros — UI e CLI montam a mesma
-dataclass. Grupos: `source, mask, text, font, flow, layout, accent, landscape,
-colors, page, text_blocks`.
+dataclass. Grupos: `source, mask, text, font, flow, layout, accent, palette,
+landscape, colors, page, text_blocks, display`.
 
 ```python
 cfg = RenderConfig.from_project("projects/magalenha/project.yaml")
@@ -152,11 +173,28 @@ afinação está em `skills/typographic-poster/SKILL.md`.
   **A DejaVu Sans *Condensed* não vem no Windows** — o preset pede
   `"DejaVu Sans Condensed"` e cai na DejaVu Sans normal, que é um pouco mais
   larga. Se quiser a condensed de verdade, jogue os `.ttf` em `fonts/`.
+- **Fonte variável só serve pro `display`.** A Bahnschrift (a DIN 1451 do
+  Windows) é um arquivo único com 15 instâncias, de `Light` a `Bold Condensed`.
+  O `display.load_font` sabe pedir a instância (`variation:` na mark); o
+  `GlyphCache` da malha **não** — e como `resolve_family` devolve
+  `regular == bold` para ela, usar Bahnschrift na malha zera o efeito do
+  `bold_threshold`, que é uma das alavancas de densidade. Por isso o
+  `debret-antropofagia` tem duas fontes: Bahnschrift nas letras gigantes e
+  Arial Narrow (com bold de verdade) na malha.
 - **Custo do export.** 150 dpi = 44 MP e ~15 s. As tabelas de soma acumulada
   (`Field`) só são construídas abaixo de `SAT_MAX_PX` (8 MP) — acima disso a
   sondagem volta ao `numpy.mean` direto, para não estourar memória.
 - **`accent.source_rule`** só implementa `"red"`. Qualquer outro valor levanta
   `NotImplementedError` com um TODO — não existe stub que finge funcionar.
+- **Uma cor ou muitas.** `accent` pinta *uma* cor onde uma regra booleana bate.
+  Para arte de várias cores use `palette`: tabela `(cor_na_fonte, cor_da_tinta)`
+  e vizinho mais próximo, amostrado no **centro** da sonda de cada glifo (não a
+  média — média entre dois blocos vizinhos inventaria uma terceira cor). Com a
+  paleta ligada o accent não pinta nada: ela já cobre o caso geral, inclusive os
+  neutros. O casamento **não** é euclidiano em RGB — `palette.value_weight`
+  (0.25) comprime o eixo de brilho, senão as bordas de anti-aliasing do desenho
+  sorteiam cor. O porquê está na docstring de `palette.py`; o uso real em
+  `projects/turnstile`.
 
 ## Estado
 

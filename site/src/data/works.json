@@ -167,23 +167,23 @@
     "glyphs": 40413
   },
   {
-    "slug": "jotape",
-    "title": "LEANDRO ROQUE",
-    "subtitle": "JOTAPÊ",
-    "blurb": "Halftone puro. A pichação do trailer lê inteira.",
+    "slug": "debret-antropofagia",
+    "title": "TUPI OR NOT TUPI",
+    "subtitle": "OSWALD DE ANDRADE · MANIFESTO ANTROPÓFAGO · 1928",
+    "blurb": "TUPI em letra de 23 cm cercando a gravura colonial.",
     "family": "cena",
-    "font": "Rockwell Condensed",
-    "bodyMm": 3.0,
+    "font": "Arial Narrow",
+    "bodyMm": 2.6,
     "layers": [
       "halftone puro"
     ],
-    "widthCm": 98.7,
+    "widthCm": 100.0,
     "heightCm": 111.5,
     "px": [
-      5003,
-      5196
+      5905,
+      6584
     ],
-    "aspect": 0.9629,
-    "glyphs": 171724
+    "aspect": 0.8969,
+    "glyphs": 188125
   }
 ]

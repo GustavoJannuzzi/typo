@@ -1,0 +1,13 @@
+# Homero, Odisseia, Livro XI (a sombra de Agamêmnon, no mundo dos mortos,
+# contando a Ulisses como Egisto e Clitemnestra o assassinaram) — tradução de
+# Manuel Odorico Mendes, 1928, domínio público.
+# Fonte: Wikisource (pt.wikisource.org/wiki/Odysséa_de_Homero/XI).
+#
+# Uma frase por linha; linhas com # são ignoradas pelo motor.
+Nada há mais sevo que a mulher indigna
+Capaz de conceber tamanhos crimes
+A que esposei donzela assim tratou-me
+Crua morte me urdiu, quando eu pensava
+Prazer vir dar a fâmulos e a filhos
+Torpemente manchou-se, e tanta infâmia
+Tem as mais virtuosas deslustrado

@@ -1,0 +1,11 @@
+# Homero, Odisseia, Livro XII (o canto das sereias) — tradução de Manuel
+# Odorico Mendes, 1928, domínio público.
+# Fonte: Wikisource (pt.wikisource.org/wiki/Odysséa_de_Homero/XII).
+#
+# Uma frase por linha; linhas com # são ignoradas pelo motor.
+Tem-te, honra dos Aqueus, famoso Ulysses
+Nenhum passa daqui, sem que das bocas
+Nos ouça a melodia, e com deleite
+E instruído se vai. Consta-nos quanto
+O Céo vos molestou na larga Tróia
+Quanto se faz nos consta n'alma terra

@@ -2,7 +2,7 @@
 
 Varredura por linhas com baseline ondulada; em cada posicao mede a escuridao
 local dentro da mascara, mapeia para o tamanho da fonte, aplica bold acima do
-limiar, rotaciona o glifo pelo fluxo e pinta com accent ou tinta.
+limiar, rotaciona o glifo pelo fluxo e pinta com a paleta, o accent ou a tinta.
 
     A = 0.4*LINE_H; row = 0; yb = LINE_H
     while yb < art_h:  ...  yb += LINE_H*0.9; row += 1
@@ -18,6 +18,8 @@ from PIL import Image
 from typo.config import FlowCfg, FontCfg, LayoutCfg, MaskCfg, clamp
 from typo.fonts import GlyphCache
 from typo.image_prep import Field, PreparedImage
+from typo.palette import PaletteMap
+from typo.regions import TextField
 
 
 @dataclass
@@ -33,7 +35,8 @@ def draw(
     mask: Field,
     lum: Field,
     accent: Field | None,
-    stream,
+    palette: PaletteMap | None,
+    text_field: TextField,
     glyphs: GlyphCache,
     font_cfg: FontCfg,
     flow: FlowCfg,
@@ -72,10 +75,19 @@ def draw(
     rot_clamp = flow.rotation_clamp_deg
     quantum = glyphs.quantum
 
-    stream_len = len(stream)
-    idx = 0
+    # sem `text.regions` isto e um stream so e `region_map is None`: o caminho
+    # do print_v4.py, com um cursor unico. Com regioes, cada stream tem o SEU
+    # cursor — se todos dividissem o mesmo indice, mudar de regiao picaria as
+    # frases no meio e o texto deixaria de se ler em pedacos.
+    streams = text_field.streams
+    stream_lens = [len(s) for s in streams]
+    cursors = [0] * len(streams)
+    region_inks = text_field.inks
+    region_map = text_field.index
+    region_w = text_field.width
     rng = random.Random(layout.jitter_seed) if jitter_px > 0 else None
     has_accent = accent is not None
+    palette_at = palette.at if palette is not None else None
 
     row = 0
     yb = float(line_h)
@@ -97,25 +109,44 @@ def draw(
                 x += blank_step
                 continue
 
-            dark = (1.0 - lum.mean(y0, y1, x0, x1)) ** gamma
+            # max(0.0, ...): ruido de ponto flutuante da SAT (soma acumulada em
+            # float64) pode fazer lum.mean() passar de 1.0 por uma fracao
+            # infinitesimal em regioes de branco puro; sem o clamp, uma base
+            # negativa elevada a gamma fracionario vira numero complexo.
+            dark = max(0.0, 1.0 - lum.mean(y0, y1, x0, x1)) ** gamma
             if dark < fill_min:
                 dark = fill_min
             fs = int(size_min + size_span * (dark - fill_min) / fill_span)
             fs = max(size_min, min(size_max, fs))
             bold = dark > bold_threshold
 
-            ch = stream[idx % stream_len]
-            idx += 1
+            cy = (y0 + y1) >> 1
+            cx = (x0 + x1) >> 1
+            rid = 0 if region_map is None else region_map[cy * region_w + cx]
+            ch = streams[rid][cursors[rid] % stream_lens[rid]]
+            cursors[rid] += 1
             if ch == " ":
                 x += fs * layout.space_advance_factor
                 continue
 
-            is_accent = has_accent and accent.mean(y0, y1, x0, x1) > accent_hit
+            # a tinta declarada na regiao ganha de tudo: ela e uma decisao de
+            # projeto grafico, enquanto paleta e accent sao derivados da imagem.
+            # A paleta, por sua vez, ganha do accent quando ligada — ela ja
+            # cobre o caso geral (inclusive os neutros), e sobrepor os dois
+            # daria uma cor unica invadindo blocos que a tabela resolveu de
+            # proposito.
+            region_ink = region_inks[rid]
+            if region_ink is not None:
+                color = region_ink
+            elif palette_at is not None:
+                color = palette_at(cy, cx)
+            elif has_accent and accent.mean(y0, y1, x0, x1) > accent_hit:
+                color = accent_color
+            else:
+                color = ink
             ang = rot_amp * math.sin(2 * math.pi * x / rot_wave + row_phase_rot)
             step = int(round(clamp(ang, -rot_clamp, rot_clamp) / quantum))
-            tile, gw = glyphs.tile(
-                ch, fs, bold, step, accent_color if is_accent else ink
-            )
+            tile, gw = glyphs.tile(ch, fs, bold, step, color)
 
             px = ox + x
             py = oy + y - fs * layout.baseline_offset_ratio

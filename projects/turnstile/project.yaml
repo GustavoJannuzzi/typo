@@ -1,0 +1,197 @@
+name: turnstile
+
+source:
+  image: refs/cartaz.jpeg
+  crop: [70, 60, 889, 1260]         # so o corpo do cartaz; fora a margem cinza 242
+
+text:
+  file: text/turnstile.txt
+  mode: phrases
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150                   # -> pagina 74 x 111.5 cm
+
+titles:
+  # o titulo NAO repete "TURNSTILE NO BRASIL": a arte ja diz isso em letra
+  # gigante 15 cm abaixo. Ver notes.
+  title: "NEVER ENOUGH"
+  subtitle: "TURNSTILE · LOLLAPALOOZA BRASIL 2026 · 22 MAR · INTERLAGOS"
+  footer: "EDIÇÃO ESPECIAL · RELEITURA TIPOGRÁFICA DA ARTE DE LUCAS PEREIRA · THESE BIRDS NOT MEANT TO FLY ALONE"
+  # medidos a 150 dpi contra os 60 cm uteis da pagina
+  title_size_mm: 30
+  footer_size_mm: 6.4               # 7.6 daria 67.5 cm e estouraria a moldura
+
+mask:
+  enabled: false                    # halftone puro, ver notes
+  border_frac: 0.01                 # 0.03 comeria a faixa NEVER ENOUGH do rodape da arte
+
+landscape:
+  enabled: false                    # arte de cor chapada nao tem contorno de paisagem
+
+accent:
+  enabled: false                    # substituido pela paleta (uma cor -> nove)
+
+palette:
+  enabled: true
+  blur_sigma: 1.2                   # achata o ruido de JPEG antes de quantizar
+  # (cor medida no cartaz do Lucas) -> (tinta da releitura)
+  stops:
+    # neutros: seguram o desenho.
+    - ["#020202", "#141414"]        # traco                -> tinta
+    - ["#6B6B63", "#4A4A46"]        # cinza-medio (bordas) -> tinta mais fraca
+    # PAPEL quase branco de proposito — ver notes. Com letra grande, tinta
+    # creme media (#D6CBA6) lia como campo de marcas ocre em vez de papel.
+    - ["#EFE6C7", "#F2EEE2"]        # papel creme          -> quase branco quente
+    - ["#F3F3F2", "#F8F8F5"]        # branco               -> quase branco
+    - ["#EFDAA1", "#F2E4BC"]        # amarelo claro        -> creme claro
+    # cores: as mesmas do cartaz, saturadas
+    # cores: as do cartaz, saturadas E ESCURECIDAS. Ver notes — com a grade CRT
+    # a cobertura de tinta cai para ~1/3, entao a tinta tem que ser mais funda
+    # que a cor que se quer ler; tinta clara aqui sai lavada.
+    - ["#ACD9FF", "#0F62C4"]        # ceu azul claro       -> azul fundo (area clara, ver notes)
+    - ["#66B7CA", "#0093B0"]        # ciano dos blocos     -> ciano fundo
+    - ["#2B60AC", "#0D28B8"]        # azul do BRASIL       -> azul ultramar
+    - ["#84B255", "#2E9E1F"]        # verde das folhas     -> verde forte
+    - ["#EFC04E", "#E09400"]        # amarelo dos blocos   -> ouro
+    - ["#E2748F", "#E5006E"]        # rosa dos blocos      -> magenta
+    - ["#D84A40", "#D4110A"]        # vermelho dos blocos  -> vermelho fundo
+
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: "#141414"
+  flow:
+    flex: 0.0                       # linha reta e glifo em pe: a grade do tubo
+  font:
+    family: Consolas                # monoespacada: coluna alinhada, cara de terminal
+    base_line_mm: 4.4               # letra grande e legivel de perto (era 3.2)
+    size_min_mm: 2.2
+    size_max_ratio: 2.3             # faixa larga: e o que fecha o preto solido
+    size_gamma: 0.75
+    bold_threshold: 0.20            # quase tudo bold: traco grosso = mais tinta
+  layout:
+    advance_factor: 0.72            # aperto HORIZONTAL: e daqui que vem a cor
+    row_step_ratio: 0.82            # vao VERTICAL: e daqui que vem o scanline
+  mask:
+    interior_fill_min: 0.14         # PONTO DE PRETO, nao piso — ver notes
+
+notes: |
+  Colab / edição especial: releitura tipográfica do cartaz oficial de campanha
+  TURNSTILE × LOLLAPALOOZA BRASIL 2026, do Lucas Pereira (@harajuicelucas,
+  harajuice.myportfolio.com/cartaz-turnstile), feito para a Warner Music Brasil.
+  A ideia é levar essa releitura para o artista e divulgar as duas juntas.
+
+  O show: domingo, 22/03/2026, Autódromo de Interlagos, São Paulo, Palco
+  Budweiser — headliner do terceiro dia, ao lado de Tyler, the Creator e Lorde.
+  Terceira passagem da banda pelo Brasil; a primeira foi no Lollapalooza de
+  2022. Em 01/02/2026 o Turnstile ganhou os dois primeiros Grammys da carreira:
+  Melhor Álbum de Rock (NEVER ENOUGH) e Melhor Performance de Metal (BIRDS).
+
+  CONCEITO. O Turnstile é uma banda de hardcore de Baltimore que fez a coisa
+  mais difícil do gênero: abrir a porta. O hardcore historicamente se protege
+  por triagem — quem sabe as regras entra. O Turnstile inverteu isso e vendeu
+  hardcore para estádio sem diluir a roda, e o cartaz do Lucas entende isso
+  perfeitamente: não desenhou a violência do show, desenhou *as pessoas*. Cinco
+  figuras sentadas e paradas em cima de blocos de cor, araras-canindé, folhagem,
+  arco-íris — o público do Turnstile em cenário brasileiro, em repouso.
+
+  A releitura tipográfica leva esse gesto um passo adiante. Se o cartaz do Lucas
+  troca o mosh pit pelas pessoas, a versão em letras dissolve as pessoas no
+  texto: nenhuma figura da arte existe sozinha, e nenhuma letra também — só
+  massa de caractere junta forma um corpo. É literalmente "THESE BIRDS NOT
+  MEANT TO FLY ALONE" (BIRDS, o Grammy de Melhor Performance de Metal) como
+  método de desenho, não como legenda. O texto é a letra inteira de BIRDS e
+  NEVER ENOUGH, as duas faixas que o cartaz original cita.
+
+  MÁSCARA DESLIGADA. Não existe separação figura/fundo por luminância aqui: o
+  cartaz é cor chapada de ponta a ponta, e os blocos de cor são o assunto tanto
+  quanto as figuras. Halftone puro, igual jotape / emicida / ainda-estou-aqui.
+  `border_frac` desce de 0.03 para 0.01 porque a rampa de borda default apagaria
+  a faixa "NEVER ENOUGH" que fecha o cartaz embaixo.
+
+  PALETA (feature nova, `palette` em typo/palette.py). O accent do motor pinta
+  UMA cor onde uma regra booleana bate — não dava conta de um cartaz de nove
+  cores. A `palette` é o caso geral: tabela `(cor_na_fonte -> cor_da_tinta)`,
+  vizinho mais próximo, amostrado no centro da sonda de cada glifo. As cores de
+  origem acima foram medidas no arquivo (share de área: céu 19%, creme 13%,
+  rosa 7,4%, vermelho 5,5%, traço 5,5%, ciano 5,4%, amarelo 4,6%, azul 4,5%,
+  verde 3,2%); as de destino são as mesmas saturadas, para a letra destacar.
+  Os quatro neutros (traço, creme, branco, cinza-médio) apontam para a tinta —
+  é assim que o traço do desenho e o painel do lettering continuam preto.
+  `value_weight: 0.25` (default) é o que impede as bordas de anti-aliasing de
+  sortearem verde; ver a docstring de typo/palette.py.
+
+  TIPOGRAFIA — A GRADE DE TUBO. A primeira versão (letra pequena, ondulada,
+  empilhada) ficou embaralhada: densidade alta demais para o olho separar
+  desenho de textura. Esta versão vai para o outro lado, com estética de tubo
+  de raios catódicos, que é o registro retrô que a banda usa:
+
+  - `flow.flex: 0.0` mata ondulação E rotação. Fileira reta, glifo em pé. É a
+    linha de varredura.
+  - `font.family: Consolas` — monoespaçada. A coluna alinha e o campo ganha
+    cara de terminal em vez de mancha de jornal.
+  - `layout.row_step_ratio: 1.06` (acima de 1) abre um vão de papel entre as
+    fileiras. É esse vão que lê como scanline.
+  - `font.base_line_mm: 4.4` contra 3.2 — 37% maior, legível de perto.
+
+  O CONFLITO que governa este projeto: vão branco entre linhas e cor saturada
+  são a MESMA variável. Scanline visível significa papel aparecendo, que
+  significa cor mais clara — e um glifo entinta só ~1/3 da própria caixa, então
+  letra grande e espaçada cobre muito menos que letra pequena empilhada. As
+  tentativas de CRT com espaçamento folgado nos dois eixos saíram todas
+  pastel. A saída foi separar os eixos:
+
+  - vão VERTICAL (`row_step_ratio: 0.82`) -> a fileira. Vale notar que NÃO
+    precisa de vão maior que 1 para o scanline aparecer: com letra grande,
+    monoespaçada e em pé, a fileira se destaca sozinha. Testei 1.06 e o ganho
+    de banda não pagou a cor perdida.
+  - aperto HORIZONTAL (`advance_factor: 0.72`) -> a cor;
+  - `bold_threshold: 0.20` deixa quase todo glifo em bold: traço mais grosso é
+    mais tinta por letra sem mexer no espaçamento;
+  - tinta ESCURECIDA nas cores (ver os stops) para compensar o 1/3 de
+    cobertura. Tinta clara com grade aberta sai lavada.
+
+  `size_max_ratio: 2.3` com `size_gamma: 0.75` é o que fecha o preto sólido: nos
+  escuros o glifo passa de duas vezes o passo de linha e as fileiras se
+  sobrepõem em massa, enquanto no meio-tom fica abaixo do passo e o vão
+  sobrevive. Sem isso o lettering "TURNSTILE" virava chuvisco cinza e a
+  composição perdia a âncora.
+
+  PAPEL vs CÉU — o ajuste mais contra-intuitivo daqui. Com letra grande, o
+  painel creme virou um campo de marcas ocre. O reflexo é baixar o piso de
+  tamanho, mas isso apaga o CÉU junto (creme tem luminância 0.90, céu 0.83 —
+  perto demais para separar por tamanho) e a metade de cima do cartaz fica oca.
+  A separação certa não é por densidade, é por TINTA: o creme foi para quase
+  branco (#F2EEE2) e desaparece mesmo com letra grande, enquanto o céu ganhou
+  azul mais fundo (#0F62C4) e segura o topo. Medido: cobertura de cor 0.44,
+  luminância do creme 0.948, do céu 0.838.
+
+  DUAS ARMADILHAS que me custaram voltas, para a próxima sessão não repetir:
+
+  1. `mask.interior_fill_min` NÃO é um piso de preenchimento, apesar do nome —
+     é PONTO DE PRETO. Subi-lo achata tudo que está abaixo dele no tamanho
+     mínimo e COMPRIME o resto para baixo; ou seja, subir esse valor deixa os
+     claros e os meio-tons MENORES, não maiores. Quem levanta as áreas claras é
+     `font.size_min_mm`. Passei três rodadas ajustando os dois na direção
+     errada porque assumi que os dois empurravam para o mesmo lado.
+  2. Não julgue densidade em miniatura. Comparei variantes em folhas de 520 px
+     de largura e o LANCZOS mediou a tinta o bastante para TODAS parecerem
+     saturadas; a versão que escolhi assim estava lavada a 1000 px. Densidade
+     e cor se medem em número (fração de pixel entintado por região de cor da
+     paleta), não no olho, e nunca abaixo de ~1000 px.
+
+  TÍTULO. Não repete "TURNSTILE NO BRASIL" — a arte já diz isso em letra
+  gigante 15 cm abaixo, e com a arte mais limpa a duplicação ficou evidente.
+  O título é "NEVER ENOUGH" (álbum, e o Grammy de Melhor Álbum de Rock); o
+  subtítulo carrega banda + show; o rodapé carrega o crédito da colab e a
+  frase-conceito. Para voltar ao anterior, é só trocar `titles.title`.
+
+  ATENÇÃO ao afinar: este projeto contraria a regra "o export sai mais chapado
+  que o preview" da SKILL.md. Aqui o export sai mais CLARO — arte de cor
+  chapada não tem textura fina para as linhas somarem em cima. Todo o ajuste
+  de densidade foi feito em export de 150 dpi, não em preview; o preview a
+  41 dpi mostra a cor bem mais forte do que ela sai impressa. Se for mexer em
+  densidade, meça no export.

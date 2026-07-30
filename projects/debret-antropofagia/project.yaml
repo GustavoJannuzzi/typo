@@ -1,0 +1,275 @@
+name: debret-antropofagia
+
+source:
+  image: refs/debret.jpg
+  # o scan ja vem aparado na arte (medi as 4 bordas: nao ha margem de papel).
+  # o corte tira o macico de mato escuro da esquerda, que era tinta sem
+  # informacao, e centra a cena no cacique. Ver notes.
+  crop: [920, 140, 4608, 2904]
+
+text:
+  file: text/debret-antropofagia.txt
+  mode: phrases
+  repeat: 120                       # o manifesto e curto; o cartaz e grande
+
+page:
+  # pagina RETRATO com arte PAISAGEM: a arte vira uma faixa e o resto do papel
+  # e o campo das letras gigantes. Ver notes.
+  mode: fixed
+  width_cm: 100
+  height_cm: 111.5
+  margins_cm: { top: 27, bottom: 12, side: 8 }
+  dpi_export: 150                   # -> faixa de arte 84 x 63 cm em y 27..90
+
+titles:
+  # NAO desenhados (draw: false abaixo) — quem nomeia a obra na pagina e o
+  # rotulo invertido do `display`. Estes textos existem como METADADO: o
+  # scripts/build_site_assets.py monta o works.json a partir daqui.
+  title: "TUPI OR NOT TUPI"
+  subtitle: "OSWALD DE ANDRADE · MANIFESTO ANTROPÓFAGO · 1928"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+  draw: false
+
+accent:
+  enabled: false                    # aquarela inteira em ocre; nada a isolar
+
+landscape:
+  enabled: false                    # cena fechada, sem horizonte fora da figura
+
+mask:
+  enabled: false                    # halftone puro — medido, ver notes
+  interior_fill_min: 0.20           # PONTO DE PRETO no p5 de claridade da prancha
+
+# --------------------------------------------------------------------------- #
+# layout `display`: a linha de especime solta em cima da arte
+# --------------------------------------------------------------------------- #
+display:
+  enabled: true
+  family: Bahnschrift               # a DIN 1451 que vem no Windows; ver notes
+  # pagina 100 x 111,5 cm; faixa de arte 84 x 63 cm em x 8..92, y 27..90.
+  # as quatro letras gigantes formam uma grade 2x2 recuada 8 cm de TODAS as
+  # bordas — o mesmo recuo da arte, entao letra e imagem dividem a borda
+  # esquerda e a direita. Nenhuma sangra: ler TUPI ganha da sangria.
+  marks:
+    # -- nome da fonte no alto, convencao de ficha de especime
+    - text: "BAHNSCHRIFT BOLD CONDENSED"
+      size_mm: 7
+      anchor: lt
+      x_cm: 8                       # alinhado com o T e com a borda da arte
+      y_cm: 3.5
+      variation: Bold Condensed
+      letter_spacing: 1
+
+    # -- TUPI, na ordem de leitura: T U em cima, P I embaixo
+    - text: "T"
+      size_cm: 32
+      anchor: lt
+      x_cm: 8
+      y_cm: 7
+      variation: Bold Condensed
+      layer: over
+    - text: "U"
+      size_cm: 32
+      anchor: rt
+      x_cm: 8
+      y_cm: 7
+      variation: Bold Condensed
+      layer: over
+    - text: "P"
+      size_cm: 32
+      anchor: lb
+      x_cm: 8
+      y_cm: 7
+      variation: Bold Condensed
+      layer: over
+    - text: "I"
+      size_cm: 32
+      anchor: rb
+      x_cm: 8
+      y_cm: 7
+      variation: Bold Condensed
+      layer: over
+
+    # -- rotulo invertido: nomeia a PECA (a referencia devorada vai no rodape)
+    - text: "TUPI OR NOT TUPI\nMANIFESTO ANTROPÓFAGO · OSWALD DE ANDRADE · 1928"
+      size_mm: 9
+      anchor: lt
+      x_cm: 8
+      y_cm: 33
+      variation: Bold Condensed
+      box: true
+      pad_mm: 5
+      leading: 1.35
+
+    # -- linha vertical na lateral: a datacao do proprio manifesto
+    - text: "PIRATININGA · ANO 374 DA DEGLUTIÇÃO DO BISPO SARDINHA"
+      size_mm: 6
+      anchor: rt
+      x_cm: 1.5
+      y_cm: 3.5
+      rotate_deg: -90
+      variation: SemiBold Condensed
+      letter_spacing: 1
+
+    # -- rodape em duas linhas: a obra que inspirou + o credito
+    - text: "REFERÊNCIA · JEAN-BAPTISTE DEBRET · FAMILLE D'UN CHEF CAMACAN SE PRÉPARANT POUR UNE FÊTE · VOYAGE PITTORESQUE ET HISTORIQUE AU BRÉSIL · 1834"
+      size_mm: 5.4
+      anchor: cb
+      x_cm: 0
+      y_cm: 5.6
+      variation: SemiBold Condensed
+      letter_spacing: 1
+    - text: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+      size_mm: 5.4
+      anchor: cb
+      x_cm: 0
+      y_cm: 4.2
+      variation: SemiBold Condensed
+      letter_spacing: 1
+
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: "#1C1109"                  # preto quente: a prancha e sepia, nao neutra
+  font:
+    family: Arial Narrow            # ver notes: precisa de bold de verdade
+    base_line_mm: 2.6               # malha fina: a cena tem 15 figuras
+    size_min_mm: 1.1
+    size_max_ratio: 2.0
+    size_gamma: 1.25
+    bold_threshold: 0.45
+  layout:
+    advance_factor: 0.86            # aperto da grade -> fidelidade, ver notes
+    row_step_ratio: 0.84
+
+notes: |
+  PRIMEIRO PROJETO DO LAYOUT `display` (typo/display.py) — letras gigantes e
+  rotulo invertido em cima da arte, em vez da ficha de especime centralizada do
+  compose.py. Referencia de estilo: cartaz de especime suico/DIN que o Gustavo
+  mandou em 29/07/2026 (halftone da Grande Onda com "DIN CO" em corpo gigante
+  sangrando pela pagina).
+
+  CONCEITO. Uma prancha do "Voyage pittoresque et historique au Brésil" (Jean-
+  Baptiste Debret, 1834-1839, dominio publico) redesenhada com o texto do
+  Manifesto Antropofago (Oswald de Andrade, 1928, em dominio publico no Brasil
+  desde 2025). O Debret veio com a Missao Artistica Francesa catalogar o Brasil
+  para olho europeu; o manifesto do Oswald e a resposta — nao recusar a
+  referencia estrangeira, deglutir. O cartaz faz isso literalmente: a imagem
+  colonial continua inteira e reconhecivel, mas cada grao dela agora e uma
+  letra do texto que a devora. Nao e ilustracao do manifesto, e o metodo dele.
+
+  Dai o titulo ser "TUPI OR NOT TUPI" e as quatro letras gigantes soletrarem
+  TUPI: perto, sao quatro blocos de tinta que cercam e cortam a gravura; de
+  longe, sao a palavra. E o mesmo salto de escala do resto da colecao — a mesma
+  familia de fonte a 23 cm e a 2,6 mm na mesma folha —, que e o que mantem a
+  peca como ficha de especime mesmo sem o cabecalho do compose.py.
+
+  SEGUNDA RODADA (pedido do Gustavo). A primeira versao era 90 x 111,5 cm com
+  as letras espalhadas em corpos diferentes (34/42/34/48 cm), duas delas
+  sangrando pela borda. Ele pediu pagina mais quadrada, letras alinhadas, mais
+  ao centro e um pouco menores. Ficou: pagina 100 x 111,5 (aspecto 0,807 ->
+  0,897), as quatro letras no mesmo corpo de 32 cm numa grade 2x2 recuada 8 cm
+  de todas as bordas — o MESMO recuo da arte, entao a coluna da esquerda (T, P)
+  divide a borda com a arte e a da direita (U, I) tambem —, e ninguem sangra.
+  Ler TUPI passou a valer mais que a sangria; na ordem de leitura, T U em cima,
+  P I embaixo. A arte cresceu junto (74x55 -> 84x63 cm) e a densidade nao
+  escorregou: cobertura 0,274 -> 0,282, fidelidade 0,575 -> 0,570.
+
+  LEGENDAS. O rotulo invertido nomeia a PECA (titulo + o texto que a constroi);
+  o rodape carrega a referencia da obra que inspirou, em duas linhas, com o
+  credito do experimento. A datacao do proprio manifesto ("Piratininga, ano 374
+  da Degluticao do Bispo Sardinha") foi para a linha vertical da lateral. Assim
+  nenhuma informacao aparece duas vezes na pagina.
+
+  A PRANCHA. "Famille d'un Chef Camacan se preparant pour une Fete", baixada do
+  Wikimedia Commons com autorizacao do Gustavo (4608 x 2904 px, 18,4 MB,
+  dominio publico; Debret morreu em 1848). Escolhemos uma prancha de retrato
+  indigena e NAO as cenas de castigo e tronco: as duas servem ao conceito, mas
+  transformar imagem de tortura em objeto de parede vendido a R$ 39,90 e outra
+  conversa.
+
+  PAGINA RETRATO COM ARTE PAISAGEM. A prancha e deitada (aspecto 1,33 depois do
+  crop) e a colecao inteira e de 111,5 cm de altura. Em vez de virar um cartaz
+  deitado como o central-do-brasil, aqui a arte vira uma FAIXA no meio de uma
+  pagina em pe (84 x 63 cm em x 8..92, y 27..90) e o resto do papel e o campo
+  das letras gigantes. Por isso `page.mode: fixed`: no modo `from_art` a pagina
+  nasceria com 140 cm de largura. A largura de 100 cm nao e arbitraria — e o
+  que deixa a pagina no aspecto 0,897, mais quadrada que o resto da colecao sem
+  deixar de ser retrato, e ainda cabe a linha longa do rodape (40,9 cm medidos
+  contra os 84 cm uteis).
+
+  DENSIDADE — MEDIDA, NAO OLHADA. Tres numeros, calculados na faixa de arte
+  contra a propria prancha (script no scratchpad da sessao):
+
+    cobertura   fracao de pixel entintado
+    modulacao   desvio-padrao da escuridao local
+    fidelidade  correlacao entre a escuridao local do render e a da prancha
+
+  A calibracao contra os posteres que ja existem foi o que orientou o alvo. Os
+  halftones puros da colecao vivem em cobertura 0,17-0,27 e fidelidade
+  0,59-0,80 (jotape 0,265 / 0,631; emicida 0,224 / 0,591; dom-casmurro 0,244 /
+  0,629; ainda-estou-aqui 0,181 / 0,804 — o mais alto, e o unico com fonte
+  monoespacada e foto de alto contraste). As mascaradas passam de 0,82 porque
+  recorte limpo correlaciona facil. Esta versao fecha em COBERTURA 0,274 e
+  FIDELIDADE 0,575: no teto de tinta da familia, no meio da faixa de fidelidade
+  dos halftones puros.
+
+  O QUE EU ERREI ANTES DE ACERTAR, para a proxima sessao nao repetir:
+
+  1. Confundi densidade com contraste. A primeira rodada tinha cobertura 0,148
+     (lavada); empurrei para 0,447 baixando `interior_fill_min` para 0,05 e
+     `size_gamma` para 0,7. Deu tinta e destruiu a imagem: a 1:1 as letras
+     saiam TODAS do mesmo tamanho, porque a prancha tem escuridao concentrada
+     entre 0,5 e 0,9 e esses dois ajustes jogam essa faixa inteira no teto do
+     tamanho. Fidelidade despencou para 0,447. Cobertura alta com fidelidade
+     baixa e uma mancha, nao um desenho.
+  2. O que de fato levanta a fidelidade e APERTAR A GRADE (`advance_factor`
+     0,86 / `row_step_ratio` 0,84 + `base_line_mm` 2,6), nao engordar o glifo:
+     mais sondas por cm = amostragem mais fina da prancha. Engordar glifo com
+     grade solta so soma tinta.
+  3. `interior_fill_min` vai onde a prancha tem o CLARO dela: p5 da escuridao =
+     0,20. Em 0,46 (meu primeiro palpite, "e escura, sobe o ponto de preto")
+     tudo abaixo de 0,46 colapsa no tamanho minimo e a metade clara da cena
+     desaparece.
+  4. Julguei duas rodadas em miniatura de 700 px e as duas vezes me enganei — a
+     primeira parecendo lavada, a segunda parecendo boa. Miniatura media a
+     tinta. Densidade se le em numero e a 1:1.
+
+  CROP. O terco esquerdo da prancha e um macico de palmeira escura: escuridao
+  alta, informacao nenhuma. Cortado (crop comeca em x=920), a cena centra no
+  cacique e a faixa ganha aspecto 1,33, que e o que faz a arte caber em 55 cm de
+  altura sem estourar a largura util.
+
+  COR. Monocromatico em preto quente (#1C1109), como o jotape — a prancha e
+  aquarela sepia/ocre e tinta neutra empalidece o resultado. A `palette`
+  (typo/palette.py) e uma variante possivel: a saturacao media da prancha e
+  0,382, ha cor de sobra para uma tabela de stops. Fica como proximo
+  experimento, nao como default: aquarela e tom continuo e a paleta foi feita
+  para cor chapada (ver projects/turnstile).
+
+  DUAS FONTES, de proposito. A `display.family` e a Bahnschrift (a DIN 1451
+  variavel que vem no Windows) na instancia "Bold Condensed" — e o desenho da
+  referencia. A `font.family` da malha e a Arial Narrow porque a Bahnschrift e
+  UM arquivo variavel: o `fonts.resolve_family` devolve regular == bold e o
+  `bold_threshold` perde efeito, ou seja, a malha perderia a alavanca de peso
+  que segura os escuros. A Arial Narrow tem bold de verdade (ARIALNB.TTF) e e
+  grotesca condensada, da mesma familia de desenho.
+  TODO: quando o GlyphCache aprender a pedir instancia de fonte variavel, a
+  malha pode ir para Bahnschrift SemiBold Condensed / Bold Condensed e a pagina
+  fica com UMA fonte so, do glifo de 3 mm a letra de 44 cm.
+
+  MASCARA DESLIGADA, medido: 74,6% da prancha esta abaixo do limiar de 0,56.
+  A mascara selecionaria tres quartos do quadro, o que nao e figura nenhuma —
+  e uma aquarela de tom continuo, sem fundo de papel branco. Halftone puro,
+  como jotape / emicida / ainda-estou-aqui.
+
+  O TEXTO AINDA E PARCIAL. O text/*.txt tem os aforismos que eu tinha certeza,
+  transcritos de memoria, e NAO o manifesto integral — esta escrito la em cima
+  do arquivo. Antes do export que vai pra grafica, colar o texto conferido no
+  fac-simile da Revista de Antropofagia (Brasiliana Digital / USP). A densidade
+  nao muda com isso: o motor so conta caractere.
+
+  SITE. Este cartaz entra no lugar do `jotape` (ver ORDER em
+  scripts/build_site_assets.py). Para o layout `display`, o script recorta a
+  PAGINA INTEIRA em vez do bbox da arte — as letras gigantes vivem fora da area
+  da arte e o recorte antigo cortaria justamente o assunto da peca.

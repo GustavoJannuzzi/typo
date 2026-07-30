@@ -1,0 +1,62 @@
+name: odisseia-sereias
+
+source:
+  image: refs/sereias.jpg
+  crop: [3, 3, 925, 1305]           # tira a moldura preta de ~2px na borda da própria ilustração
+
+text:
+  file: text/odisseia-sereias.txt
+  mode: phrases
+  repeat: 80
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150
+
+titles:
+  title: "AS SEREIAS"
+  subtitle: "HOMERO · ODISSEIA"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: false                    # ilustração em preto e branco, sem cor pra isolar
+
+mask:
+  enabled: true                     # ver notes: xilogravura preto-no-branco, caso ideal
+
+landscape:
+  enabled: false                    # sem horizonte: é um medalhão decorativo, fundo liso
+
+style_preset: magalenha
+style_overrides:
+  font:
+    family: Cambria
+
+notes: |
+  Ilustração estilo art nouveau/xilogravura das sereias em torno do navio de
+  Ulisses (medalhão circular, pássaros com cabeça feminina nos mastros,
+  remador ao leme) — sem cor (saturação medida = 0 na imagem inteira).
+  Escolhi o texto do próprio canto das sereias (Livro XII: "Nenhum passa
+  daqui, sem que das bocas nos ouça a melodia...") — é a única imagem da
+  série onde o conceito é "as sereias falando", não Ulisses.
+
+  Diferente das outras três: aqui o fundo é papel bem claro (lum médio 0.92
+  nos cantos) e o traço é tinta preta — o caso "silhuetas legíveis contra
+  fundo claro" que o SKILL.md descreve como ideal. Máscara ligada,
+  ao contrário de ulisses/agamênon/mastro.
+
+  Crop: a imagem tem uma moldura preta fininha (~2px) exatamente na borda —
+  confirmei pixel a pixel (linha 0-1 e col 0-1 em preto puro, lum<0.01).
+  Cortei 3px de cada lado pra essa moldura não virar uma linha preta sólida
+  colada na moldura que o compose.py desenha.
+
+  Accent e paisagem desligados: sem cor não há regra `red` pra aplicar, e o
+  fundo é papel liso sem horizonte/contorno externo à máscara — não há o que
+  a paisagem trace.
+
+  Fonte: Cambria, mesma escolha das outras três (ver comparação em
+  odisseia-ulisses/project.yaml) — mantém a família da série coerente e o
+  traço anguloso combina com o próprio desenho, que já é todo linha reta e
+  voluta geométrica (art nouveau).

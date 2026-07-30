@@ -1,0 +1,66 @@
+name: odisseia-agamenon
+
+source:
+  image: refs/agamenon.jpg
+  crop: [0, 100, 598, 1280]         # corta parte do céu vazio (só gradiente, sem textura)
+
+text:
+  file: text/odisseia-agamenon.txt
+  mode: phrases
+  repeat: 80
+
+page:
+  mode: from_art
+  art_height_cm: 88
+  margins_cm: { top: 13, bottom: 10.5, side: 7 }
+  dpi_export: 150
+
+titles:
+  title: "AGAMÊMNON"
+  subtitle: "HOMERO · ODISSEIA"
+  footer: "EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI"
+
+accent:
+  enabled: false                    # ver notes: a coluna dourada não é "vermelha"
+
+mask:
+  enabled: false                    # ver notes: névoa de contraste baixo, sem fundo claro
+
+landscape:
+  enabled: false                    # anda junto com a máscara desligada
+
+style_preset: magalenha
+style_overrides:
+  font:
+    family: Cambria
+
+notes: |
+  Agamêmnon, rei de Micenas — a imagem é do filme "A Odisseia" de Christopher
+  Nolan (confirmado pelo Gustavo). Elmo visto de trás, crista escura, uma
+  "coluna" dourada (parece osso/marfim) pendendo pelo pescoço, névoa azul com
+  uma multidão em silhueta ao fundo. Escolhi para o texto o encontro de
+  Ulisses com a sombra de Agamêmnon no mundo dos mortos (Livro XI): ele conta
+  como Egisto e Clitemnestra o mataram, e desabafa contra "a mulher indigna" —
+  bate com a névoa/multidão de sombras da imagem.
+
+  Medi luminância: não há fundo claro nem fundo realmente escuro — é tudo
+  névoa de meio-tom (0.30–0.56 do topo ao meio, caindo a preto só na roupa
+  no rodapé). `mask.lum_threshold` (0.56) pegaria a cena inteira ou nada,
+  dependendo de onde eu cortasse — não é o caso de "silhueta legível contra
+  fundo claro" do SKILL.md, então halftone puro, como no ulisses.
+
+  Accent desligado: testei a regra `red` na coluna dourada (r médio 34,
+  g 43, b 50 — na verdade puxa pro azul por causa da luz da cena, não passa
+  nem perto do limiar). Sem regra de matiz implementada, não dá pra isolar
+  "dourado" — mesma limitação notada em jotape/ouro-marrom.
+
+  Crop: cortei ~8% do topo (céu perfeitamente liso, std < 0.01 — não tem
+  textura nenhuma pra ler) pra não desperdiçar tanto da tela em preto quase
+  uniforme; mantive o resto (elmo, coluna, multidão, roupa) inteiro.
+
+  Fonte: mesma comparação do ulisses (Cambria / Georgia / Goudy Old Style).
+  Repeti o teste aqui porque a cena é bem mais escura/plana (não tem branco
+  puro): Cambria de novo ficou com o melhor equilíbrio de peso — Georgia
+  ficou um pouco carregada demais nas áreas médias, Goudy sumiu no fundo
+  escuro. Mantive Cambria pra também dar unidade visual à dupla
+  Ulisses/Agamêmnon (retrato + sombra do retrato).

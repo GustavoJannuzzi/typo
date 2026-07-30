@@ -15,3 +15,9 @@ site/node_modules/
 site/dist/
 site/.vite/
 
+# credenciais locais — NUNCA sobe pro GitHub
+.claude.env
+*.env
+.env*
+!.env.example
+
