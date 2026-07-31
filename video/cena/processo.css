@@ -1,0 +1,186 @@
+/**
+ * A cena do processo herda a identidade de site/src/styles/base.css (que e
+ * carregado antes deste arquivo): as fontes, os tokens de cor, e as classes
+ * `label` / `readout` / `display` / `eyebrow`.
+ *
+ * Aqui so' esta o layout da bancada. Nada de animacao em CSS: a cena inteira e
+ * uma funcao pura de `t` desenhada em canvas (ver processo.mjs). Transicao em
+ * CSS seria tempo de relogio — o oposto do que a captura frame a frame quer.
+ */
+
+.cena {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+  height: 100vh;
+}
+
+.cena__quadro {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: clamp(0.75rem, 2.2vh, 1.75rem);
+  padding: clamp(1.1rem, 3.4vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+/* --- topo ------------------------------------------------------------- */
+
+.cena__topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: clamp(0.5rem, 1.4vh, 0.9rem);
+}
+
+.cena__topo .eyebrow {
+  margin: 0;
+  color: var(--grey);
+}
+
+.cena__topo .readout {
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- bancada ---------------------------------------------------------- */
+
+.cena__bancada {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cena__bancada canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- instrumentos ----------------------------------------------------- */
+
+.cena__instrumentos {
+  border-top: 1px solid var(--rule);
+  padding-top: clamp(0.5rem, 1.4vh, 0.9rem);
+  display: grid;
+  gap: clamp(0.35rem, 1vh, 0.6rem);
+}
+
+.cena__formula {
+  margin: 0;
+  min-height: 1.2em;
+  color: var(--grey);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Duas colunas fixas, nao `auto-fit`: com auto-fit uma leitura longa
+   ("Bookman Old Style") empurrava a vizinha pra fora do quadro. Duas colunas
+   com minimo zero deixam cada celula encolher e cortar por conta propria. */
+.cena__leituras {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(0.75rem, 3vw, 2rem);
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.cena__leituras div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 0.22em 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 55%, transparent);
+}
+
+.cena__leituras dt {
+  color: var(--grey);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.cena__leituras dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cena__leituras dd[data-destaque="1"] {
+  color: var(--accent);
+}
+
+/* --- rodape ----------------------------------------------------------- */
+
+.cena__rodape {
+  display: grid;
+  gap: 0.15em;
+}
+
+.cena__ato {
+  margin: 0;
+  font-size: var(--step-h2);
+  line-height: 0.92;
+  text-transform: uppercase;
+  /* cada letra e' um <span data-ch>, animado em JS por progresso — nunca por
+     tempo de relogio. Ver `pintarAto()` em processo.mjs. */
+}
+
+.cena__ato span {
+  display: inline-block;
+  will-change: auto; /* NAO promover: a captura quer raster fresco por frame */
+}
+
+.cena__glosa {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--grey);
+  font-size: var(--step-body);
+  line-height: 1.35;
+}
+
+/* --- paisagem (16:9): bancada a esquerda, leitura a direita ----------- */
+
+@media (min-aspect-ratio: 1/1) {
+  .cena__quadro {
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr minmax(18rem, 30%);
+    grid-template-areas:
+      "topo   topo"
+      "banc   lado";
+    column-gap: clamp(1.5rem, 4vw, 3.5rem);
+  }
+  .cena__topo { grid-area: topo; }
+  .cena__bancada { grid-area: banc; }
+  .cena__instrumentos,
+  .cena__rodape { grid-area: lado; }
+  .cena__quadro > .cena__instrumentos { align-self: end; }
+  .cena__quadro > .cena__rodape { align-self: start; padding-top: 1rem; }
+  .cena__instrumentos {
+    order: 2;
+    border-top: 1px solid var(--rule);
+  }
+  /* no formato deitado a coluna da direita empilha rodape em cima,
+     instrumentos embaixo — mesma leitura, outro eixo */
+  .cena__quadro {
+    grid-template-areas:
+      "topo topo"
+      "banc lado";
+  }
+  .cena__lado-pilha { display: contents; }
+  .cena__leituras {
+    grid-template-columns: 1fr;
+  }
+}

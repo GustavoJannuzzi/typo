@@ -1,49 +1,43 @@
-import { CONFIG, whatsappLink } from "../config.js";
+import { whatsappLink } from "../config.js";
+import { t } from "../i18n/runtime.js";
 
 /**
  * O construtor de pedido — resolve "sem e-commerce": em vez de formulario
  * que envia pra algum lugar, monta a MENSAGEM que o proprio visitante manda
  * pelo WhatsApp dele. Nada sai deste navegador por aqui.
+ *
+ * A mensagem sai no idioma da pagina: ela parte do WhatsApp do visitante, e
+ * ninguem manda o que nao consegue ler. Os valores sao sempre os mesmos cinco
+ * / sete / quatro, entao do lado de ca' da' pra reconhecer o pedido em
+ * qualquer idioma.
  */
-const SUBJECT_OPTIONS = [
-  { value: "pessoa", label: "📷 Uma pessoa" },
-  { value: "pet", label: "🐾 Um pet" },
-  { value: "casal", label: "💍 Um casal" },
-  { value: "lugar", label: "🏡 Um lugar especial" },
-  { value: "outra", label: "✨ Outra imagem" },
-];
+const SUBJECT_OPTIONS = ["pessoa", "pet", "casal", "lugar", "outra"];
 
-const WORDS_OPTIONS = [
-  { value: "musica", label: "🎵 Letra de música" },
-  { value: "carta", label: "💌 Carta ou mensagem" },
-  { value: "frases", label: "❤️ Frases importantes" },
-  { value: "texto", label: "📖 Texto pessoal" },
-  { value: "votos", label: "✍️ Votos de casamento" },
-  { value: "familia", label: "👨‍👩‍👧 História de família" },
-  { value: "poema", label: "🌎 Poema ou lembrança" },
-];
+const WORDS_OPTIONS = ["musica", "carta", "frases", "texto", "votos", "familia", "poema"];
 
+// `family` casa com o campo homonimo de works.json — e' o que escolhe a
+// miniatura de exemplo de cada estilo
 const STYLE_OPTIONS = [
-  { value: "retrato", label: "Retrato", desc: "Rosto ou figura em foco, fundo limpo.", family: "retrato" },
-  { value: "cena", label: "Cena inteira", desc: "Halftone puro, textura da foto toda.", family: "cena" },
-  { value: "paisagem", label: "Paisagem", desc: "Figura isolada, horizonte ao fundo.", family: "paisagem" },
-  { value: "estencil", label: "Estêncil", desc: "Alto contraste, gráfico, cartaz.", family: "estencil" },
+  { value: "retrato", family: "retrato" },
+  { value: "cena", family: "cena" },
+  { value: "paisagem", family: "paisagem" },
+  { value: "estencil", family: "estencil" },
 ];
 
-function labelOf(options, value) {
-  return options.find((o) => o.value === value)?.label ?? "—";
+function labelOf(group, value) {
+  return value ? t(`brief.${group}.${value}`) : "—";
 }
 
-function renderPills(container, options, current, onPick) {
+function renderPills(container, group, values, current, onPick) {
   container.innerHTML = "";
-  options.forEach((opt) => {
+  values.forEach((value) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "pill";
-    btn.textContent = opt.label;
-    btn.setAttribute("aria-pressed", String(opt.value === current));
-    if (opt.value === current) btn.classList.add("is-active");
-    btn.addEventListener("click", () => onPick(opt.value));
+    btn.textContent = t(`brief.${group}.${value}`);
+    btn.setAttribute("aria-pressed", String(value === current));
+    if (value === current) btn.classList.add("is-active");
+    btn.addEventListener("click", () => onPick(value));
     container.appendChild(btn);
   });
 }
@@ -62,8 +56,8 @@ function renderStyleOptions(container, works, current, onPick) {
         ${sample ? `<img src="/art/${sample.slug}-thumb.webp" alt="" loading="lazy" width="400" height="300" />` : ""}
       </span>
       <span class="style-option__label">
-        <span class="style-option__title">${opt.label}</span>
-        <span class="style-option__desc">${opt.desc}</span>
+        <span class="style-option__title">${t(`brief.style.${opt.value}`)}</span>
+        <span class="style-option__desc">${t(`brief.style.${opt.value}.desc`)}</span>
       </span>
     `;
     card.addEventListener("click", () => onPick(opt.value));
@@ -73,16 +67,16 @@ function renderStyleOptions(container, works, current, onPick) {
 
 function buildMessage(state) {
   const lines = [
-    "Olá! Quero encomendar uma arte da Onde Moram as Palavras ✦",
+    t("brief.msg.intro"),
     "",
-    `O que vai virar arte: ${labelOf(SUBJECT_OPTIONS, state.subject)}`,
-    `Palavras da obra: ${labelOf(WORDS_OPTIONS, state.words)}`,
-    `Estilo: ${labelOf(STYLE_OPTIONS, state.style)}`,
+    t("brief.msg.subject", { v: labelOf("subject", state.subject) }),
+    t("brief.msg.words", { v: labelOf("words", state.words) }),
+    t("brief.msg.style", { v: labelOf("style", state.style) }),
     "",
-    `Nome: ${state.name || "—"}`,
-    `E-mail: ${state.email || "—"}`,
+    t("brief.msg.name", { v: state.name || "—" }),
+    t("brief.msg.email", { v: state.email || "—" }),
     "",
-    "(Vou enviar a imagem e o texto completo por aqui.)",
+    t("brief.msg.tail"),
   ];
   return lines.join("\n");
 }
@@ -106,12 +100,12 @@ export function initBriefBuilder(form, works) {
 
   function pickSubject(value) {
     state.subject = value;
-    renderPills(subjectEl, SUBJECT_OPTIONS, state.subject, pickSubject);
+    renderPills(subjectEl, "subject", SUBJECT_OPTIONS, state.subject, pickSubject);
     update();
   }
   function pickWords(value) {
     state.words = value;
-    renderPills(wordsEl, WORDS_OPTIONS, state.words, pickWords);
+    renderPills(wordsEl, "words", WORDS_OPTIONS, state.words, pickWords);
     update();
   }
   function pickStyle(value) {
@@ -120,8 +114,8 @@ export function initBriefBuilder(form, works) {
     update();
   }
 
-  renderPills(subjectEl, SUBJECT_OPTIONS, state.subject, pickSubject);
-  renderPills(wordsEl, WORDS_OPTIONS, state.words, pickWords);
+  renderPills(subjectEl, "subject", SUBJECT_OPTIONS, state.subject, pickSubject);
+  renderPills(wordsEl, "words", WORDS_OPTIONS, state.words, pickWords);
   renderStyleOptions(styleEl, works, state.style, pickStyle);
 
   nameEl.addEventListener("input", () => {

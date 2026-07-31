@@ -98,5 +98,7 @@ TYPO_PARITY=1 .venv/Scripts/python.exe -m pytest -k parity -q
 ## Landing page (`site/`)
 
 Página de divulgação da marca **Onde Moram as Palavras** — vanilla JS + Vite,
-mobile-first, sem backend (encomenda via WhatsApp). Ver
+mobile-first, sem backend (encomenda via WhatsApp). Sai em quatro idiomas, uma
+página por idioma gerada na build (`/`, `/en/`, `/es/`, `/it/`) — os títulos das
+obras ficam em português, que é como estão impressos no pôster. Ver
 [`site/README.md`](site/README.md) para rodar, configurar e publicar.

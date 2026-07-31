@@ -14,6 +14,13 @@
       "runtimeArgs": ["--prefix", "site", "run", "preview", "--", "--host", "127.0.0.1", "--port", "4173"],
       "port": 4173,
       "url": "http://127.0.0.1:4173"
+    },
+    {
+      "name": "video-cena",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["video/lib/servidor.mjs", "4319"],
+      "port": 4319,
+      "url": "http://127.0.0.1:4319"
     }
   ]
 }

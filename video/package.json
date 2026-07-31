@@ -1,0 +1,19 @@
+{
+  "name": "typo-video",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Captura deterministica de video do site e da cena de processo. Fora de site/ de proposito: o bundle da landing nao pode engordar por causa da ferramenta de estudio.",
+  "scripts": {
+    "tour": "node render.mjs roteiros/tour-9x16.mjs",
+    "tour:rascunho": "node render.mjs roteiros/tour-9x16.mjs --rascunho",
+    "processo": "node render.mjs roteiros/processo-9x16.mjs",
+    "processo:rascunho": "node render.mjs roteiros/processo-9x16.mjs --rascunho",
+    "chapas": "node lib/chapa.mjs cena",
+    "servir": "node lib/servidor.mjs"
+  },
+  "//": "O navegador NAO e' dependencia: lib/cdp.mjs fala CDP direto com o Chrome/Edge ja instalado. A unica dependencia e' o ffmpeg, e so' porque o Chrome headless sem GPU nao encoda H.264 (so' VP8/VP9) — e o entregavel precisa ser mp4.",
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0"
+  }
+}

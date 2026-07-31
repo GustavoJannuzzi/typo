@@ -1,0 +1,58 @@
+{
+  "_note": "Português é o idioma-fonte: o texto da página vive inline no index.html. Aqui só entram (a) as poucas strings de marcação gerada pelo plugin e (b) as strings que o JS monta em tempo de execução.",
+
+  "html": {
+    "lang.aria": "Idioma"
+  },
+
+  "js": {
+    "slots.remaining": "restam {n} de {total} vagas",
+    "slots.remainingOne": "resta 1 de {total} vagas",
+    "slots.soldOut": "vagas de lançamento esgotadas",
+
+    "gallery.zoomIn": "Ver de perto",
+    "gallery.zoomOut": "Ver obra inteira",
+    "gallery.cardAlt": "Obra {title}",
+    "gallery.detailAlt": "Detalhe ampliado da obra {title}, mostrando as letras que a formam",
+    "gallery.fullAlt": "Obra {title} completa",
+    "gallery.glyphs": "{n} glifos",
+
+    "layer.máscara": "máscara",
+    "layer.halftone puro": "halftone puro",
+    "layer.paisagem": "paisagem",
+    "layer.accent": "accent",
+
+    "brief.subject.pessoa": "📷 Uma pessoa",
+    "brief.subject.pet": "🐾 Um pet",
+    "brief.subject.casal": "💍 Um casal",
+    "brief.subject.lugar": "🏡 Um lugar especial",
+    "brief.subject.outra": "✨ Outra imagem",
+
+    "brief.words.musica": "🎵 Letra de música",
+    "brief.words.carta": "💌 Carta ou mensagem",
+    "brief.words.frases": "❤️ Frases importantes",
+    "brief.words.texto": "📖 Texto pessoal",
+    "brief.words.votos": "✍️ Votos de casamento",
+    "brief.words.familia": "👨‍👩‍👧 História de família",
+    "brief.words.poema": "🌎 Poema ou lembrança",
+
+    "brief.style.retrato": "Retrato",
+    "brief.style.retrato.desc": "Rosto ou figura em foco, fundo limpo.",
+    "brief.style.cena": "Cena inteira",
+    "brief.style.cena.desc": "Halftone puro, textura da foto toda.",
+    "brief.style.paisagem": "Paisagem",
+    "brief.style.paisagem.desc": "Figura isolada, horizonte ao fundo.",
+    "brief.style.estencil": "Estêncil",
+    "brief.style.estencil.desc": "Alto contraste, gráfico, cartaz.",
+
+    "brief.msg.intro": "Olá! Quero encomendar uma arte da Onde Moram as Palavras ✦",
+    "brief.msg.subject": "O que vai virar arte: {v}",
+    "brief.msg.words": "Palavras da obra: {v}",
+    "brief.msg.style": "Estilo: {v}",
+    "brief.msg.name": "Nome: {v}",
+    "brief.msg.email": "E-mail: {v}",
+    "brief.msg.tail": "(Vou enviar a imagem e o texto completo por aqui.)",
+
+    "footer.waMessage": "Olá! Quero saber mais sobre a Onde Moram as Palavras."
+  }
+}

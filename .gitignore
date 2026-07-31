@@ -2,8 +2,8 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-build/
-dist/
+/build/
+/dist/
 .pytest_cache/
 
 # artes geradas — pesadas, e sempre reproduzíveis a partir do project.yaml

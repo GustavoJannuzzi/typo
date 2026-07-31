@@ -76,12 +76,75 @@ body.intro-lock {
 
 .site-header__brand-text {
   color: var(--ink);
+  white-space: nowrap;
+}
+
+/* abaixo de 360px o nome nao cabe ao lado do seletor de idioma: ficam os
+   quatro quadradinhos, que ja' sao a marca (aparecem no rodape do poster). */
+@media (max-width: 22.4rem) {
+  .site-header__brand-text {
+    display: none;
+  }
+}
+
+.site-header__tools {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .site-header__toggle {
   display: inline-flex;
   border: 1px solid var(--rule);
   padding: 0.5em 0.9em;
+}
+
+/* ------------------------------------------------------------------ */
+/* seletor de idioma                                                    */
+/* ------------------------------------------------------------------ */
+/* Quatro links de verdade (um por versao da pagina) — o Google segue e o
+   visitante troca sem depender de JS. Fica sempre visivel no cabecalho
+   fixo: quem esta' no exterior e quer ler em portugues nao pode ficar
+   preso na deteccao automatica. */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+.lang-switch a {
+  padding: 0.5em 0.35em;
+  color: var(--rule);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.lang-switch a:hover {
+  color: var(--ink);
+}
+
+.lang-switch a.is-current {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.4em;
+  text-decoration-thickness: 1px;
+}
+
+.lang-switch--footer {
+  margin-top: var(--space-2);
+  margin-left: -0.4em; /* alinha a caixa da letra com a coluna, nao o padding */
+}
+
+.lang-switch--footer a {
+  color: var(--footer-grey);
+}
+
+.lang-switch--footer a:hover,
+.lang-switch--footer a.is-current {
+  color: var(--accent);
 }
 
 .site-header__nav {
@@ -111,9 +174,24 @@ body.intro-lock {
   color: var(--paper) !important;
 }
 
-@media (max-width: 46rem) {
+/* O menu inteiro so' cabe na horizontal quando ha' espaco pra marca (250px) +
+   quatro secoes (490px em espanhol/italiano, as linguas mais compridas) + o
+   seletor de idioma. Abaixo disso o menu vira dropdown, e o seletor fica ao
+   lado do botao Menu — visivel do mesmo jeito. */
+@media (max-width: 60rem) {
   .site-header__toggle {
     display: inline-flex;
+  }
+
+  /* no celular a linha do cabecalho fica disputada: marca + 4 idiomas +
+     menu. O seletor aperta o passo em vez de empurrar o nome da marca
+     pra uma segunda linha. */
+  .site-header__tools {
+    gap: 0.65rem;
+  }
+
+  .lang-switch a {
+    padding: 0.5em 0.25em;
   }
 
   .site-header__nav {
@@ -151,9 +229,20 @@ body.intro-lock {
   }
 }
 
-@media (min-width: 46.01rem) {
+@media (min-width: 60.01rem) {
   .site-header__toggle {
     display: none;
+  }
+
+  /* o menu encosta na direita e o seletor de idioma fecha a linha; o vao
+     entre as secoes cede primeiro, antes de qualquer coisa quebrar */
+  .site-header__nav {
+    margin-left: auto;
+    gap: clamp(var(--space-2), 1.6vw, var(--space-3));
+  }
+
+  .site-header__tools {
+    margin-left: var(--space-2);
   }
 }
 
@@ -395,6 +484,15 @@ body.intro-lock {
 .gallery-detail__title {
   font-size: clamp(1.6rem, 4vw, 2.4rem);
   margin: 0.2em 0 0.4em;
+}
+
+/* tradução do título nas versões estrangeiras — em itálico e apagada, para
+   ficar claro que é legenda, não o nome da obra (esse está no pôster) */
+.gallery-detail__gloss {
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: var(--grey);
+  margin: -0.2em 0 0.6em;
 }
 
 .gallery-detail__actions {

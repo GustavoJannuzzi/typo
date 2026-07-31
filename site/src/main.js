@@ -1,5 +1,6 @@
 import { CONFIG, whatsappLink } from "./config.js";
 import works from "./data/works.json";
+import { t } from "./i18n/runtime.js";
 
 import { runIntro } from "./modules/intro.js";
 import { assemble } from "./modules/assemble.js";
@@ -12,6 +13,21 @@ import { initBriefBuilder } from "./modules/briefBuilder.js";
 // --- intro --------------------------------------------------------------
 const introEl = document.querySelector("[data-intro]");
 if (introEl) runIntro(introEl);
+
+// --- idioma: a escolha manual manda --------------------------------------
+// A raiz redireciona por navigator.language (script inline no <head>), mas
+// quem troca de idioma na mao trava a escolha: dai em diante nunca mais e'
+// mandado pra outra versao. Sem isso, um brasileiro no exterior com o
+// navegador em ingles nao conseguiria ficar no portugues.
+document.querySelectorAll("[data-lang-link]").forEach((link) => {
+  link.addEventListener("click", () => {
+    try {
+      localStorage.setItem("omp-lang", link.dataset.langLink);
+    } catch (e) {
+      /* modo privado: sem memoria, mas a navegacao segue */
+    }
+  });
+});
 
 // --- header: menu mobile -------------------------------------------------
 const navToggle = document.querySelector("[data-nav-toggle]");
@@ -61,10 +77,13 @@ document.querySelectorAll("[data-slots-total]").forEach((el) => {
   el.textContent = String(CONFIG.LAUNCH_SLOTS_TOTAL);
 });
 document.querySelectorAll("[data-slots-remaining]").forEach((el) => {
+  const vars = { n: slotsRemaining, total: CONFIG.LAUNCH_SLOTS_TOTAL };
   el.textContent =
-    slotsRemaining > 0
-      ? `restam ${slotsRemaining} de ${CONFIG.LAUNCH_SLOTS_TOTAL} vagas`
-      : "vagas de lançamento esgotadas";
+    slotsRemaining > 1
+      ? t("slots.remaining", vars)
+      : slotsRemaining === 1
+        ? t("slots.remainingOne", vars)
+        : t("slots.soldOut");
 });
 document.querySelectorAll("[data-price-launch]").forEach((el) => {
   el.textContent = CONFIG.LAUNCH_PRICE;
@@ -80,7 +99,7 @@ if (briefForm) initBriefBuilder(briefForm, works);
 // --- rodapé: contatos -------------------------------------------------
 const waLink = document.querySelector("[data-footer-whatsapp]");
 if (waLink && CONFIG.WHATSAPP) {
-  waLink.href = whatsappLink("Olá! Quero saber mais sobre a Onde Moram as Palavras.");
+  waLink.href = whatsappLink(t("footer.waMessage"));
   waLink.textContent = "WhatsApp";
   waLink.target = "_blank";
   waLink.rel = "noopener";

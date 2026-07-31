@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Como nasce uma obra — Onde Moram as Palavras</title>
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <link rel="stylesheet" href="/cena/processo.css" />
+  </head>
+  <body class="cena">
+    <div class="cena__quadro">
+      <!-- cabecalho: rotulo de laboratorio + numero do ato -->
+      <header class="cena__topo">
+        <p class="label eyebrow" data-obra>ONDE MORAM AS PALAVRAS · PROCESSO</p>
+        <p class="readout" data-passo>00 / 08</p>
+      </header>
+
+      <!-- a bancada: plano cartesiano + a peca sendo medida -->
+      <div class="cena__bancada">
+        <canvas data-plano></canvas>
+      </div>
+
+      <!-- os instrumentos: o que o motor esta lendo neste instante -->
+      <div class="cena__instrumentos">
+        <p class="readout cena__formula" data-formula></p>
+        <dl class="cena__leituras" data-leituras></dl>
+      </div>
+
+      <!-- o nome do ato, em display condensado -->
+      <footer class="cena__rodape">
+        <p class="display cena__ato" data-ato></p>
+        <p class="cena__glosa" data-glosa></p>
+      </footer>
+    </div>
+
+    <script type="module" src="/cena/processo.mjs"></script>
+  </body>
+</html>

@@ -1,0 +1,178 @@
+{
+  "_note": "Español. `html` traduz o index.html (chave = data-i18n); `js` são as strings que o JS monta; `works` sobrescreve o blurb de works.json e dá a tradução do título ao lado — o título em si NÃO se traduz: está impresso no pôster.",
+
+  "html": {
+    "meta.title": "Onde Moram as Palavras — tu historia, escrita en miles de palabras",
+    "meta.description": "Arte tipográfico personalizado: tu foto o tu canción convertida en una imagen hecha de miles de palabras. Edición de lanzamiento, pedidos por WhatsApp.",
+    "meta.ogDescription": "Tu historia, escrita en miles de palabras hasta formar una imagen.",
+
+    "a11y.skip": "Saltar al contenido",
+    "intro.skip": "saltar ↦",
+
+    "nav.aria": "Secciones de la página",
+    "nav.menu": "Menú",
+    "nav.collection": "Colección",
+    "nav.how": "Cómo funciona",
+    "nav.launch": "Lanzamiento",
+    "nav.cta": "Arma tu pedido",
+
+    "lang.aria": "Idioma",
+
+    "hero.kicker": "Laboratorio tipográfico · edición de lanzamiento",
+    "hero.lead": "Tu foto, tu canción, tu historia — escritas miles de veces hasta formar una imagen.",
+    "hero.ctaPrimary": "Crea tu arte",
+    "hero.ctaSecondary": "Ver la colección",
+    "hero.meta": "catálogo · 9 especímenes · impresión en alta resolución",
+    "hero.scroll": "desliza",
+
+    "manifesto.eyebrow": "Manifiesto",
+    "manifesto.title": "Una imagen hecha de miles de palabras.",
+    "manifesto.body": "Cada obra nace de algo que ya existe — una canción, una carta, un recuerdo. Lo transformamos en miles de palabras que se organizan, letra por letra, hasta formar un rostro, una escena, un recuerdo que por fin se puede ver.",
+
+    "collection.eyebrow": "La colección",
+    "collection.title": "Nueve especímenes",
+    "collection.lead": "Cada pieza catalogada como en un laboratorio: tipografía, cuerpo de la letra, capas del motor, dimensión real de impresión.",
+    "collection.aria": "Colección de obras",
+
+    "how.eyebrow": "Cómo funciona",
+    "how.title": "De la foto a la obra",
+    "compare.afterAlt": "Arte tipográfico terminado — Ouro Marrom",
+    "compare.beforeAlt": "Foto de referencia original usada en la obra Ouro Marrom",
+    "compare.rangeAria": "Arrastra para comparar la foto original y el arte tipográfico",
+    "compare.hint": "arrastra para revelar",
+
+    "steps.1.title": "Cuenta tu historia por WhatsApp",
+    "steps.1.body": "Envía la imagen que quieres transformar y las palabras que van a construir la obra.",
+    "steps.2.title": "Lo transformamos en arte",
+    "steps.2.body": "Unimos el motor tipográfico con la sensibilidad humana para crear una imagen única.",
+    "steps.3.title": "Recíbelo por e-mail",
+    "steps.3.body": "Archivo en alta resolución, listo para guardar, imprimir o regalar.",
+
+    "pricing.eyebrow": "Nuestra primera colección",
+    "pricing.intro": "Toda gran historia empieza con las primeras personas que creen en ella. Por eso, en el lanzamiento de la marca, abrimos una edición especial con solo <strong data-slots-total>5</strong> primeras creaciones — una oportunidad de transformar tu historia en una obra de arte construida en la unión entre inteligencia artificial, diseño y sensibilidad humana.",
+    "pricing.launchLabel": "Edición de lanzamiento",
+    "pricing.launchList": "<li>Creación personalizada de alta calidad</li><li>Arte construido a partir de tus palabras</li><li>Archivo digital en alta resolución</li><li>Preparado para imprimir</li>",
+    "pricing.launchCta": "Reservar mi lugar",
+    "pricing.regularLabel": "Después del lanzamiento",
+    "pricing.regularSlots": "arte personalizado",
+    "pricing.regularList": "<li>Creación exclusiva</li><li>Proceso artístico personalizado</li><li>Archivo digital en alta resolución</li><li>Calidad profesional para impresión</li>",
+    "pricing.regularCta": "Encargar después",
+    "pricing.why": "¿Por qué existe un precio de lanzamiento? Porque toda creación necesita una primera historia. Estas cinco primeras obras serán parte del nacimiento de Onde Moram as Palavras — los primeros recuerdos transformados en arte, los primeros encuentros entre personas, palabras y tecnología.",
+
+    "brief.eyebrow": "Arma tu pedido",
+    "brief.title": "¿Qué va a convertirse en arte?",
+    "brief.lead": "Sin carrito, sin checkout. Tú eliges las opciones, nosotros armamos el mensaje y tú lo envías desde tu propio WhatsApp — nada más sale de este navegador.",
+    "brief.legend1": "1 · La imagen que quieres transformar",
+    "brief.legend2": "2 · Las palabras que van a construir la obra",
+    "brief.legend3": "3 · El estilo del arte",
+    "brief.legend4": "4 · Tus datos para la entrega",
+    "brief.aria1": "Qué va a convertirse en arte",
+    "brief.aria2": "Las palabras de la obra",
+    "brief.aria3": "Estilo del arte",
+    "brief.name": "Nombre completo",
+    "brief.namePlaceholder": "Tu nombre",
+    "brief.email": "E-mail para recibirlo",
+    "brief.emailPlaceholder": "tu@email.com",
+    "brief.previewLabel": "Vista previa del mensaje",
+    "brief.submit": "Enviar por WhatsApp",
+    "brief.note": "Al enviar, WhatsApp se abre con este mensaje listo — tú confirmas y lo mandas desde ahí.",
+
+    "detail.close": "Cerrar ✕",
+    "detail.zoom": "Ver de cerca",
+    "detail.cta": "Quiero una así",
+
+    "footer.tagline": "Laboratorio de arte tipográfico · pedidos por WhatsApp",
+    "footer.contact": "Contacto",
+    "footer.nav": "Navegación",
+    "footer.fine": "EXPERIMENTO TIPOGRÁFICO — CADA OBRA ES ÚNICA, CONSTRUIDA A PARTIR DE TUS PALABRAS"
+  },
+
+  "js": {
+    "slots.remaining": "quedan {n} de {total} plazas",
+    "slots.remainingOne": "queda 1 de {total} plazas",
+    "slots.soldOut": "plazas de lanzamiento agotadas",
+
+    "gallery.zoomIn": "Ver de cerca",
+    "gallery.zoomOut": "Ver la obra entera",
+    "gallery.cardAlt": "Obra {title}",
+    "gallery.detailAlt": "Detalle ampliado de la obra {title}, mostrando las letras que la forman",
+    "gallery.fullAlt": "Obra {title} completa",
+    "gallery.glyphs": "{n} glifos",
+
+    "layer.máscara": "máscara",
+    "layer.halftone puro": "halftone puro",
+    "layer.paisagem": "paisaje",
+    "layer.accent": "acento",
+
+    "brief.subject.pessoa": "📷 Una persona",
+    "brief.subject.pet": "🐾 Una mascota",
+    "brief.subject.casal": "💍 Una pareja",
+    "brief.subject.lugar": "🏡 Un lugar especial",
+    "brief.subject.outra": "✨ Otra imagen",
+
+    "brief.words.musica": "🎵 Letra de una canción",
+    "brief.words.carta": "💌 Carta o mensaje",
+    "brief.words.frases": "❤️ Frases importantes",
+    "brief.words.texto": "📖 Texto personal",
+    "brief.words.votos": "✍️ Votos de boda",
+    "brief.words.familia": "👨‍👩‍👧 Historia de familia",
+    "brief.words.poema": "🌎 Poema o recuerdo",
+
+    "brief.style.retrato": "Retrato",
+    "brief.style.retrato.desc": "Rostro o figura en foco, fondo limpio.",
+    "brief.style.cena": "Escena entera",
+    "brief.style.cena.desc": "Halftone puro, la textura de toda la foto.",
+    "brief.style.paisagem": "Paisaje",
+    "brief.style.paisagem.desc": "Figura recortada, horizonte al fondo.",
+    "brief.style.estencil": "Estarcido",
+    "brief.style.estencil.desc": "Alto contraste, gráfico, de cartel.",
+
+    "brief.msg.intro": "¡Hola! Quiero encargar una obra de Onde Moram as Palavras ✦",
+    "brief.msg.subject": "Qué va a convertirse en arte: {v}",
+    "brief.msg.words": "Palabras de la obra: {v}",
+    "brief.msg.style": "Estilo: {v}",
+    "brief.msg.name": "Nombre: {v}",
+    "brief.msg.email": "E-mail: {v}",
+    "brief.msg.tail": "(Voy a enviar la imagen y el texto completo por aquí.)",
+
+    "footer.waMessage": "¡Hola! Quiero saber más sobre Onde Moram as Palavras."
+  },
+
+  "works": {
+    "ouro-marrom": {
+      "gloss": "Oro Marrón",
+      "blurb": "El sombrero se vuelve masa sólida y la piel es el destaque, en oro."
+    },
+    "nossa-senhora": {
+      "gloss": "Nuestra Señora",
+      "blurb": "La oración entera cabe en el velo. Fondo liso, recorte limpio."
+    },
+    "cidade-de-deus": {
+      "gloss": "Ciudad de Dios",
+      "blurb": "El letrero del cartel se vuelve letra hecha de letra."
+    },
+    "dom-casmurro": {
+      "gloss": "Ojos de resaca",
+      "blurb": "Placa de colodión: la viñeta oscura se volvió un marco natural."
+    },
+    "garota-de-ipanema": {
+      "gloss": "La Chica de Ipanema",
+      "blurb": "Figura recortada, el Dois Irmãos en contorno fino al fondo."
+    },
+    "central-do-brasil": {
+      "gloss": "Estación Central",
+      "blurb": "Caligrafía: la película trata de cartas escritas a mano."
+    },
+    "ainda-estou-aqui": {
+      "gloss": "Aún estoy aquí",
+      "blurb": "Mecanografía — la película está hecha de papel con membrete."
+    },
+    "emicida": {
+      "gloss": "El Glorioso Retorno",
+      "blurb": "Sin máscara: el contraste tonal separa traje, cuello y fondo."
+    },
+    "debret-antropofagia": {
+      "blurb": "TUPI en letra de 23 cm rodeando el grabado colonial."
+    }
+  }
+}

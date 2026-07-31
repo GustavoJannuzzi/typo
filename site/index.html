@@ -3,9 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Onde Moram as Palavras — sua história, escrita em milhares de palavras</title>
+
+    <!-- Português é o idioma-fonte: o texto daqui é o original, e `data-i18n`
+         marca o que a build troca ao gerar /en/, /es/ e /it/. Ver build/i18n.js. -->
+    <!--i18n:head-->
+
+    <title data-i18n="meta.title">Onde Moram as Palavras — sua história, escrita em milhares de palavras</title>
     <meta
       name="description"
+      data-i18n-attr="content:meta.description"
       content="Arte tipográfica personalizada: sua foto ou sua música transformada em uma imagem feita de milhares de palavras. Edição de lançamento, encomenda por WhatsApp."
     />
     <meta name="theme-color" content="#ffffff" />
@@ -15,6 +21,7 @@
     <meta property="og:title" content="Onde Moram as Palavras" />
     <meta
       property="og:description"
+      data-i18n-attr="content:meta.ogDescription"
       content="Sua história, escrita em milhares de palavras até formar uma imagem."
     />
     <meta property="og:image" content="/art/ouro-marrom-thumb.webp" />
@@ -27,10 +34,10 @@
     <link rel="stylesheet" href="/src/styles/sections.css" />
   </head>
   <body>
-    <a class="skip-link label" href="#main">Pular para o conteúdo</a>
+    <a class="skip-link label" href="#main" data-i18n="a11y.skip">Pular para o conteúdo</a>
 
     <div class="intro" data-intro>
-      <button class="intro__skip label" data-intro-skip type="button">pular ↦</button>
+      <button class="intro__skip label" data-intro-skip type="button" data-i18n="intro.skip">pular ↦</button>
       <p class="intro__text display" data-intro-text>Onde moram as palavras</p>
     </div>
 
@@ -40,15 +47,18 @@
           <span class="mark-squares" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
           <span class="label site-header__brand-text">Onde Moram as Palavras</span>
         </a>
-        <button class="site-header__toggle label" data-nav-toggle aria-expanded="false" aria-controls="site-nav">
-          Menu
-        </button>
-        <nav class="site-header__nav label" id="site-nav" data-nav aria-label="Seções da página">
-          <a href="#colecao">Coleção</a>
-          <a href="#como-funciona">Como funciona</a>
-          <a href="#lancamento">Lançamento</a>
-          <a href="#pedido" class="site-header__cta">Monte seu pedido</a>
+        <nav class="site-header__nav label" id="site-nav" data-nav aria-label="Seções da página" data-i18n-attr="aria-label:nav.aria">
+          <a href="#colecao" data-i18n="nav.collection">Coleção</a>
+          <a href="#como-funciona" data-i18n="nav.how">Como funciona</a>
+          <a href="#lancamento" data-i18n="nav.launch">Lançamento</a>
+          <a href="#pedido" class="site-header__cta" data-i18n="nav.cta">Monte seu pedido</a>
         </nav>
+        <div class="site-header__tools">
+          <!--i18n:langswitch-->
+          <button class="site-header__toggle label" data-nav-toggle aria-expanded="false" aria-controls="site-nav" data-i18n="nav.menu">
+            Menu
+          </button>
+        </div>
       </div>
     </header>
 
@@ -56,27 +66,28 @@
       <section id="top" class="hero framed">
         <canvas class="hero__canvas" data-hero-canvas aria-hidden="true"></canvas>
         <div class="wrap hero__content">
-          <p class="label eyebrow hero__kicker">Laboratório tipográfico · edição de lançamento</p>
+          <p class="label eyebrow hero__kicker" data-i18n="hero.kicker">Laboratório tipográfico · edição de lançamento</p>
+          <!-- a marca não se traduz: é nome próprio, como o título dos pôsteres -->
           <h1 class="display hero__title" data-assemble data-wobble>Onde moram as palavras</h1>
-          <p class="lead hero__lead">
+          <p class="lead hero__lead" data-i18n="hero.lead">
             Sua foto, sua música, sua história — escritas milhares de vezes até formarem uma imagem.
           </p>
           <div class="hero__actions">
-            <a class="btn btn--primary" href="#pedido">Monte sua arte</a>
-            <a class="btn btn--ghost" href="#colecao">Ver a coleção</a>
+            <a class="btn btn--primary" href="#pedido" data-i18n="hero.ctaPrimary">Monte sua arte</a>
+            <a class="btn btn--ghost" href="#colecao" data-i18n="hero.ctaSecondary">Ver a coleção</a>
           </div>
-          <p class="readout hero__meta" data-hero-meta>catálogo · 9 espécimes · impressão em alta resolução</p>
+          <p class="readout hero__meta" data-hero-meta data-i18n="hero.meta">catálogo · 9 espécimes · impressão em alta resolução</p>
         </div>
-        <div class="hero__scroll label" aria-hidden="true"><span>role</span><span class="hero__scroll-line"></span></div>
+        <div class="hero__scroll label" aria-hidden="true"><span data-i18n="hero.scroll">role</span><span class="hero__scroll-line"></span></div>
       </section>
 
       <section id="manifesto" class="manifesto">
         <div class="wrap">
-          <p class="label eyebrow">Manifesto</p>
-          <h2 class="display manifesto__title" data-assemble>
+          <p class="label eyebrow" data-i18n="manifesto.eyebrow">Manifesto</p>
+          <h2 class="display manifesto__title" data-assemble data-i18n="manifesto.title">
             Uma imagem feita de milhares de palavras.
           </h2>
-          <p class="lead manifesto__body">
+          <p class="lead manifesto__body" data-i18n="manifesto.body">
             Cada obra nasce de algo que já existe — uma música, uma carta, uma lembrança. Transformamos
             isso em milhares de palavras que se organizam, letra por letra, até formarem um rosto, uma
             cena, uma memória que agora pode ser vista.
@@ -86,58 +97,58 @@
 
       <section id="colecao" class="collection">
         <div class="wrap collection__head">
-          <p class="label eyebrow">A coleção</p>
-          <h2 class="display" data-assemble>Nove espécimes</h2>
-          <p class="lead">
+          <p class="label eyebrow" data-i18n="collection.eyebrow">A coleção</p>
+          <h2 class="display" data-assemble data-i18n="collection.title">Nove espécimes</h2>
+          <p class="lead" data-i18n="collection.lead">
             Cada peça catalogada como em laboratório: fonte, corpo da letra, camadas do motor,
             dimensão real de impressão.
           </p>
         </div>
-        <div class="collection__rail" data-gallery role="list" aria-label="Coleção de obras"></div>
+        <div class="collection__rail" data-gallery role="list" aria-label="Coleção de obras" data-i18n-attr="aria-label:collection.aria"></div>
       </section>
 
       <section id="como-funciona" class="how">
         <div class="wrap how__head">
-          <p class="label eyebrow">Como funciona</p>
-          <h2 class="display" data-assemble>Da foto à obra</h2>
+          <p class="label eyebrow" data-i18n="how.eyebrow">Como funciona</p>
+          <h2 class="display" data-assemble data-i18n="how.title">Da foto à obra</h2>
         </div>
 
         <div class="compare wrap" data-compare>
           <div class="compare__frame" data-compare-frame>
-            <img class="compare__after" src="/art/ouro-marrom-full.webp" alt="Arte tipográfica finalizada — Ouro Marrom" width="1500" height="1600" loading="lazy" />
+            <img class="compare__after" src="/art/ouro-marrom-full.webp" alt="Arte tipográfica finalizada — Ouro Marrom" data-i18n-attr="alt:compare.afterAlt" width="1500" height="1600" loading="lazy" />
             <div class="compare__before-wrap" data-compare-before-wrap>
-              <img class="compare__before" src="/art/ouro-marrom-before.webp" alt="Foto de referência original usada na obra Ouro Marrom" width="1500" height="1600" loading="lazy" />
+              <img class="compare__before" src="/art/ouro-marrom-before.webp" alt="Foto de referência original usada na obra Ouro Marrom" data-i18n-attr="alt:compare.beforeAlt" width="1500" height="1600" loading="lazy" />
             </div>
             <div class="compare__handle" data-compare-handle aria-hidden="true"><span></span></div>
           </div>
-          <input type="range" min="0" max="100" value="50" class="compare__range" data-compare-range aria-label="Arraste para comparar a foto original e a arte tipográfica" />
-          <p class="readout compare__hint">arraste para revelar</p>
+          <input type="range" min="0" max="100" value="50" class="compare__range" data-compare-range aria-label="Arraste para comparar a foto original e a arte tipográfica" data-i18n-attr="aria-label:compare.rangeAria" />
+          <p class="readout compare__hint" data-i18n="compare.hint">arraste para revelar</p>
         </div>
 
         <ol class="steps wrap">
           <li class="steps__item">
             <span class="steps__num readout">01</span>
-            <h3 class="display steps__title">Conte sua história pelo WhatsApp</h3>
-            <p>Envie a imagem que quer transformar e as palavras que vão construir a obra.</p>
+            <h3 class="display steps__title" data-i18n="steps.1.title">Conte sua história pelo WhatsApp</h3>
+            <p data-i18n="steps.1.body">Envie a imagem que quer transformar e as palavras que vão construir a obra.</p>
           </li>
           <li class="steps__item">
             <span class="steps__num readout">02</span>
-            <h3 class="display steps__title">Transformamos em arte</h3>
-            <p>Unimos o motor tipográfico à sensibilidade humana pra criar uma imagem única.</p>
+            <h3 class="display steps__title" data-i18n="steps.2.title">Transformamos em arte</h3>
+            <p data-i18n="steps.2.body">Unimos o motor tipográfico à sensibilidade humana pra criar uma imagem única.</p>
           </li>
           <li class="steps__item">
             <span class="steps__num readout">03</span>
-            <h3 class="display steps__title">Receba por e-mail</h3>
-            <p>Arquivo em alta resolução, pronto pra guardar, imprimir ou presentear.</p>
+            <h3 class="display steps__title" data-i18n="steps.3.title">Receba por e-mail</h3>
+            <p data-i18n="steps.3.body">Arquivo em alta resolução, pronto pra guardar, imprimir ou presentear.</p>
           </li>
         </ol>
       </section>
 
       <section id="lancamento" class="pricing">
         <div class="wrap">
-          <p class="label eyebrow">Nossa primeira coleção</p>
+          <p class="label eyebrow" data-i18n="pricing.eyebrow">Nossa primeira coleção</p>
           <h2 class="display" data-assemble>Onde Moram as Palavras</h2>
-          <p class="lead pricing__intro">
+          <p class="lead pricing__intro" data-i18n="pricing.intro">
             Toda grande história começa com as primeiras pessoas que acreditam nela. Por isso, no
             lançamento da marca, abrimos uma edição especial com apenas
             <strong data-slots-total>5</strong> primeiras criações — uma oportunidade de transformar sua
@@ -147,33 +158,33 @@
 
           <div class="pricing__cards">
             <article class="price-card price-card--launch">
-              <p class="label eyebrow">Edição de lançamento</p>
+              <p class="label eyebrow" data-i18n="pricing.launchLabel">Edição de lançamento</p>
               <p class="price-card__slots readout" data-slots-remaining>restam 5 de 5 vagas</p>
               <p class="price-card__value display" data-price-launch>R$ 39,90</p>
-              <ul class="price-card__list">
+              <ul class="price-card__list" data-i18n="pricing.launchList">
                 <li>Criação personalizada em alta qualidade</li>
                 <li>Arte construída a partir das suas palavras</li>
                 <li>Arquivo digital em alta resolução</li>
                 <li>Preparado para impressão</li>
               </ul>
-              <a class="btn btn--primary" href="#pedido">Garantir minha vaga</a>
+              <a class="btn btn--primary" href="#pedido" data-i18n="pricing.launchCta">Garantir minha vaga</a>
             </article>
 
             <article class="price-card">
-              <p class="label eyebrow">Depois do lançamento</p>
-              <p class="price-card__slots readout">arte personalizada</p>
+              <p class="label eyebrow" data-i18n="pricing.regularLabel">Depois do lançamento</p>
+              <p class="price-card__slots readout" data-i18n="pricing.regularSlots">arte personalizada</p>
               <p class="price-card__value display" data-price-regular>R$ 69,90</p>
-              <ul class="price-card__list">
+              <ul class="price-card__list" data-i18n="pricing.regularList">
                 <li>Criação exclusiva</li>
                 <li>Processo artístico personalizado</li>
                 <li>Arquivo digital em alta resolução</li>
                 <li>Qualidade profissional para impressão</li>
               </ul>
-              <a class="btn btn--ghost" href="#pedido">Encomendar depois</a>
+              <a class="btn btn--ghost" href="#pedido" data-i18n="pricing.regularCta">Encomendar depois</a>
             </article>
           </div>
 
-          <p class="lead pricing__why">
+          <p class="lead pricing__why" data-i18n="pricing.why">
             Por que existe um valor de lançamento? Porque toda criação precisa de uma primeira
             história. Essas cinco primeiras obras serão parte do nascimento da Onde Moram as Palavras
             — as primeiras memórias transformadas em arte, os primeiros encontros entre pessoas,
@@ -184,48 +195,48 @@
 
       <section id="pedido" class="brief">
         <div class="wrap">
-          <p class="label eyebrow">Monte seu pedido</p>
-          <h2 class="display" data-assemble>O que vai virar arte?</h2>
-          <p class="lead">
+          <p class="label eyebrow" data-i18n="brief.eyebrow">Monte seu pedido</p>
+          <h2 class="display" data-assemble data-i18n="brief.title">O que vai virar arte?</h2>
+          <p class="lead" data-i18n="brief.lead">
             Sem carrinho, sem checkout. Você escolhe as opções, a gente monta a mensagem, e você envia
             pelo seu próprio WhatsApp — nada sai deste navegador além disso.
           </p>
 
           <form class="brief-form" data-brief-form novalidate>
             <fieldset class="brief-field">
-              <legend class="label">1 · A imagem que deseja transformar</legend>
-              <div class="pill-group" data-field="subject" role="group" aria-label="O que vai virar arte"></div>
+              <legend class="label" data-i18n="brief.legend1">1 · A imagem que deseja transformar</legend>
+              <div class="pill-group" data-field="subject" role="group" aria-label="O que vai virar arte" data-i18n-attr="aria-label:brief.aria1"></div>
             </fieldset>
 
             <fieldset class="brief-field">
-              <legend class="label">2 · As palavras que vão construir a obra</legend>
-              <div class="pill-group" data-field="words" role="group" aria-label="As palavras da obra"></div>
+              <legend class="label" data-i18n="brief.legend2">2 · As palavras que vão construir a obra</legend>
+              <div class="pill-group" data-field="words" role="group" aria-label="As palavras da obra" data-i18n-attr="aria-label:brief.aria2"></div>
             </fieldset>
 
             <fieldset class="brief-field">
-              <legend class="label">3 · O estilo da arte</legend>
-              <div class="style-group" data-field="style" role="group" aria-label="Estilo da arte"></div>
+              <legend class="label" data-i18n="brief.legend3">3 · O estilo da arte</legend>
+              <div class="style-group" data-field="style" role="group" aria-label="Estilo da arte" data-i18n-attr="aria-label:brief.aria3"></div>
             </fieldset>
 
             <fieldset class="brief-field brief-field--grid">
-              <legend class="label">4 · Seus dados para entrega</legend>
+              <legend class="label" data-i18n="brief.legend4">4 · Seus dados para entrega</legend>
               <label class="text-field">
-                <span class="label">Nome completo</span>
-                <input type="text" name="name" data-field-name autocomplete="name" placeholder="Seu nome" />
+                <span class="label" data-i18n="brief.name">Nome completo</span>
+                <input type="text" name="name" data-field-name autocomplete="name" placeholder="Seu nome" data-i18n-attr="placeholder:brief.namePlaceholder" />
               </label>
               <label class="text-field">
-                <span class="label">E-mail para recebimento</span>
-                <input type="email" name="email" data-field-email autocomplete="email" placeholder="voce@email.com" />
+                <span class="label" data-i18n="brief.email">E-mail para recebimento</span>
+                <input type="email" name="email" data-field-email autocomplete="email" placeholder="voce@email.com" data-i18n-attr="placeholder:brief.emailPlaceholder" />
               </label>
             </fieldset>
 
             <div class="brief-preview">
-              <p class="label eyebrow">Prévia da mensagem</p>
+              <p class="label eyebrow" data-i18n="brief.previewLabel">Prévia da mensagem</p>
               <pre class="readout brief-preview__text" data-brief-preview></pre>
-              <a class="btn btn--primary btn--wide" data-brief-submit href="#" target="_blank" rel="noopener">
+              <a class="btn btn--primary btn--wide" data-brief-submit href="#" target="_blank" rel="noopener" data-i18n="brief.submit">
                 Enviar pelo WhatsApp
               </a>
-              <p class="readout brief-preview__note">
+              <p class="readout brief-preview__note" data-i18n="brief.note">
                 Ao enviar, o WhatsApp abre com esta mensagem pronta — você confirma e manda por lá.
               </p>
             </div>
@@ -237,18 +248,21 @@
     <div class="gallery-detail" data-gallery-detail hidden>
       <div class="gallery-detail__scrim" data-gallery-close></div>
       <div class="gallery-detail__panel">
-        <button class="gallery-detail__close label" data-gallery-close type="button">Fechar ✕</button>
+        <button class="gallery-detail__close label" data-gallery-close type="button" data-i18n="detail.close">Fechar ✕</button>
         <figure class="gallery-detail__figure">
           <img data-gallery-detail-img alt="" />
         </figure>
         <div class="gallery-detail__info">
           <p class="label eyebrow" data-gallery-detail-eyebrow></p>
+          <!-- título da obra: fica em português, é o que está impresso no pôster.
+               A tradução, quando existe, entra ao lado — descreve sem substituir. -->
           <h3 class="display gallery-detail__title" data-gallery-detail-title></h3>
+          <p class="readout gallery-detail__gloss" data-gallery-detail-gloss hidden></p>
           <p class="readout" data-gallery-detail-meta></p>
           <p data-gallery-detail-blurb></p>
           <div class="gallery-detail__actions">
-            <button class="btn btn--ghost btn--small" data-gallery-toggle type="button">Ver de perto</button>
-            <a class="btn btn--primary btn--small" href="#pedido" data-gallery-close>Quero uma assim</a>
+            <button class="btn btn--ghost btn--small" data-gallery-toggle type="button" data-i18n="detail.zoom">Ver de perto</button>
+            <a class="btn btn--primary btn--small" href="#pedido" data-gallery-close data-i18n="detail.cta">Quero uma assim</a>
           </div>
         </div>
       </div>
@@ -259,21 +273,22 @@
         <div>
           <span class="mark-squares" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
           <p class="display site-footer__brand">Onde Moram as Palavras</p>
-          <p class="readout">Laboratório de arte tipográfica · encomenda por WhatsApp</p>
+          <p class="readout" data-i18n="footer.tagline">Laboratório de arte tipográfica · encomenda por WhatsApp</p>
+          <!--i18n:langswitch:footer-->
         </div>
         <div class="site-footer__contact">
-          <p class="label">Contato</p>
+          <p class="label" data-i18n="footer.contact">Contato</p>
           <a class="site-footer__link" data-footer-whatsapp href="#pedido">WhatsApp</a>
           <a class="site-footer__link" data-footer-email href="#pedido">E-mail</a>
         </div>
         <div class="site-footer__nav">
-          <p class="label">Navegação</p>
-          <a href="#colecao">Coleção</a>
-          <a href="#como-funciona">Como funciona</a>
-          <a href="#lancamento">Lançamento</a>
+          <p class="label" data-i18n="footer.nav">Navegação</p>
+          <a href="#colecao" data-i18n="nav.collection">Coleção</a>
+          <a href="#como-funciona" data-i18n="nav.how">Como funciona</a>
+          <a href="#lancamento" data-i18n="nav.launch">Lançamento</a>
         </div>
       </div>
-      <p class="readout site-footer__fine wrap">
+      <p class="readout site-footer__fine wrap" data-i18n="footer.fine">
         EXPERIMENTO TIPOGRÁFICO — CADA OBRA É ÚNICA, CONSTRUÍDA A PARTIR DAS SUAS PALAVRAS
       </p>
     </footer>
