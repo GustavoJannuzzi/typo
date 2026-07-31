@@ -96,6 +96,21 @@
             </label>
           </div>
 
+          <!-- a mídia vem ANTES da descrição de propósito: numa tarefa de
+               divulgação os arquivos são o assunto, e embaixo do editor de
+               markdown (9 linhas) eles ficavam a meia tela de rolagem de
+               distância no celular. Em tarefa sem anexo o bloco some inteiro,
+               então não custa nada às outras. -->
+          <div class="media" data-media hidden>
+            <div class="media__head">
+              <span class="label">Mídia</span>
+              <button type="button" class="label media__copyall" data-copy-all>
+                copiar todos os links
+              </button>
+            </div>
+            <div class="media__grid" data-media-grid></div>
+          </div>
+
           <div class="md-field">
             <div class="md-field__tabs">
               <span class="label">Descrição</span>
@@ -112,16 +127,6 @@
               placeholder="# briefing&#10;&#10;- [ ] primeiro passo&#10;- [ ] segundo passo&#10;&#10;**negrito**, *itálico*, `código`, [link](https://…)"
             ></textarea>
             <div class="md-field__preview markdown" data-md-preview hidden></div>
-          </div>
-
-          <div class="media" data-media hidden>
-            <div class="media__head">
-              <span class="label">Mídia</span>
-              <button type="button" class="label media__copyall" data-copy-all>
-                copiar todos os links
-              </button>
-            </div>
-            <div class="media__grid" data-media-grid></div>
           </div>
         </div>
 
