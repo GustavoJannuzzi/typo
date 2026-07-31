@@ -79,9 +79,10 @@ body.intro-lock {
   white-space: nowrap;
 }
 
-/* abaixo de 360px o nome nao cabe ao lado do seletor de idioma: ficam os
+/* abaixo de 432px o nome nao cabe ao lado do seletor de idioma + botao Menu
+   (mede 375/390/414 de celular real, nao só o valor redondo): ficam os
    quatro quadradinhos, que ja' sao a marca (aparecem no rodape do poster). */
-@media (max-width: 22.4rem) {
+@media (max-width: 27rem) {
   .site-header__brand-text {
     display: none;
   }
@@ -106,7 +107,8 @@ body.intro-lock {
    visitante troca sem depender de JS. Fica sempre visivel no cabecalho
    fixo: quem esta' no exterior e quer ler em portugues nao pode ficar
    preso na deteccao automatica. */
-.lang-switch {
+.lang-switch,
+.lang-switch__list {
   display: inline-flex;
   align-items: center;
   font-family: var(--font-mono);
@@ -147,6 +149,33 @@ body.intro-lock {
   color: var(--accent);
 }
 
+/* cabecalho: no desktop e' so a fileira de 4 links de sempre (o toggle fica
+   escondido). Abaixo do breakpoint do menu hamburguer (60rem) o toggle
+   aparece e a fileira vira dropdown — ver a media query mais abaixo. Sem
+   JS o toggle nao faz nada e a fileira segue visivel em linha, do jeito
+   antigo: mesmo trade-off que o .site-header__nav ja assume. */
+.lang-switch--menu {
+  position: relative;
+}
+
+.lang-switch__toggle {
+  display: none;
+  align-items: center;
+  gap: 0.35em;
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--rule);
+  padding: 0.45em 0.7em;
+}
+
+.lang-switch__toggle:hover {
+  border-color: var(--ink);
+}
+
 .site-header__nav {
   display: flex;
   align-items: center;
@@ -176,22 +205,45 @@ body.intro-lock {
 
 /* O menu inteiro so' cabe na horizontal quando ha' espaco pra marca (250px) +
    quatro secoes (490px em espanhol/italiano, as linguas mais compridas) + o
-   seletor de idioma. Abaixo disso o menu vira dropdown, e o seletor fica ao
-   lado do botao Menu — visivel do mesmo jeito. */
+   seletor de idioma. Abaixo disso o menu vira dropdown, e o seletor de
+   idioma tambem — marca + 4 siglas + botao Menu não cabem na mesma linha. */
 @media (max-width: 60rem) {
   .site-header__toggle {
     display: inline-flex;
   }
 
-  /* no celular a linha do cabecalho fica disputada: marca + 4 idiomas +
-     menu. O seletor aperta o passo em vez de empurrar o nome da marca
-     pra uma segunda linha. */
   .site-header__tools {
     gap: 0.65rem;
   }
 
-  .lang-switch a {
-    padding: 0.5em 0.25em;
+  .lang-switch__toggle {
+    display: inline-flex;
+  }
+
+  .lang-switch__list {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 20;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 0.3em;
+    transform: translateY(-6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .lang-switch__list a {
+    padding: 0.6em 0.8em;
+  }
+
+  .lang-switch--menu.is-open .lang-switch__list {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .site-header__nav {

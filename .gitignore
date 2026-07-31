@@ -21,3 +21,6 @@ site/.vite/
 .env*
 !.env.example
 
+
+# fontes da identidade convertidas de woff2 (reproduzivel: social_kit.py)
+scripts/.fontcache/

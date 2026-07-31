@@ -100,7 +100,6 @@ function dataHooks(fragment) {
 
 function langSwitchHtml(current, catalog, variant) {
   const aria = escapeAttr(catalog.html?.["lang.aria"] || "Idioma");
-  const cls = variant ? `lang-switch lang-switch--${variant}` : "lang-switch";
   const links = LOCALES.map((loc) => {
     const isCurrent = loc.code === current.code;
     return (
@@ -110,7 +109,23 @@ function langSwitchHtml(current, catalog, variant) {
       `>${loc.short}</a>`
     );
   }).join("");
-  return `<nav class="${cls}" aria-label="${aria}">${links}</nav>`;
+
+  if (variant === "footer") {
+    return `<nav class="lang-switch lang-switch--footer" aria-label="${aria}">${links}</nav>`;
+  }
+
+  // Cabeçalho: os 4 links continuam de verdade no DOM (Google segue, e sem
+  // JS eles ficam visíveis do jeito antigo, em linha). Com JS, viram um
+  // dropdown abaixo do breakpoint do menu hambúrguer — ver .lang-switch__list
+  // em components.css e o toggle em main.js.
+  return (
+    `<div class="lang-switch lang-switch--menu" data-lang-switch>` +
+    `<button type="button" class="lang-switch__toggle" data-lang-toggle` +
+    ` aria-haspopup="true" aria-expanded="false" aria-label="${aria}">` +
+    `${current.short} <span aria-hidden="true">&#9662;</span></button>` +
+    `<nav class="lang-switch__list" data-lang-list aria-label="${aria}">${links}</nav>` +
+    `</div>`
+  );
 }
 
 /**

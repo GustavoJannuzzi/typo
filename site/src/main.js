@@ -45,6 +45,22 @@ if (navToggle && nav) {
   );
 }
 
+// --- header: seletor de idioma vira dropdown no mobile --------------------
+const langSwitch = document.querySelector("[data-lang-switch]");
+const langToggle = document.querySelector("[data-lang-toggle]");
+if (langSwitch && langToggle) {
+  langToggle.addEventListener("click", () => {
+    const open = langSwitch.classList.toggle("is-open");
+    langToggle.setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("click", (e) => {
+    if (langSwitch.classList.contains("is-open") && !langSwitch.contains(e.target)) {
+      langSwitch.classList.remove("is-open");
+      langToggle.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
 // --- textos que se montam ao entrar na tela ------------------------------
 document.querySelectorAll("[data-assemble]").forEach((el) => {
   const isHero = el.hasAttribute("data-wobble");
