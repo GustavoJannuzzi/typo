@@ -138,6 +138,11 @@ export function criarServidor() {
       ["/src/", join(RAIZ, "site", "src")],
       ["/art/", join(RAIZ, "site", "public", "art")],
       ["/fonts/", join(RAIZ, "site", "public", "fonts")],
+      // os recortes de `scripts/build_instagram.py`. O `-detail.webp` do site
+      // tem 1100 px e amolece antes de 3x; as avulsas sao recortes 1:1 do
+      // export de 150 dpi, entao um mergulho de verdade cabe sem carregar o
+      // PNG de 27 MP inteiro no navegador.
+      ["/social/", join(RAIZ, "social")],
     ]) {
       if (p.startsWith(prefixo)) {
         const alvo = seguro(base, p.slice(prefixo.length));

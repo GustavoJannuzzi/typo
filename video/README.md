@@ -183,6 +183,44 @@ window.__cena.seek("letras", 0.5)   // mesmo frame, sempre
 Trocar a obra é `?obra=<slug>` na url do roteiro — qualquer slug de
 `site/src/data/works.json`.
 
+## A cena da obra
+
+`cena/obra.html` — a outra cena. A de processo responde *"como isto foi
+feito"*; esta responde *"o que é isso"*, que é a pergunta de quem vê a peça
+pendurada. Não tem grade, não tem sonda e não tem fórmula: tem a frase, a
+malha, o retrato e a contagem, em sete atos.
+
+```bash
+node video/render.mjs video/roteiros/emicida-9x16.mjs
+```
+
+O argumento é o do e-mail de entrega (`emails/entrega-emicida.html`): *de
+longe, é o Emicida; de perto, é a música inteira*. Então o vídeo anda essa
+distância duas vezes — pra fora nos atos 01..04 (a frase vira malha vira
+retrato) e pra dentro nos 05..06 (o retrato vira malha vira palavra contada).
+
+Duas coisas que valem saber antes de mexer:
+
+- **O macro sai das avulsas do `build_instagram.py`**, não do `-detail.webp`.
+  São recortes 1:1 do export de 150 dpi, então o mergulho aguenta o zoom que o
+  `-detail` (1100 px) não aguenta — é o débito 2 aqui embaixo, resolvido pra
+  esta cena. Sem as avulsas ela cai no `-detail` e **avisa no console**. Rode
+  antes: `python scripts/build_instagram.py <slug>`.
+- **A peça abre espaço pra própria etiqueta.** Com a arte centrada e a placa de
+  espécime no pé, a placa tapa o terço de baixo da peça. Nos atos 04 e 07 a
+  arte encolhe e sobe até a placa encostar embaixo dela — é a regra da ficha de
+  espécime do pôster (nada se cruza), só que animada. As duas constantes que
+  governam isso são `FICHA_ESCALA` e `FICHA_SOBE`, no `obra.mjs`, e elas
+  dependem do corpo do título: título que quebra em três linhas come a peça.
+
+A redação específica de cada obra (a frase de abertura, as duas glosas e a
+contagem) está na tabela `COPIA` do `obra.mjs`. Obra sem entrada lá ainda roda:
+cai num texto genérico montado do `works.json`.
+
+```bash
+node video/lib/chapa.mjs cena --cena obra --obra emicida
+```
+
 A foto de referência sai do `<slug>-before.webp` quando ele existe (é o
 recorte alinhado pixel a pixel com a arte, gerado pelo
 `build_site_assets.py`). Hoje só `ouro-marrom` tem esse par; para as outras a
@@ -196,11 +234,15 @@ video/
 ├── render.mjs            CLI
 ├── roteiros/             <- É AQUI QUE SE AFINA
 │   ├── tour-9x16.mjs
-│   └── processo-9x16.mjs
+│   ├── processo-9x16.mjs
+│   └── emicida-9x16.mjs
 ├── cena/
 │   ├── processo.html     a cena de "como nasce uma obra"
 │   ├── processo.css
-│   └── processo.mjs
+│   ├── processo.mjs
+│   ├── obra.html         a cena de "o que é isso" (conceitual)
+│   ├── obra.css
+│   └── obra.mjs
 ├── lib/
 │   ├── cdp.mjs           cliente do protocolo do Chrome (sem dependência)
 │   ├── servidor.mjs      serve dist + cena + refs + textos numa origem só
@@ -212,6 +254,45 @@ video/
 │   └── chapa.mjs         chapas paradas pra conferir composição
 └── out/                  frames e mp4 (fora do git)
 ```
+
+## Débitos e melhorias
+
+Coisas conhecidas, deixadas de fora de propósito. Nenhuma bloqueia o uso.
+
+**1. `site/dist` estava divergente do `site/src`.** O build servido tem um
+seletor de idiomas (PT/EN/ES/IT) que o `site/index.html` do fonte não tem —
+alguém buildou de um estado diferente. Como o tour renderiza o `dist`, o vídeo
+sai do site *que foi buildado*, não do que está no fonte. O `render.mjs` agora
+avisa quando `dist` está mais velho, mas **não** detecta divergência de
+conteúdo. Rodar `npm --prefix site run build` antes resolve.
+
+**2. Teto de zoom preso ao asset.** Sobre o `-detail.webp` (1100 px) o mergulho
+aguenta ~3×. Para ir mais fundo: reexportar os 150 dpi para
+`projects/<slug>/output/` (a pasta está vazia hoje) e acrescentar um `-macro`
+de 2400 px ao `scripts/build_site_assets.py`.
+
+**3. Só `ouro-marrom` tem `-before.webp`.** É o par alinhado pixel a pixel que
+a cena de processo usa como foto de referência. Para as outras oito obras a
+cena cai na referência crua com o `crop` do `project.yaml` — funciona, mas o
+cross-fade final para a arte pronta não casa perfeitamente. Virar o
+`COMPARE_SLUG` do `build_site_assets.py` numa lista resolve (3 linhas), mas
+precisa dos exports de 150 dpi de volta.
+
+**4. `works.json` não guarda onde o `-detail` foi recortado.** O
+`find_densest_window` calcula `dx, dy` e joga fora. Gravar isso permitiria um
+zoom contínuo e sem corte do `-full` para o `-detail`, em vez do corte atual.
+
+**5. Não há roteiro 16:9 nem 1:1.** Só 9:16. O mecanismo já aceita
+(`saida.largura/altura` + `pagina.largura/altura`), falta escrever os roteiros
+— e a cena de processo já tem layout de paisagem no CSS, não testado.
+
+**6. Sem áudio e sem legenda.** O `ffmpeg` está ali e faz as duas coisas;
+ninguém pediu ainda.
+
+**7. Um plano de `acao` sempre gasta a própria duração em frames parados.**
+Para `comparar(pct)` isso vira um degrau, não um arraste. Um tipo de plano que
+interpole o argumento da ação ao longo da duração daria um arraste de verdade
+no comparador.
 
 ## Vocabulário de ações
 

@@ -4,8 +4,20 @@
     python scripts/build_instagram.py ouro-marrom
     python scripts/build_instagram.py ouro-marrom --formatos feed,story --debug
 
-Escreve `social/<slug>/feed/*.png` e `social/<slug>/story/*.png`, prontos pra
-postar na ordem do nome do arquivo.
+Escreve, prontos pra postar na ordem do nome do arquivo:
+
+    social/<slug>/feed/01..04.png   o carrossel de quatro cartas
+    social/<slug>/story/story.png   o story, numa carta só
+    social/<slug>/avulsas/*.png     material solto, pra montar à mão
+
+O **story é uma carta só** porque lá não existe passar o dedo pra próxima: o
+mergulho que o carrossel faz em quatro tempos ele faz de uma vez, com o macro
+sangrando no fundo e a peça inteira numa placa de papel por cima. `--story
+carrossel` volta pras mesmas quatro cartas do feed.
+
+As **avulsas** não são cartas: são o título em PNG com alfa e N recortes 1:1 da
+malha, sem placa, sem etiqueta e sem moldura. É matéria-prima pra montagem à
+mão, não peça fechada. `--avulsas 0` desliga.
 
 O motor **não roda aqui**. A única coisa que este script lê do `typo` é
 metadado (título, corpo da fonte, tamanho da página) e a geometria de onde a
@@ -179,6 +191,33 @@ def num(v: float, casas: int = 0) -> str:
 # carregar a arte
 # --------------------------------------------------------------------------
 
+def _bbox_sem_referencia(cfg, dpi: float) -> tuple[int, int, int, int] | None:
+    """O bbox da arte quando a imagem de referência sumiu.
+
+    O `art_bbox_px` abre a referência por um motivo só: saber o tamanho do
+    crop. E quando `source.crop` é explícito — que é o caso de todo projeto que
+    recorta — esse tamanho é a diferença das próprias coordenadas. Então a
+    geometria inteira da página sai do `project.yaml`, sem a foto.
+
+    É o que devolve o `magalenha` à fila: a referência dele se perdeu (ver
+    "Estado" no CLAUDE.md), o motor não roda mais, mas o PNG exportado existe —
+    e as peças de divulgação são pós-processamento do PNG, não do motor.
+
+    Sem crop explícito devolve `None`: aí o tamanho vem mesmo da imagem, e
+    chutar daria um recorte errado sem avisar.
+    """
+    crop = cfg.source.crop
+    if not crop:
+        return None
+    from typo.config import Scale
+
+    art_w, art_h = cfg.art_size(crop[2] - crop[0], crop[3] - crop[1], dpi)
+    pw, _ph = cfg.page_size(art_w, art_h, dpi)
+    ox = (pw - art_w) // 2
+    oy = int(Scale(dpi).cm(cfg.page.margin_top_cm))
+    return ox, oy, ox + art_w, oy + art_h
+
+
 def _works_meta(slug: str) -> dict:
     if not WORKS_JSON.exists():
         return {}
@@ -213,9 +252,15 @@ def carregar(slug: str) -> Obra:
 
             art = page.copy() if cfg.display.enabled else page.crop(art_bbox_px(cfg, dpi))
         except Exception as exc:  # imagem de referência sumiu, etc.
-            print(f"  ! não deu pra localizar a arte dentro da página ({exc});"
-                  " usando a página inteira")
-            art = page
+            bbox = None if cfg.display.enabled else _bbox_sem_referencia(cfg, dpi)
+            if bbox:
+                print(f"  ! sem a imagem de referência; bbox da arte derivado do "
+                      f"source.crop do project.yaml")
+                art = page.crop(bbox)
+            else:
+                print(f"  ! não deu pra localizar a arte dentro da página ({exc});"
+                      " usando a página inteira")
+                art = page
     else:
         webp = ROOT / "site" / "public" / "art" / f"{slug}-full.webp"
         if not webp.exists():
@@ -350,12 +395,12 @@ def _bump(v: np.ndarray, ideal: float, largura: float) -> np.ndarray:
     return np.exp(-(((v - ideal) / largura) ** 2))
 
 
-def escolher_janela(crit: Criterio, art_size: tuple[int, int],
-                    win_w: int, win_h: int) -> tuple[int, int]:
-    """Centro da melhor janela `win_w × win_h`, em pixels da arte.
+def _campo_de_score(crit: Criterio, art_size: tuple[int, int],
+                    win_w: int, win_h: int) -> np.ndarray:
+    """O score de cada posição de janela, na grade reduzida.
 
-    O score é a legibilidade média da janela, temperada pela gaussiana larga
-    de cobertura. Fora da região válida (janela inteira dentro da arte, menos a
+    É a legibilidade média da janela, temperada pela gaussiana larga de
+    cobertura. Fora da região válida (janela inteira dentro da arte, menos a
     margem morta) o score é -inf.
     """
     r = crit.bloco
@@ -377,12 +422,43 @@ def escolher_janela(crit: Criterio, art_size: tuple[int, int],
         lo_x, hi_x = 0, score.shape[1]
         lo_y, hi_y = 0, score.shape[0]
     valido[lo_y:hi_y, lo_x:hi_x] = True
-    score = np.where(valido, score, -np.inf)
+    return np.where(valido, score, -np.inf)
 
-    iy, ix = np.unravel_index(int(np.argmax(score)), score.shape)
-    cx = int(np.clip(ix * r + r // 2, win_w // 2, max(win_w // 2, aw - win_w // 2)))
-    cy = int(np.clip(iy * r + r // 2, win_h // 2, max(win_h // 2, ah - win_h // 2)))
-    return cx, cy
+
+def escolher_janela(crit: Criterio, art_size: tuple[int, int],
+                    win_w: int, win_h: int) -> tuple[int, int]:
+    """Centro da melhor janela `win_w × win_h`, em pixels da arte."""
+    return escolher_janelas(crit, art_size, win_w, win_h, 1)[0]
+
+
+def escolher_janelas(crit: Criterio, art_size: tuple[int, int],
+                     win_w: int, win_h: int, quantas: int) -> list[tuple[int, int]]:
+    """As `quantas` melhores janelas que **não se sobrepõem**.
+
+    Pegar os `quantas` maiores do score direto não serve: o campo é suave, e os
+    três maiores seriam três deslocamentos de um bloco da mesma janela — as
+    avulsas sairiam praticamente iguais. Depois de escolher uma, a vizinhança do
+    tamanho da própria janela é zerada antes da próxima rodada, então cada
+    recorte vem de um lugar diferente da peça.
+
+    Se a arte não comporta `quantas` janelas disjuntas, devolve menos — repetir
+    a mesma região com outro nome seria pior que entregar três em vez de quatro.
+    """
+    r = crit.bloco
+    aw, ah = art_size
+    score = _campo_de_score(crit, art_size, win_w, win_h)
+    kw, kh = max(1, round(win_w / r)), max(1, round(win_h / r))
+
+    centros: list[tuple[int, int]] = []
+    for _ in range(quantas):
+        if not np.isfinite(score).any():
+            break
+        iy, ix = np.unravel_index(int(np.argmax(score)), score.shape)
+        cx = int(np.clip(ix * r + r // 2, win_w // 2, max(win_w // 2, aw - win_w // 2)))
+        cy = int(np.clip(iy * r + r // 2, win_h // 2, max(win_h // 2, ah - win_h // 2)))
+        centros.append((cx, cy))
+        score[max(0, iy - kh):iy + kh + 1, max(0, ix - kw):ix + kw + 1] = -np.inf
+    return centros or [(aw // 2, ah // 2)]
 
 
 def recortar(art: Image.Image, centro: tuple[int, int], win_w: int, win_h: int,
@@ -666,6 +742,160 @@ def carta_ficha(obra: Obra, macro: Image.Image, fmt: kit.Format) -> Image.Image:
     return img
 
 
+def carta_story_unica(obra: Obra, crit: Criterio,
+                      fmt: kit.Format = kit.STORY) -> Image.Image:
+    """O story inteiro numa carta só — a peça e o macro na mesma tela.
+
+    O carrossel do feed conta em quatro passos porque o dedo passa de uma carta
+    pra outra, e o salto de escala acontece no tempo. No story não passa: é uma
+    tela e alguns segundos. Subir a carta 01 sozinha entrega um retrato, e o que
+    a peça tem de próprio — que ela é *escrita* — fica de fora; subir só o macro
+    entrega textura sem obra.
+
+    Então esta põe os dois planos na mesma tela, um dentro do outro: o macro
+    1:1 sangrando nos quatro lados, e a peça inteira numa **placa de papel de
+    corte reto** por cima. As letras do fundo cercam o retrato — que é
+    literalmente o que a peça faz.
+
+    Empilhar (peça em cima, faixa de macro embaixo) foi a primeira tentativa e
+    saiu errada: num quadro 9:16 sobra tão pouca altura pro retrato que ele vira
+    selo no meio do branco. O fundo sangrado resolve porque a arte não disputa
+    espaço com o macro — ela mora em cima dele.
+
+    Continua **sem véu, sem degradê e sem sombra**: a placa é opaca e de corte
+    reto, o mesmo gesto da margem do pôster. E o fundo não é textura decorativa,
+    é a própria peça no tamanho de impressão.
+    """
+    c = kit.colors()
+    img = Image.new("RGB", fmt.size, c["paper"])
+
+    # --- o fundo: a própria peça, 1:1 com o arquivo de impressão -------------
+    centro = escolher_janela(crit, obra.art.size, fmt.w, fmt.h)
+    img.paste(recortar(obra.art, centro, fmt.w, fmt.h, fmt.size), (0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # --- a placa: dimensionada pela altura livre entre as zonas seguras ------
+    topo = kit.STORY_SAFE_TOP
+    base = fmt.h - kit.STORY_SAFE_BOTTOM
+    pad = round(fmt.w * 0.038)
+    f_lab = kit.mono(round(fmt.w * 0.0195), 500)
+    f_sub = kit.mono(round(fmt.w * 0.0185), 400)
+    f_nota = kit.mono(round(fmt.w * 0.017), 400)
+
+    titulo = obra.titulo.upper()
+    tit_max = round(fmt.w * 0.085)
+    subs = (kit.wrap(obra.subtitulo.upper(), f_sub, fmt.w * 0.62, f_sub.size * 0.1)
+            if obra.subtitulo else [])
+    # tudo que a placa carrega além da arte — some antes de sobrar altura pra ela
+    fora_da_arte = round(
+        pad * 2 + f_lab.size * 2.6 + tit_max * 1.06 + len(subs) * f_sub.size * 1.5
+        + fmt.h * 0.014 + f_nota.size * 1.9 + fmt.h * 0.012 + fmt.w * 0.0165 * 1.9
+    )
+    art_h = max(1, (base - topo) - fora_da_arte)
+    art_w = min(round(art_h * obra.art.width / obra.art.height),
+                round(fmt.w * 0.80) - pad * 2)
+    art_h = round(art_w * obra.art.height / obra.art.width)
+
+    placa_w = art_w + pad * 2
+    placa_h = art_h + fora_da_arte
+    px = (fmt.w - placa_w) // 2
+    py = topo + max(0, (base - topo - placa_h) // 2)
+    draw.rectangle([px, py, px + placa_w - 1, py + placa_h - 1], fill=c["paper"])
+
+    y = py + pad
+    kit.eyebrow(draw, px + pad, y + f_lab.size, "espécime", f_lab)
+    y += round(f_lab.size * 2.6)
+    f_tit = kit.fit_display(titulo, art_w, max_size=tit_max)
+    kit.draw_tracked(draw, (px + pad, y + f_tit.size * 0.92), titulo, f_tit,
+                     c["ink"], anchor="ls")
+    y += round(tit_max * 1.06)
+    for linha in subs:
+        kit.draw_tracked(draw, (px + pad, y), linha, f_sub, c["footer-grey"],
+                         tracking=f_sub.size * 0.1, anchor="la")
+        y += round(f_sub.size * 1.5)
+
+    y += round(fmt.h * 0.014)
+    img.paste(obra.art.resize((art_w, art_h), Image.LANCZOS), (px + pad, y))
+    kit.hairline(draw, [px + pad, y, px + pad + art_w - 1, y + art_h - 1])
+    y += art_h
+
+    # diz o que é o fundo. Sem esta linha ele lê como textura de enfeite, que é
+    # justamente o contrário do que ele é.
+    kit.draw_tracked(draw, (px + pad, y + f_nota.size * 1.5),
+                     f"O FUNDO É ESTA MESMA PEÇA · 1:1 · "
+                     f"{num(fmt.w * obra.cm_por_px)} × {num(fmt.h * obra.cm_por_px)} CM",
+                     f_nota, c["grey"], tracking=f_nota.size * 0.1, anchor="ls")
+    y += round(f_nota.size * 1.9 + fmt.h * 0.012)
+    _assinatura(draw, fmt, y + round(fmt.w * 0.0165 * 0.95), px + pad)
+    return img
+
+
+# --------------------------------------------------------------------------
+# avulsas — material solto, pra montar à mão
+# --------------------------------------------------------------------------
+
+def avulsa_titulo(obra: Obra, largura: int = 2400) -> Image.Image:
+    """O bloco de título isolado, em PNG com **alfa**.
+
+    Sem carta, sem papel e sem moldura: quem escolhe o fundo é a montagem, não
+    este script. Com o papel chapado embutido o bloco só serviria sobre papel —
+    com alfa ele assenta sobre a arte, sobre tinta ou sobre o que for.
+
+    O desenho é o mesmo da carta 01 (etiqueta com quadradinho, título em Archivo
+    condensada, subtítulo em mono) porque a peça avulsa e a carta têm que
+    parecer a mesma marca quando aparecem no mesmo feed.
+    """
+    c = kit.colors()
+    titulo = obra.titulo.upper()
+    margem = round(largura * 0.015)
+    util = largura - margem * 2
+
+    f_tit = kit.fit_display(titulo, util, max_size=round(largura * 0.20))
+    f_lab = kit.mono(round(largura * 0.0175), 500)
+    f_sub = kit.mono(round(largura * 0.0165), 400)
+    subs = kit.wrap(obra.subtitulo.upper(), f_sub, util, f_sub.size * 0.1) if obra.subtitulo else []
+
+    alto = round(margem * 2 + f_lab.size * 2.6 + f_tit.size * 1.06
+                 + len(subs) * f_sub.size * 1.5 + f_lab.size * 2.2)
+    img = Image.new("RGBA", (largura, alto), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    y = margem
+    kit.eyebrow(draw, margem, y + f_lab.size, "espécime", f_lab)
+    y += round(f_lab.size * 2.6)
+    kit.draw_tracked(draw, (margem, y + f_tit.size * 0.92), titulo, f_tit,
+                     c["ink"], anchor="ls")
+    y += round(f_tit.size * 1.06)
+    for linha in subs:
+        kit.draw_tracked(draw, (margem, y), linha, f_sub, c["footer-grey"],
+                         tracking=f_sub.size * 0.1, anchor="la")
+        y += round(f_sub.size * 1.5)
+    kit.mark_squares(draw, margem, y + f_lab.size * 0.9, round(largura * 0.014),
+                     anchor="lm")
+    return img
+
+
+def avulsas_malha(obra: Obra, crit: Criterio, quantas: int = 3,
+                  lado: int = 1400) -> list[tuple[str, Image.Image]]:
+    """Recortes 1:1 da malha, crus — sem placa, sem etiqueta, sem moldura.
+
+    São `lado × lado` pixels tirados direto do export, então cada um é material
+    de impressão em tamanho real, não uma imagem reamostrada. As janelas são
+    escolhidas pelo mesmo critério das cartas e **não se sobrepõem**: três
+    recortes da mesma região seriam a mesma imagem três vezes.
+
+    Se a arte for menor que `lado`, o recorte sai do tamanho que couber, em vez
+    de ampliar — ampliar entregaria borrão anunciado como 1:1.
+    """
+    lado = min(lado, obra.art.width, obra.art.height)
+    centros = escolher_janelas(crit, obra.art.size, lado, lado, quantas)
+    saida = []
+    for i, centro in enumerate(centros, 1):
+        saida.append((f"malha-{i:02d}.png",
+                      recortar(obra.art, centro, lado, lado, (lado, lado))))
+    return saida
+
+
 # --------------------------------------------------------------------------
 # debug
 # --------------------------------------------------------------------------
@@ -738,7 +968,8 @@ def chapa_debug(obra: Obra, crit: Criterio, janelas: list[tuple[str, tuple[int, 
 # --------------------------------------------------------------------------
 
 def montar(slug: str, formatos: list[kit.Format], debug: bool,
-           titulo: str = "auto") -> list[Path]:
+           titulo: str = "auto", story: str = "unico",
+           avulsas: int = 3) -> list[Path]:
     obra = carregar(slug)
     print(f"  arte {obra.art.width}×{obra.art.height}px "
           f"({num(obra.art.width * obra.cm_por_px)}×"
@@ -747,7 +978,30 @@ def montar(slug: str, formatos: list[kit.Format], debug: bool,
     crit = medir(obra.art)
 
     escritos: list[Path] = []
+    if avulsas:
+        destino = OUT_ROOT / slug / "avulsas"
+        escritos.append(kit.save(avulsa_titulo(obra), destino / "titulo.png"))
+        for nome, corte in avulsas_malha(obra, crit, avulsas):
+            escritos.append(kit.save(corte, destino / nome))
+
     for fmt in formatos:
+        # o story sai numa carta só por padrão: lá não existe "passar o dedo
+        # pra próxima", então o mergulho tem que caber numa tela
+        if fmt is kit.STORY and story == "unico":
+            destino = OUT_ROOT / slug / fmt.name
+            # obra gerada antes do story único deixou as quatro cartas aqui.
+            # Não apago (é arquivo de saída de outra rodada, e apagar por conta
+            # própria é pior que avisar), mas o `publish_media.py` publicaria as
+            # cinco e o cartão do /admin ficaria com um story de quatro imagens.
+            velhas = sorted(p.name for p in destino.glob("0*.png"))
+            if velhas:
+                print(f"  ! sobraram {len(velhas)} cartas do story antigo em "
+                      f"{destino.relative_to(ROOT)}: {', '.join(velhas)}\n"
+                      f"    apague antes de publicar, ou o cartão do /admin sai "
+                      f"com story de {len(velhas) + 1} imagens")
+            escritos.append(kit.save(carta_story_unica(obra, crit, fmt),
+                                     destino / "story.png"))
+            continue
         # o macro é 1:1 com o pixel do export — nítido por construção
         win_w, win_h = fmt.w, fmt.h
         centro = escolher_janela(crit, obra.art.size, win_w, win_h)
@@ -800,6 +1054,12 @@ def main() -> int:
                          "houver faixa silenciosa, senão no papel), sobre (força "
                          "por cima, com placa de corte reto quando precisar) ou "
                          "papel (sempre embaixo)")
+    ap.add_argument("--story", default="unico", choices=("unico", "carrossel"),
+                    help="unico (padrão): uma carta só, com a peça e o macro na "
+                         "mesma tela. carrossel: as mesmas quatro cartas do feed")
+    ap.add_argument("--avulsas", type=int, default=3, metavar="N",
+                    help="N recortes 1:1 da malha + o título com alfa, em "
+                         "social/<slug>/avulsas/ (0 desliga)")
     ap.add_argument("--debug", action="store_true",
                     help="escreve o mapa do critério e as janelas escolhidas")
     args = ap.parse_args()
@@ -813,7 +1073,8 @@ def main() -> int:
     total = 0
     for slug in args.slugs:
         print(f"\n{slug}")
-        for path in montar(slug, formatos, args.debug, args.titulo):
+        for path in montar(slug, formatos, args.debug, args.titulo,
+                           args.story, args.avulsas):
             print(f"  ok {path.relative_to(ROOT)}")
             total += 1
     print(f"\n{total} imagens -> {OUT_ROOT.relative_to(ROOT)}")

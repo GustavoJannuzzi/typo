@@ -10,6 +10,12 @@ __pycache__/
 projects/*/output/*
 !projects/*/output/.gitkeep
 
+# ...menos o magalenha, que NAO e' reproduzivel: a foto de referencia se perdeu
+# (ver "Estado" no CLAUDE.md) e o motor nao roda mais pra ele. Este PNG e' o
+# unico sobrevivente do render original, e e' dele que o build_instagram.py
+# tira as pecas de divulgacao. Se ele sumir, o magalenha sai da colecao.
+!projects/magalenha/output/*150dpi.png
+
 # landing page (site/) — instalado via npm, buildado via vite
 site/node_modules/
 site/dist/

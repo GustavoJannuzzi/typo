@@ -27,12 +27,15 @@ export function acharFfmpeg() {
 }
 
 export function montarArgumentos({ pastaFrames, ext, fps, saida, largura, altura, ssaa, crf, preset }) {
-  const filtros = [];
-  if (ssaa > 1) {
-    // reduzir com lanczos DEPOIS de capturar grande e' o que da' antialias de
-    // verdade no texto — melhor do que qualquer suavizacao do navegador
-    filtros.push(`scale=${largura}:${altura}:flags=lanczos`);
-  }
+  // O scale entra SEMPRE, nao so' quando ha supersample. A densidade de pixel
+  // sai de uma divisao (1080/430 = 2,5116...) e quase nunca fecha redonda: a
+  // captura de 1080x1920 chegava com 1080x1919, e o libx264 em yuv420p recusa
+  // altura impar. Forcar o tamanho aqui resolve os dois casos de uma vez —
+  // e com lanczos, que e' o que da' antialias de verdade no texto quando a
+  // captura foi maior que a saida.
+  // setsar=1 porque o scale herda a razao de amostra da origem: sem ele o mp4
+  // sai 1080x1920 com SAR 1920:1919 e o player exibe 1080x1919 de novo.
+  const filtros = [`scale=${largura}:${altura}:flags=lanczos`, "setsar=1"];
   // yuv420p e' o unico pix_fmt que todo player entende; sem ele, o video abre
   // no VLC e nao abre no celular
   filtros.push("format=yuv420p");

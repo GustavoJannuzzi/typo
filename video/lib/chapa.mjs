@@ -2,7 +2,11 @@
  * Chapa: tira N fotos paradas de um roteiro sem gerar video nenhum.
  *
  *   node video/lib/chapa.mjs cena --obra ouro-marrom
+ *   node video/lib/chapa.mjs cena --cena obra --obra emicida
  *   node video/lib/chapa.mjs site
+ *
+ * `--cena` escolhe qual cena de video/cena/ abrir (sem o `.html`). Vale pra
+ * qualquer uma que cumpra o contrato `__cena.atos` / `__cena.seek(ato, u)`.
  *
  * Serve pra duas coisas:
  *   1. afinar a cena sem esperar um encode inteiro;
@@ -22,6 +26,7 @@ const opt = (nome, alt) => {
 };
 
 const obra = opt("obra", "ouro-marrom");
+const cena = opt("cena", "processo");
 const largura = Number(opt("largura", 430));
 const altura = Number(opt("altura", 764));
 const escala = Number(opt("escala", 2));
@@ -36,14 +41,14 @@ const aba = await abrirAba(sessao, { largura, altura, escala });
 
 try {
   if (alvo === "cena") {
-    await aba.ir(`${base}/cena/processo.html?obra=${obra}`);
+    await aba.ir(`${base}/cena/${cena}.html?obra=${obra}`);
     await aba.esperar(`document.documentElement.dataset.cenaPronta === "1"`);
     const atos = await aba.avaliar(`window.__cena.atos`);
     for (const ato of atos) {
       for (const u of [0.55, 1]) {
         await aba.avaliar(`window.__cena.seek(${JSON.stringify(ato)}, ${u})`);
         const png = await aba.frame();
-        const nome = `${obra}-${String(atos.indexOf(ato) + 1).padStart(2, "0")}-${ato}-u${String(u).replace(".", "")}.png`;
+        const nome = `${cena}-${obra}-${String(atos.indexOf(ato) + 1).padStart(2, "0")}-${ato}-u${String(u).replace(".", "")}.png`;
         await writeFile(join(destino, nome), png);
         console.log("  ", nome, `${(png.length / 1024).toFixed(0)} KB`);
       }

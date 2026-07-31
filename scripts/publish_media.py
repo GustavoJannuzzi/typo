@@ -71,6 +71,16 @@ DESCRICOES = {
     "03-macro.png": "1:1 com o arquivo de impressão — aqui se lê a palavra. "
                     "É a carta que segura o post.",
     "04-ficha.png": "Ficha técnica: medida, glifos, fonte e o trecho do texto.",
+    # story — uma carta só
+    "story.png": "O story inteiro numa imagem: o macro sangrando no fundo e a "
+                 "peça inteira na placa de papel. No story não dá pra passar o "
+                 "dedo pra próxima, então o mergulho cabe numa tela.",
+    # avulsas — matéria-prima, não peça fechada
+    "titulo.png": "O título isolado, PNG com FUNDO TRANSPARENTE. Pra montar por "
+                  "cima do que você quiser.",
+    "malha-01.png": "Recorte 1:1 da malha, cru — sem placa e sem moldura.",
+    "malha-02.png": "Outro recorte 1:1, de outra região da peça.",
+    "malha-03.png": "Outro recorte 1:1, de outra região da peça.",
     # avatares
     "avatar-marca.png": "RECOMENDADO pra foto de perfil. Os quatro quadradinhos "
                         "do rodapé do pôster, na grade 2×2.",
@@ -113,7 +123,18 @@ CORES = 256
 #: precisa pra ser idempotente.
 NS = uuid.uuid5(uuid.NAMESPACE_URL, "https://ondemoramaspalavras/admin/tasks")
 
-GRUPOS = {"feed": "feed 4:5 · carrossel", "story": "story 9:16"}
+#: subpastas de `social/<slug>/`, na ordem em que fazem sentido na ficha. A
+#: ordem importa: é a ordem em que os anexos aparecem no cartão do /admin, e o
+#: carrossel é o que se posta primeiro.
+GRUPOS = {
+    "feed": "feed 4:5 · carrossel",
+    "story": "story 9:16",
+    "video": "vídeo 9:16",
+    "avulsas": "avulsas · pra montar à mão",
+}
+
+#: o que `publicar()` sabe copiar
+EXTENSOES = (".png", ".mp4")
 
 #: subpastas de `social/marca/`, na ordem em que fazem sentido na ficha
 GRUPOS_MARCA = [
@@ -152,14 +173,57 @@ class Tarefa:
 # publicação dos arquivos
 # --------------------------------------------------------------------------
 
+def _miniatura(img: Image.Image, rel: Path, base: str) -> str:
+    """Escreve a miniatura de 320 px ao lado e devolve a URL dela."""
+    thumb_rel = rel.with_name(f"{rel.stem}-thumb.webp")
+    escala = THUMB_PX / max(img.size)
+    thumb = (img.resize((max(1, round(img.width * escala)),
+                         max(1, round(img.height * escala))), Image.LANCZOS)
+             if escala < 1 else img)
+    (DESTINO / thumb_rel).parent.mkdir(parents=True, exist_ok=True)
+    thumb.save(DESTINO / thumb_rel, quality=80, method=6)
+    return f"{base}/{thumb_rel.as_posix()}"
+
+
 def publicar(src: Path, rel: Path, quantizar: bool, base: str) -> tuple[str, str]:
-    """Copia um PNG pra `site/public/midia/<rel>` e gera a miniatura.
+    """Copia um arquivo pra `site/public/midia/<rel>` e gera a miniatura.
 
     Devolve `(url, url_da_miniatura)`.
+
+    Três casos, e cada um existe por um motivo:
+
+    - **mp4** — copiado cru (quantizar vídeo não faz sentido) e a miniatura sai
+      do pôster `.jpg` de mesmo nome, que o `render_video.ps1`/ffmpeg deixou ao
+      lado. O `/admin` desenha o anexo num `<img>`: sem pôster ele tentaria
+      desenhar o mp4 ali e não sairia nada.
+    - **PNG com alfa** (o título das avulsas) — copiado sem `convert("RGB")`,
+      que achataria a transparência em cima de PRETO e entregaria um bloco
+      preto no lugar do título. A miniatura é composta sobre papel, porque o
+      painel mostra o thumb sobre fundo claro.
+    - **PNG opaco** — o caminho de sempre: paleta de 256 cores e miniatura.
     """
     dst = DESTINO / rel
     dst.parent.mkdir(parents=True, exist_ok=True)
+
+    if src.suffix.lower() == ".mp4":
+        shutil.copyfile(src, dst)
+        poster = src.with_suffix(".jpg")
+        if not poster.exists():
+            print(f"  ! {src.name} sem pôster ({poster.name}) — o /admin vai "
+                  "mostrar um quadro vazio no lugar da miniatura")
+            return (f"{base}/{rel.as_posix()}", f"{base}/{rel.as_posix()}")
+        with Image.open(poster) as im:
+            return (f"{base}/{rel.as_posix()}", _miniatura(im.convert("RGB"), rel, base))
+
     with Image.open(src) as im:
+        tem_alfa = im.mode in ("RGBA", "LA") or (
+            im.mode == "P" and "transparency" in im.info)
+        if tem_alfa:
+            shutil.copyfile(src, dst)
+            papel = Image.new("RGBA", im.size, (255, 255, 255, 255))
+            papel.alpha_composite(im.convert("RGBA"))
+            return (f"{base}/{rel.as_posix()}", _miniatura(papel.convert("RGB"), rel, base))
+
         img = im.convert("RGB")
         if quantizar:
             img.quantize(colors=CORES, method=Image.MEDIANCUT, dither=Image.NONE).save(
@@ -167,13 +231,7 @@ def publicar(src: Path, rel: Path, quantizar: bool, base: str) -> tuple[str, str
             )
         else:
             shutil.copyfile(src, dst)
-        thumb_rel = rel.with_name(f"{rel.stem}-thumb.webp")
-        escala = THUMB_PX / max(img.size)
-        thumb = (img.resize((max(1, round(img.width * escala)),
-                             max(1, round(img.height * escala))), Image.LANCZOS)
-                 if escala < 1 else img)
-        thumb.save(DESTINO / thumb_rel, quality=80, method=6)
-    return (f"{base}/{rel.as_posix()}", f"{base}/{thumb_rel.as_posix()}")
+        return (f"{base}/{rel.as_posix()}", _miniatura(img, rel, base))
 
 
 def anexos_da_obra(slug: str, quantizar: bool, base: str) -> list[Anexo]:
@@ -182,10 +240,12 @@ def anexos_da_obra(slug: str, quantizar: bool, base: str) -> list[Anexo]:
         origem = SOCIAL / slug / pasta
         if not origem.is_dir():
             continue
-        for png in sorted(origem.glob("*.png")):
-            rel = Path(slug) / pasta / png.name
-            url, thumb = publicar(png, rel, quantizar, base)
-            out.append(Anexo(png.name, url, thumb, rotulo))
+        for arq in sorted(origem.iterdir()):
+            if arq.suffix.lower() not in EXTENSOES:
+                continue
+            rel = Path(slug) / pasta / arq.name
+            url, thumb = publicar(arq, rel, quantizar, base)
+            out.append(Anexo(arq.name, url, thumb, rotulo))
     return out
 
 
@@ -242,7 +302,7 @@ def lista_de_arquivos(anexos: list[Anexo]) -> str:
 # conteúdo das tarefas
 # --------------------------------------------------------------------------
 
-def descricao_obra(slug: str) -> str:
+def descricao_obra(slug: str, anexos: list[Anexo]) -> str:
     meta = {}
     caminho = ROOT / "site" / "src" / "data" / "works.json"
     if caminho.exists():
@@ -256,6 +316,31 @@ def descricao_obra(slug: str) -> str:
     dim = (f"{meta['widthCm']:.0f} × {meta['heightCm']:.0f} cm"
            if meta.get("widthCm") else "—")
 
+    tem = {a.group for a in anexos}
+    tarefas = ["- [ ] postar o carrossel no feed (4 imagens, 4:5)"]
+    if GRUPOS["story"] in tem:
+        tarefas.append("- [ ] subir `story.png` no story (é **uma** imagem só)")
+    if GRUPOS["video"] in tem:
+        tarefas.append("- [ ] subir o vídeo em reels e story")
+    tarefas.append("- [ ] fixar a legenda com o trecho do texto que aparece na ficha")
+
+    extras = []
+    if GRUPOS["video"] in tem:
+        extras.append(
+            "**O vídeo** tem 30 s e é o argumento da peça em movimento: a frase\n"
+            "vira malha, a malha vira retrato, e o retrato volta a virar palavra\n"
+            "contada. Serve pra reels e pra story."
+        )
+    if GRUPOS["avulsas"] in tem:
+        extras.append(
+            "**As avulsas** não são peça fechada — são matéria-prima. O título sai\n"
+            "em PNG com fundo transparente e os `malha-*.png` são recortes 1:1 do\n"
+            "arquivo de impressão, sem placa e sem moldura. É o material pra montar\n"
+            "uma arte à mão sem ter que recortar da carta pronta."
+        )
+
+    corpo = "\n".join(tarefas)
+    cauda = ("\n\n" + "\n\n".join(extras)) if extras else ""
     return f"""## {titulo}
 
 {sub}
@@ -269,13 +354,11 @@ arquivos já estão numerados:
 3. `03-macro.png` — o macro, onde se lê a palavra
 4. `04-ficha.png` — a ficha técnica
 
-- [ ] postar o carrossel no feed (4 imagens, 4:5)
-- [ ] subir os quatro no story também (9:16, já cortados)
-- [ ] fixar a legenda com o trecho do texto que aparece na ficha
+{corpo}
 
 **Ficha:** {dim} · {glifos} glifos · impressão em 150 dpi.
 
-> A carta 3 é a que segura o post. Se for cortar alguma, corte a 2.
+> A carta 3 é a que segura o post. Se for cortar alguma, corte a 2.{cauda}
 """
 
 
@@ -409,7 +492,7 @@ def main() -> int:
         tarefas.append(Tarefa(
             slug=f"carrossel:{slug}",
             title=f"Carrossel — {titulo}",
-            description=descricao_obra(slug) + "\n" + lista_de_arquivos(anexos),
+            description=descricao_obra(slug, anexos) + "\n" + lista_de_arquivos(anexos),
             anexos=anexos,
         ))
         print(f"  ok {slug:<20} {len(anexos)} arquivos")

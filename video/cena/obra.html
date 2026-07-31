@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>A obra — Onde Moram as Palavras</title>
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <link rel="stylesheet" href="/cena/obra.css" />
+  </head>
+  <body class="obra">
+    <!-- Camadas empilhadas, todas do tamanho do quadro. Quem liga e desliga
+         cada uma e' o `seek(ato, u)` do obra.mjs — nada aqui se mexe sozinho. -->
+    <div class="obra__quadro">
+      <!-- as duas imagens da peca: o macro 1:1 e a peca inteira -->
+      <!-- dois recortes de macro, os DOIS pre-carregados: o mergulho do ato 05
+           usa outra regiao da peca, e trocar `src` no meio da captura custaria
+           um frame branco. Aqui a troca e' so' opacidade. -->
+      <div class="obra__camada" data-camada="macro">
+        <img data-macro alt="" /><img data-macro2 alt="" />
+      </div>
+      <div class="obra__camada" data-camada="peca"><img data-peca alt="" /></div>
+
+      <!-- o enxame: a mesma frase repetida em linhas, que vira malha -->
+      <div class="obra__camada obra__enxame" data-enxame></div>
+
+      <!-- a frase que se monta letra a letra -->
+      <div class="obra__camada obra__palavra" data-palavra></div>
+
+      <!-- o bloco editorial: etiqueta, titulo, subtitulo -->
+      <!-- o bloco vai numa placa de papel de corte reto, nao solto sobre a
+           malha: nestas pecas a figura enche a pagina e nao sobra faixa
+           silenciosa, entao tinta sobre tinta ficaria ilegivel. Placa opaca,
+           nunca veu — a mesma regra do carrossel. -->
+      <div class="obra__camada obra__ficha" data-ficha>
+        <div class="obra__placa">
+          <p class="label eyebrow" data-ficha-lab>espécime</p>
+          <h1 class="display" data-ficha-titulo></h1>
+          <p class="label" data-ficha-sub></p>
+          <!-- a assinatura mora DENTRO da placa. Solta sobre a malha ela some,
+               que foi o que aconteceu na primeira versao — o mesmo motivo pelo
+               qual a placa do carrossel guarda a dela. -->
+          <div class="obra__assinatura" data-assinatura>
+            <span class="mark-squares" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+            <span class="label" data-arroba></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- as duas linhas de leitura ("de longe / de perto") -->
+      <div class="obra__camada obra__glosa" data-glosa></div>
+
+      <!-- a contagem: o numero grande e a tabela embaixo -->
+      <div class="obra__camada obra__contagem" data-contagem>
+        <p class="display obra__numero" data-numero></p>
+        <p class="display obra__palavra-contada" data-contada></p>
+        <p class="label obra__nota" data-nota></p>
+      </div>
+
+    </div>
+
+    <script type="module" src="/cena/obra.mjs"></script>
+  </body>
+</html>

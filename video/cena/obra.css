@@ -1,0 +1,230 @@
+/**
+ * A cena da OBRA herda a identidade de site/src/styles/base.css (carregado
+ * antes deste arquivo): fontes, tokens de cor e as classes `label` / `display`
+ * / `eyebrow` / `mark-squares`.
+ *
+ * Aqui so' esta o empilhamento das camadas e o repouso de cada uma. **Nao ha
+ * nenhuma animacao, transicao ou keyframe** — animar em CSS seria tempo de
+ * relogio, e a captura anda por frame. Tudo que se mexe e' inline style escrito
+ * pelo `seek(ato, u)` do obra.mjs, que e' funcao pura do progresso.
+ *
+ * A unidade de tudo aqui e' `cqw`/`cqh` (o quadro e um container de tamanho):
+ * o roteiro renderiza num layout de 430 px e entrega 1080, entao medida presa
+ * a pixel sairia certa num tamanho so'.
+ */
+
+.obra {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+  height: 100vh;
+}
+
+.obra__quadro {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  container-type: size;
+  background: var(--paper);
+}
+
+.obra__camada {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+/* --- as duas imagens da peca ------------------------------------------ */
+
+/* O macro entra em `cover` porque ele e' fundo: sobra dele e' o que se quer.
+   A peca inteira entra em `contain` porque ela e' a obra: cortar seria mentir
+   sobre o enquadramento impresso. */
+.obra__camada[data-camada] img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transform-origin: 50% 50%;
+}
+
+.obra__camada[data-camada="macro"] img {
+  object-fit: cover;
+}
+
+.obra__camada[data-camada="peca"] img {
+  object-fit: contain;
+}
+
+/* --- o enxame: a frase virando malha ----------------------------------- */
+
+.obra__enxame {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* A fonte da ARTE, nao a da identidade: o enxame e' a malha da peca vista de
+   longe, entao tem que ser desenhado com a letra que a peca usa. O fallback
+   cai na display da identidade se a maquina nao tiver a fonte do projeto. */
+.obra__enxame b {
+  display: block;
+  font-family: "Century Gothic", var(--font-display);
+  font-weight: 400;
+  line-height: 0.94;
+  color: var(--ink);
+  transform-origin: 0 50%;
+}
+
+/* --- a frase que se monta letra a letra -------------------------------- */
+
+.obra__palavra {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 8cqw;
+  box-sizing: border-box;
+}
+
+.obra__palavra p {
+  margin: 0;
+  font-family: "Century Gothic", var(--font-display);
+  font-size: 13cqw;
+  line-height: 1.02;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.obra__palavra span {
+  display: inline-block;
+}
+
+/* --- o bloco editorial ------------------------------------------------- */
+
+.obra__ficha {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 0 12cqh;
+  box-sizing: border-box;
+}
+
+.obra__placa {
+  background: var(--paper);
+  border-top: 1px solid var(--ink);
+  padding: 3cqh 8cqw 3.4cqh;
+}
+
+.obra__ficha .eyebrow {
+  margin: 0 0 2.4cqh;
+  color: var(--grey);
+}
+
+/* 11cqw, nao 13,5: em 13,5 "O GLORIOSO RETORNO" quebra em TRES linhas, a placa
+   passa de 40% da altura do quadro e come a peca inteira. O corpo do titulo e'
+   o que decide quanto sobra pra arte — nao e' so' escolha de gosto. */
+.obra__ficha h1 {
+  margin: 0;
+  font-size: 11cqw;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  font-variation-settings: "wght" 800, "wdth" var(--wdth-condensed);
+  text-transform: uppercase;
+}
+
+.obra__ficha .label {
+  margin: 2.2cqh 0 0;
+  color: var(--footer-grey);
+}
+
+/* --- as linhas de leitura ---------------------------------------------- */
+
+/* Papel chapado de corte reto atras do texto — **sem opacidade, sem degrade,
+   sem sombra**. E' a mesma regra do carrossel: veu semitransparente e o gesto
+   de quem precisa esconder a imagem pra conseguir escrever nela. */
+.obra__glosa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 1.6cqh;
+  padding: 0 0 20cqh;
+  box-sizing: border-box;
+}
+
+.obra__glosa p {
+  margin: 0;
+  max-width: 84cqw;
+  padding: 2.2cqh 6cqw 2.4cqh;
+  background: var(--paper);
+  border-top: 1px solid var(--ink);
+  font-family: var(--font-display);
+  font-variation-settings: "wght" 600, "wdth" var(--wdth-condensed);
+  font-size: 8.6cqw;
+  line-height: 1.04;
+  text-transform: uppercase;
+}
+
+.obra__glosa em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+/* --- a contagem -------------------------------------------------------- */
+
+.obra__contagem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 8cqw;
+  box-sizing: border-box;
+  background: var(--paper);
+}
+
+.obra__numero {
+  margin: 0;
+  font-size: 34cqw;
+  line-height: 0.82;
+  letter-spacing: -0.03em;
+  font-variation-settings: "wght" 800, "wdth" var(--wdth-condensed);
+  color: var(--accent);
+}
+
+.obra__palavra-contada {
+  margin: 1cqh 0 0;
+  font-size: 15cqw;
+  line-height: 0.9;
+  font-variation-settings: "wght" 800, "wdth" var(--wdth-condensed);
+  text-transform: uppercase;
+}
+
+.obra__nota {
+  margin: 4cqh 0 0;
+  max-width: 78cqw;
+  line-height: 1.7;
+  color: var(--footer-grey);
+}
+
+/* --- assinatura -------------------------------------------------------- */
+
+/* dentro da placa, nao camada solta — ver a nota no obra.html */
+.obra__assinatura {
+  display: flex;
+  align-items: center;
+  gap: 3.4cqw;
+  margin-top: 3.2cqh;
+}
+
+.obra__assinatura .mark-squares {
+  font-size: 4.4cqw;
+}
+
+.obra__assinatura .label {
+  color: var(--ink);
+}
