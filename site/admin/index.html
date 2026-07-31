@@ -23,8 +23,12 @@
         <p class="label eyebrow gate__kicker">Laboratório · acesso interno</p>
         <h1 class="display gate__title">Painel</h1>
         <label class="text-field gate__field">
-          <span class="label">Frase de acesso</span>
-          <input type="password" name="passphrase" autocomplete="current-password" required />
+          <span class="label">E-mail</span>
+          <input type="email" name="email" autocomplete="username" required />
+        </label>
+        <label class="text-field gate__field">
+          <span class="label">Senha</span>
+          <input type="password" name="password" autocomplete="current-password" required />
         </label>
         <p class="readout gate__error" data-gate-error role="alert" hidden></p>
         <button type="submit" class="btn btn--primary btn--wide">Entrar</button>

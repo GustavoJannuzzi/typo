@@ -21,21 +21,30 @@ const gateError = document.querySelector("[data-gate-error]");
 
 gateForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const value = new FormData(gateForm).get("passphrase");
-  const result = await signIn(String(value));
+  const data = new FormData(gateForm);
+  const submit = gateForm.querySelector("button[type=submit]");
+  submit.disabled = true;
+  const result = await signIn(String(data.get("email")), String(data.get("password")));
+  submit.disabled = false;
   if (!result.ok) {
     gateError.textContent = result.message;
     gateError.hidden = false;
-    gateForm.querySelector("input").select();
+    gateForm.elements.password.select();
     return;
   }
+  gateError.hidden = true;
   enter();
 });
 
-document.querySelector("[data-signout]").addEventListener("click", () => {
-  signOut();
+document.querySelector("[data-signout]").addEventListener("click", async () => {
+  await signOut();
   location.reload();
 });
+
+function failed(err) {
+  console.error(err);
+  alert("Não deu para falar com o servidor. Tente de novo.");
+}
 
 async function enter() {
   gate.hidden = true;
@@ -46,9 +55,13 @@ async function enter() {
   board = createBoard(document.querySelector("[data-board]"), {
     onOpen: openSheet,
     onAdd: (status) => openSheet({ ...blankTask(), status }, true),
-    onMove: (changed) => saveMany(changed),
+    onMove: (changed) => saveMany(changed).catch(failed),
   });
-  tasks = await list();
+  try {
+    tasks = await list();
+  } catch (err) {
+    return failed(err);
+  }
   refresh();
 }
 
@@ -108,7 +121,12 @@ form.addEventListener("submit", async (e) => {
     priority: form.elements.priority.value,
     description: mdInput.value,
   };
-  const saved = await save(next);
+  let saved;
+  try {
+    saved = await save(next);
+  } catch (err) {
+    return failed(err);
+  }
   const i = tasks.findIndex((t) => t.id === saved.id);
   if (i === -1) tasks.push(saved);
   else tasks[i] = saved;
@@ -118,10 +136,17 @@ form.addEventListener("submit", async (e) => {
 
 deleteBtn.addEventListener("click", async () => {
   if (!confirm(`Apagar “${editing.title || "sem título"}”?`)) return;
-  await remove(editing.id);
-  tasks = tasks.filter((t) => t.id !== editing.id);
+  const id = editing.id;
+  try {
+    await remove(id);
+  } catch (err) {
+    return failed(err);
+  }
+  tasks = tasks.filter((t) => t.id !== id);
   closeSheet();
   refresh();
 });
 
-if (isAuthed()) enter();
+// o Supabase devolve a sessao de forma assincrona, entao mostrar o quadro so'
+// pode ser decidido depois dessa volta — nao da' pra checar no corpo do modulo.
+isAuthed().then((yes) => yes && enter());
