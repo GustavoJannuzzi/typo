@@ -52,6 +52,16 @@ src/typo/
 app/ui.py         interface Gradio
 ```
 
+Fora do motor, em `scripts/`, vive a camada de **divulgação** — pós-processamento
+puro do PNG exportado, sem redesenhar pixel nenhum:
+
+```
+scripts/social_kit.py           tokens do base.css + fontes da identidade + primitivas
+scripts/build_brand_assets.py   avatar / lockups / capas de destaque -> social/marca/
+scripts/build_instagram.py      carrossel 4:5 e 9:16 por obra      -> social/<slug>/
+scripts/publish_media.py        social/ -> site/public/midia/ + SQL das tarefas
+```
+
 ### Pipeline — `engine.render(config, mode)`
 
 1. **image_prep** — abre, aplica `source.crop`, calcula a resolução alvo
@@ -134,6 +144,52 @@ python -m venv .venv
 
 Também existem os entry points `typo-ui`, `typo-render` e `typo-new-project`,
 e os wrappers `scripts/run_ui.sh` / `scripts/run_ui.ps1`.
+
+```bash
+.venv/Scripts/python.exe scripts/build_brand_assets.py          # marca do Instagram
+.venv/Scripts/python.exe scripts/build_instagram.py ouro-marrom # carrossel da obra
+```
+
+## Divulgação — a camada de Instagram
+
+`build_instagram.py <slug>` lê `projects/<slug>/output/*150dpi.png` e cospe
+`social/<slug>/{feed,story}/` com quatro cartas que vão de longe pra perto:
+a peça inteira, a malha a 2,6×, o macro 1:1 e a ficha de espécime. **Não chama
+o motor** — é recorte e composição em cima do PNG que já existe. Sem export,
+ele cai no `-full.webp` do site e avisa em voz alta que o macro sai borrado.
+
+Duas decisões que valem conhecer antes de mexer:
+
+- **Onde o macro corta.** O critério é `min(espessura da tinta, folga do
+  branco)`, medido por erosão em degraus. Rejeita de uma vez a mancha preta
+  chapada (tinta grossa, branco zero) e o papel vazio (branco largo, tinta
+  zero) — que é o que "procure a região mais escura" (o
+  `find_densest_window` do `build_site_assets.py`) erra. A cobertura entra só
+  como desempate. `--debug` escreve o mapa do critério com as janelas
+  escolhidas por cima da arte.
+- **O título da carta 01.** Sem véu, sem degradê, sem sombra — nunca. Ou o
+  título acha uma faixa silenciosa na própria arte e escreve em tinta sólida,
+  ou desce pro papel embaixo da moldura, que é o que o pôster faz. `--titulo
+  sobre` força por cima com placa de papel de corte reto; nas peças de hoje o
+  automático quase sempre escolhe o papel, porque a figura enche a página.
+
+A marca (`build_brand_assets.py`) prova cada avatar em **110 px circular**, que
+é o tamanho real no feed — é lá que ideia bonita morre. `social/marca/` fica no
+git; `social/<slug>/` não, pela mesma regra de `projects/*/output/`.
+
+`publish_media.py` fecha o ciclo: copia `social/` pra `site/public/midia/` (que
+o deploy serve como URL pública) e gera `site/supabase/seed-tarefas.sql` — uma
+tarefa por obra, com anexos e responsável, pro quadro do `/admin`. **Ele não
+escreve no banco**: a RLS de `public.tasks` só aceita sessão autenticada, então
+o caminho é colar o `.sql` no SQL Editor do Supabase. Os ids são `uuid v5` do
+slug, então rodar de novo atualiza em vez de duplicar. Detalhes de operação em
+`site/README.md`.
+
+Nenhuma cor e nenhum nome de fonte é escrito nesses scripts: `social_kit.py` lê
+`site/src/styles/base.css` e `site/src/config.js` em runtime. Trocar a
+terracota lá troca o Instagram junto. As fontes vêm dos mesmos `.woff2` do site,
+convertidos pra `.ttf` uma vez em `scripts/.fontcache/` (precisa de `fonttools`
+e `brotli`; a Archivo é variável e os eixos `wght`/`wdth` são os do CSS).
 
 ## Convenção de projetos
 

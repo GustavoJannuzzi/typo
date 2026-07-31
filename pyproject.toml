@@ -21,6 +21,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+# so' para scripts/build_brand_assets.py e scripts/build_instagram.py: converter
+# as fontes .woff2 da identidade para .ttf (o Pillow nao le woff2). Fora do
+# runtime do motor de proposito — nada disso e' preciso pra renderizar arte.
+social = ["fonttools>=4.50", "brotli>=1.1"]
 
 [project.scripts]
 typo-render = "typo.cli:render_main"

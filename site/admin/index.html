@@ -90,6 +90,10 @@
               <span class="label">Prioridade</span>
               <select name="priority" data-options="priority"></select>
             </label>
+            <label class="text-field">
+              <span class="label">Responsável</span>
+              <select name="assignee" data-options="assignee"></select>
+            </label>
           </div>
 
           <div class="md-field">
@@ -108,6 +112,16 @@
               placeholder="# briefing&#10;&#10;- [ ] primeiro passo&#10;- [ ] segundo passo&#10;&#10;**negrito**, *itálico*, `código`, [link](https://…)"
             ></textarea>
             <div class="md-field__preview markdown" data-md-preview hidden></div>
+          </div>
+
+          <div class="media" data-media hidden>
+            <div class="media__head">
+              <span class="label">Mídia</span>
+              <button type="button" class="label media__copyall" data-copy-all>
+                copiar todos os links
+              </button>
+            </div>
+            <div class="media__grid" data-media-grid></div>
           </div>
         </div>
 

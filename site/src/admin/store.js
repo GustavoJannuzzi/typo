@@ -32,6 +32,37 @@ export const PRIORITIES = [
   { id: "alta", label: "Alta" },
 ];
 
+/**
+ * Responsaveis. E' uma lista fixa, nao uma consulta a `auth.users`: quem
+ * aparece no cartao nao precisa ter conta (ver o comentario da migration
+ * 0001). Para incluir alguem, e' uma linha aqui.
+ */
+export const ASSIGNEES = [
+  { id: "", label: "sem responsável" },
+  { id: "gustavo", label: "Gustavo" },
+  { id: "geovana", label: "Geovana" },
+];
+
+/**
+ * `attachments` chega do banco como jsonb. O check da migration garante que e'
+ * array, mas linha antiga (anterior a migration, com a coluna recem-criada) e
+ * resposta de erro parcial nao garantem nada — entao a normalizacao acontece
+ * aqui, uma vez, e o resto do /admin pode fazer `.map()` sem medo.
+ */
+function toAttachments(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((a) => a && typeof a.url === "string" && a.url)
+    .map((a) => ({
+      name: String(a.name || a.url.split("/").pop() || "arquivo"),
+      url: String(a.url),
+      // a ficha pode abrir com oito imagens; sem miniatura ela puxaria
+      // megabytes so' pra desenhar oito quadradinhos
+      thumb: String(a.thumb || a.url),
+      group: String(a.group || ""),
+    }));
+}
+
 function toTask(row) {
   return {
     id: row.id,
@@ -40,6 +71,8 @@ function toTask(row) {
     status: row.status,
     priority: row.priority,
     description: row.description,
+    assignee: row.assignee || "",
+    attachments: toAttachments(row.attachments),
     order: row.position,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -54,6 +87,8 @@ function toRow(task) {
     status: task.status,
     priority: task.priority,
     description: task.description,
+    assignee: task.assignee || null,
+    attachments: toAttachments(task.attachments),
     position: task.order,
     updated_at: new Date().toISOString(),
   };
@@ -68,6 +103,8 @@ export function blankTask() {
     status: "todo",
     priority: "media",
     description: "",
+    assignee: "",
+    attachments: [],
     order: Date.now(),
     createdAt: now,
     updatedAt: now,

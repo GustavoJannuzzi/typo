@@ -267,6 +267,38 @@
   color: var(--grey);
 }
 
+.task-card__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--rule);
+  color: var(--grey);
+}
+
+/* o nome do responsavel e' a informacao que se procura de relance no quadro:
+   ganha o quadradinho de destaque na frente, como o `.eyebrow` do site */
+.task-card__who {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  color: var(--footer-grey);
+}
+
+.task-card__who::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  background: var(--accent);
+  flex: none;
+}
+
+.task-card__who:not([hidden]) + .task-card__clip:not([hidden])::before {
+  content: "·";
+  margin-right: 0.5em;
+  color: var(--rule);
+}
+
 .task-card--source {
   opacity: 0.3;
   border-style: dashed;
@@ -354,7 +386,13 @@ html.is-locked {
 
 @media (min-width: 30rem) {
   .sheet__row {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 44rem) {
+  .sheet__row {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -581,6 +619,135 @@ html.is-locked {
   border: 0;
   border-top: 1px solid var(--rule);
   margin: 1.3em 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* mídia da tarefa                                                      */
+/* ------------------------------------------------------------------ */
+/* A fileira rola no eixo horizontal em vez de quebrar em grade. No celular
+   uma grade de miniaturas 4:5 empurraria o botão de salvar pra três telas
+   abaixo, e o que se faz aqui é escolher UM arquivo e copiar o link — a
+   fileira que desliza é o gesto certo pra isso. */
+.media {
+  display: grid;
+  gap: 0.7rem;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--rule);
+}
+
+.media__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.media__copyall {
+  color: var(--accent);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.1em;
+}
+
+.media__copyall.is-done {
+  color: var(--footer-grey);
+  border-color: transparent;
+}
+
+.media__grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.media__group {
+  color: var(--grey);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-top: 0.35rem;
+}
+
+.media__row {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.media-item {
+  flex: none;
+  width: 8.5rem;
+  display: grid;
+  gap: 0.35rem;
+  scroll-snap-align: start;
+}
+
+.media-item__thumb {
+  display: block;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.media-item__thumb:hover {
+  border-color: var(--ink);
+}
+
+.media-item__thumb img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.media-item__cap {
+  min-width: 0;
+}
+
+.media-item__name {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  color: var(--footer-grey);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.6rem;
+}
+
+.media-item__btn {
+  font-size: 0.625rem;
+  color: var(--grey);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.1em;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.media-item__btn:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.media-item__btn.is-done {
+  color: var(--accent);
+  border-color: transparent;
+}
+
+.media-item__btn--danger:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.media-item--broken {
+  width: auto;
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  color: var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {

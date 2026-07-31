@@ -21,6 +21,11 @@ site/.vite/
 .env*
 !.env.example
 
-
 # fontes da identidade convertidas de woff2 (reproduzivel: social_kit.py)
 scripts/.fontcache/
+
+# carrosseis de Instagram — derivados do export, mesma regra de projects/output.
+# social/marca/ FICA no git: e a marca, e e' o que se anexa num e-mail sem
+# precisar rodar nada.
+social/*
+!social/marca/

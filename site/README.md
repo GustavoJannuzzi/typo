@@ -110,6 +110,43 @@ moldura do poster — usa a mesma geometria de `engine.py`) e escreve:
 Para adicionar uma obra nova à vitrine: edite as listas `ORDER`, `GLYPHS` e
 `BLURB` no topo do script.
 
+## Mídia social e o quadro do /admin
+
+```bash
+cd ..
+.venv/Scripts/python.exe scripts/build_instagram.py ouro-marrom
+.venv/Scripts/python.exe scripts/publish_media.py
+```
+
+O `publish_media.py` copia `social/` para `site/public/midia/` e escreve
+`site/supabase/seed-tarefas.sql` — uma tarefa por obra, mais uma da identidade
+do perfil, cada uma com os anexos e o responsável.
+
+`site/public/midia/` **vai pro git de propósito**: é o deploy do site que
+transforma cada arquivo numa URL que a equipe abre e baixa sem login. Os PNGs
+são quantizados em 256 cores antes de entrar (~10 MB no total em vez de 27,
+com erro medido de zero nos macros — a arte já cabia na paleta), e cada um
+ganha uma miniatura de 320 px que é o que a ficha da tarefa carrega.
+
+Ordem na primeira vez:
+
+1. SQL Editor do Supabase → `supabase/migrations/0001_assignee_attachments.sql`
+   (uma vez só; adiciona `assignee` e `attachments`, puramente aditivo)
+2. SQL Editor do Supabase → `supabase/seed-tarefas.sql`
+3. Authentication ▸ Users, no painel do Supabase → criar o login de quem vai
+   usar o quadro. A RLS de `public.tasks` aceita qualquer usuário
+   autenticado, então sem conta a pessoa não abre o `/admin`.
+4. deploy — as URLs de `/midia/` só existem depois dele
+
+Rodar o `publish_media.py` de novo é seguro: os ids das tarefas são `uuid v5`
+derivados do slug, então o `on conflict` atualiza a mesma tarefa em vez de
+duplicar. `position` fica fora do update, pra não jogar de volta pro fim do
+quadro um cartão que alguém já arrastou.
+
+Quem aparece no seletor de responsável é a lista `ASSIGNEES` em
+[`src/admin/store.js`](src/admin/store.js) — uma linha por pessoa. Não é
+consulta a `auth.users`: dá pra atribuir tarefa a quem ainda não tem conta.
+
 ## Estrutura
 
 ```
@@ -135,8 +172,12 @@ site/
 │       ├── wipeCompare.js     comparador antes/depois (arrasta pra revelar)
 │       ├── gallery.js         cartões da coleção + detalhe em zoom
 │       └── briefBuilder.js    monta a mensagem do pedido (link wa.me)
+├── supabase/
+│   ├── migrations/        rodar no SQL Editor, na ordem
+│   └── seed-tarefas.sql   gerado por scripts/publish_media.py
 └── public/
     ├── art/    gerado — não editar a mão
+    ├── midia/  gerado — carrosséis e marca, servidos pro /admin
     └── fonts/  Archivo Variable + JetBrains Mono (self-hosted, SIL OFL)
 ```
 

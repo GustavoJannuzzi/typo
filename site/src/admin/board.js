@@ -1,4 +1,4 @@
-import { STATUSES, TYPES, PRIORITIES } from "./store.js";
+import { STATUSES, TYPES, PRIORITIES, ASSIGNEES } from "./store.js";
 
 /**
  * Quadro kanban.
@@ -22,6 +22,7 @@ const DRAG_THRESHOLD = 6;
 
 const TYPE_LABEL = new Map(TYPES.map((t) => [t.id, t.label]));
 const PRIORITY_LABEL = new Map(PRIORITIES.map((p) => [p.id, p.label]));
+const ASSIGNEE_LABEL = new Map(ASSIGNEES.filter((a) => a.id).map((a) => [a.id, a.label]));
 
 const dateFmt = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" });
 
@@ -42,12 +43,33 @@ function cardEl(task) {
     <p class="task-card__meta readout">
       <span class="task-card__prio" data-prio="${task.priority}"></span>
       <span class="task-card__date"></span>
+    </p>
+    <p class="task-card__foot readout" data-foot hidden>
+      <span class="task-card__who" data-who hidden></span>
+      <span class="task-card__clip" data-clip hidden></span>
     </p>`;
 
   el.querySelector(".task-card__type").textContent = TYPE_LABEL.get(task.type) || task.type;
   el.querySelector(".task-card__title").textContent = task.title || "sem título";
   el.querySelector(".task-card__prio").textContent = PRIORITY_LABEL.get(task.priority) || task.priority;
   el.querySelector(".task-card__date").textContent = dateFmt.format(new Date(task.updatedAt));
+
+  // responsavel e contagem de midia: e' o que se precisa saber sem abrir a
+  // ficha. O rodape inteiro some quando nao ha nem um nem outro, pra nao abrir
+  // uma linha vazia em todo cartao antigo.
+  const who = el.querySelector("[data-who]");
+  const clip = el.querySelector("[data-clip]");
+  const nome = ASSIGNEE_LABEL.get(task.assignee);
+  const anexos = Array.isArray(task.attachments) ? task.attachments.length : 0;
+  if (nome) {
+    who.textContent = nome;
+    who.hidden = false;
+  }
+  if (anexos) {
+    clip.textContent = `${anexos} arquivo${anexos > 1 ? "s" : ""}`;
+    clip.hidden = false;
+  }
+  el.querySelector("[data-foot]").hidden = !nome && !anexos;
   return el;
 }
 
