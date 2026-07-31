@@ -339,7 +339,10 @@ def gerar_sql(tarefas: list[Tarefa], responsavel: str) -> str:
     return f"""-- Tarefas de mídia social — GERADO por scripts/publish_media.py
 -- {agora.isoformat(timespec='seconds')} · {len(tarefas)} tarefas · {total} anexos
 --
--- Antes de rodar isto, rode a migration 0001_assignee_attachments.sql uma vez.
+-- Antes de rodar isto, rode as migrations de site/supabase/migrations/ na
+-- ordem, uma vez cada: 0001 (assignee + attachments) e 0002 (position bigint).
+-- Sem a 0002 este arquivo falha com `22003: integer out of range`, porque
+-- `position` abaixo é um timestamp em ms e não cabe num integer.
 --
 -- Cole no SQL Editor do Supabase e execute. Os ids são derivados do slug
 -- (uuid v5), então rodar de novo ATUALIZA as mesmas tarefas em vez de criar
@@ -421,13 +424,16 @@ def main() -> int:
     print(f"\nmídia  -> {DESTINO.relative_to(ROOT)}  ({peso / 1024 / 1024:.1f} MB)")
     print(f"tarefas -> {SEED.relative_to(ROOT)}  ({len(tarefas)} tarefas, "
           f"responsável: {args.responsavel})")
+    migrations = sorted((ROOT / "site" / "supabase" / "migrations").glob("*.sql"))
     print("\nfalta você fazer, nesta ordem:")
-    print("  1. SQL Editor do Supabase: rodar site/supabase/migrations/"
-          "0001_assignee_attachments.sql (uma vez só)")
+    print("  1. SQL Editor do Supabase: rodar as migrations, uma vez cada —")
+    for m in migrations:
+        print(f"       {m.relative_to(ROOT).as_posix()}")
     print(f"  2. SQL Editor do Supabase: rodar {SEED.relative_to(ROOT).as_posix()}")
-    print("  3. criar o login da Geovana em Authentication > Users, no painel "
-          "do Supabase")
-    print("  4. publicar o site (as URLs de /midia só existem depois do deploy)")
+    print(f"  3. criar o login de quem vai usar o quadro ({args.responsavel}) "
+          "em Authentication > Users")
+    print("  4. publicar o site (o /admin só fica acessível pra equipe depois "
+          "do deploy)")
     return 0
 
 

@@ -130,8 +130,13 @@ ganha uma miniatura de 320 px que é o que a ficha da tarefa carrega.
 
 Ordem na primeira vez:
 
-1. SQL Editor do Supabase → `supabase/migrations/0001_assignee_attachments.sql`
-   (uma vez só; adiciona `assignee` e `attachments`, puramente aditivo)
+1. SQL Editor do Supabase → as migrations de `supabase/migrations/`, na ordem,
+   uma vez cada:
+   - `0001_assignee_attachments.sql` — adiciona `assignee` e `attachments`
+   - `0002_position_bigint.sql` — alarga `position` de `integer` pra `bigint`.
+     Sem ela o seed falha com `22003: integer out of range`, e o botão
+     "+ tarefa" do quadro também: a ordem de um cartão novo é `Date.now()`,
+     que é mil vezes maior que o teto do `integer`.
 2. SQL Editor do Supabase → `supabase/seed-tarefas.sql`
 3. Authentication ▸ Users, no painel do Supabase → criar o login de quem vai
    usar o quadro. A RLS de `public.tasks` aceita qualquer usuário
