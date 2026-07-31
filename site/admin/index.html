@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Painel — Onde Moram as Palavras</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <link rel="preload" as="font" href="/fonts/archivo-variable.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/fonts/jetbrains-mono-500.woff2" type="font/woff2" crossorigin />
+
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <link rel="stylesheet" href="/src/styles/components.css" />
+    <link rel="stylesheet" href="/src/styles/admin.css" />
+  </head>
+  <body class="admin-body">
+    <!-- portão -->
+    <div class="gate framed" data-gate>
+      <form class="gate__form" data-gate-form>
+        <span class="mark-squares" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        <p class="label eyebrow gate__kicker">Laboratório · acesso interno</p>
+        <h1 class="display gate__title">Painel</h1>
+        <label class="text-field gate__field">
+          <span class="label">Frase de acesso</span>
+          <input type="password" name="passphrase" autocomplete="current-password" required />
+        </label>
+        <p class="readout gate__error" data-gate-error role="alert" hidden></p>
+        <button type="submit" class="btn btn--primary btn--wide">Entrar</button>
+      </form>
+    </div>
+
+    <!-- quadro -->
+    <div class="admin" data-app hidden>
+      <header class="admin-bar">
+        <div class="wrap admin-bar__row">
+          <a href="/" class="admin-bar__brand">
+            <span class="mark-squares" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+            <span class="label">Onde Moram as Palavras</span>
+          </a>
+          <div class="admin-bar__actions">
+            <span class="readout admin-bar__count" data-total></span>
+            <button type="button" class="label admin-bar__exit" data-signout>sair ↦</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="admin__main">
+        <div class="wrap admin__head">
+          <p class="label eyebrow">Tarefas catalogadas</p>
+          <h1 class="display admin__title">Quadro</h1>
+          <p class="readout admin__hint">
+            arraste pelo punho para mover · toque no cartão para editar
+          </p>
+        </div>
+        <div class="board" data-board></div>
+      </main>
+    </div>
+
+    <!-- ficha da tarefa -->
+    <div class="sheet" data-modal hidden>
+      <div class="sheet__scrim" data-close></div>
+      <form class="sheet__panel" data-form>
+        <header class="sheet__head">
+          <p class="label eyebrow">Ficha da tarefa</p>
+          <button type="button" class="label sheet__close" data-close>fechar ✕</button>
+        </header>
+
+        <div class="sheet__body">
+          <label class="text-field">
+            <span class="label">Título</span>
+            <input type="text" name="title" autocomplete="off" required />
+          </label>
+
+          <div class="sheet__row">
+            <label class="text-field">
+              <span class="label">Tipo</span>
+              <select name="type" data-options="type"></select>
+            </label>
+            <label class="text-field">
+              <span class="label">Coluna</span>
+              <select name="status" data-options="status"></select>
+            </label>
+            <label class="text-field">
+              <span class="label">Prioridade</span>
+              <select name="priority" data-options="priority"></select>
+            </label>
+          </div>
+
+          <div class="md-field">
+            <div class="md-field__tabs">
+              <span class="label">Descrição</span>
+              <div class="md-field__toggle">
+                <button type="button" class="md-tab label is-active" data-tab="write">escrever</button>
+                <button type="button" class="md-tab label" data-tab="preview">formatado</button>
+              </div>
+            </div>
+            <textarea
+              name="description"
+              class="md-field__input"
+              rows="9"
+              data-md-input
+              placeholder="# briefing&#10;&#10;- [ ] primeiro passo&#10;- [ ] segundo passo&#10;&#10;**negrito**, *itálico*, `código`, [link](https://…)"
+            ></textarea>
+            <div class="md-field__preview markdown" data-md-preview hidden></div>
+          </div>
+        </div>
+
+        <footer class="sheet__foot">
+          <button type="button" class="btn btn--ghost btn--small sheet__delete" data-delete>Apagar</button>
+          <button type="submit" class="btn btn--primary btn--small">Salvar</button>
+        </footer>
+      </form>
+    </div>
+
+    <script type="module" src="/src/admin/main.js"></script>
+  </body>
+</html>

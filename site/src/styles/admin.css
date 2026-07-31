@@ -1,0 +1,591 @@
+/* ------------------------------------------------------------------ */
+/* portão                                                               */
+/* ------------------------------------------------------------------ */
+.gate {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4) var(--gutter-r) var(--space-4) var(--gutter-l);
+}
+
+.gate[hidden] {
+  display: none;
+}
+
+.gate__form {
+  width: min(24rem, 100%);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.gate__kicker {
+  margin-top: var(--space-2);
+}
+
+.gate__title {
+  font-size: var(--step-h2);
+  margin-bottom: var(--space-2);
+}
+
+.gate__error {
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* barra + cabeçalho do quadro                                          */
+/* ------------------------------------------------------------------ */
+.admin[hidden] {
+  display: none;
+}
+
+.admin-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(var(--paper-rgb), 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.admin-bar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.85rem;
+}
+
+.admin-bar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.admin-bar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-bar__count {
+  display: none;
+}
+
+.admin-bar__exit {
+  color: var(--grey);
+}
+
+.admin-bar__exit:hover {
+  color: var(--accent);
+}
+
+@media (min-width: 30rem) {
+  .admin-bar__count {
+    display: inline;
+  }
+}
+
+.admin__head {
+  padding-block: var(--space-4) var(--space-3);
+}
+
+.admin__title {
+  font-size: var(--step-h2);
+  margin: var(--space-1) 0 var(--space-2);
+}
+
+.admin__hint {
+  color: var(--grey);
+}
+
+/* ------------------------------------------------------------------ */
+/* quadro                                                               */
+/* ------------------------------------------------------------------ */
+.board {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0 var(--gutter-r) var(--space-5) var(--gutter-l);
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+@media (min-width: 64rem) {
+  .board {
+    grid-template-columns: repeat(4, 1fr);
+    align-items: start;
+    gap: var(--space-2);
+  }
+}
+
+.column {
+  border-top: 1px solid var(--ink);
+  padding-top: 0.7rem;
+}
+
+.column__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.column__title {
+  color: var(--ink);
+}
+
+.column__list {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+  /* coluna vazia continua sendo alvo de soltura */
+  min-height: 4rem;
+}
+
+.board.is-dragging .column__list {
+  outline: 1px dashed var(--rule);
+  outline-offset: 0.4rem;
+}
+
+.column__add {
+  margin-top: 0.7rem;
+  padding: 0.5em 0;
+  color: var(--grey);
+}
+
+.column__add:hover {
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* cartão                                                               */
+/* ------------------------------------------------------------------ */
+.task-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem 0.85rem 0.7rem;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.task-card:hover,
+.task-card:focus-visible {
+  border-color: var(--ink);
+}
+
+.task-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.task-card__type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  color: var(--footer-grey);
+}
+
+.task-card__type::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  flex: none;
+  background: var(--ink);
+}
+
+.task-card__type[data-type="pedido"]::before {
+  background: var(--accent);
+}
+
+.task-card__type[data-type="arte"]::before {
+  background: var(--accent-2);
+}
+
+.task-card__type[data-type="social"]::before {
+  background: var(--rule);
+}
+
+/* o punho é a única parte do cartão que arrasta no toque — o resto precisa
+   continuar rolando a página, por isso só ele desliga o `touch-action` */
+.task-card__grip {
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  gap: 3px;
+  place-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: -0.75rem -0.85rem -0.5rem 0;
+  flex: none;
+  cursor: grab;
+  touch-action: none;
+}
+
+.task-card__grip i {
+  width: 3px;
+  height: 3px;
+  background: var(--rule);
+}
+
+.task-card:hover .task-card__grip i {
+  background: var(--grey);
+}
+
+.task-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.task-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.task-card__prio::after {
+  content: "·";
+  margin-left: 0.5em;
+  color: var(--rule);
+}
+
+.task-card__prio[data-prio="alta"] {
+  color: var(--accent);
+}
+
+.task-card__prio[data-prio="baixa"] {
+  color: var(--grey);
+}
+
+.task-card__date {
+  color: var(--grey);
+}
+
+.task-card--source {
+  opacity: 0.3;
+  border-style: dashed;
+}
+
+.task-card--ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 400;
+  pointer-events: none;
+  border-color: var(--ink);
+  box-shadow: 0 14px 34px rgba(var(--ink-rgb), 0.16);
+}
+
+/* ------------------------------------------------------------------ */
+/* ficha da tarefa                                                      */
+/* ------------------------------------------------------------------ */
+/* trava a rolagem de fundo no <html>, nao no <body>: com `overflow` no body a
+   propagacao pro viewport para e ele vira container de rolagem — o mesmo
+   efeito colateral que quebraria a barra sticky quando a ficha fechasse */
+html.is-locked {
+  overflow: hidden;
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+}
+
+.sheet[hidden] {
+  display: none;
+}
+
+.sheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--ink-rgb), 0.6);
+  animation: fade-in var(--dur-fast) var(--ease-out);
+}
+
+.sheet__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 92svh;
+  background: var(--paper);
+  overscroll-behavior: contain;
+  animation: sheet-up var(--dur-med) var(--ease-out);
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--gutter) 0.85rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sheet__close {
+  color: var(--grey);
+}
+
+.sheet__close:hover {
+  color: var(--accent);
+}
+
+.sheet__body {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--gutter);
+  overflow-y: auto;
+}
+
+.sheet__row {
+  display: grid;
+  gap: var(--space-2);
+}
+
+@media (min-width: 30rem) {
+  .sheet__row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.sheet__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem var(--gutter) calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--rule);
+}
+
+.sheet__delete {
+  border-color: var(--rule);
+  color: var(--grey);
+}
+
+.sheet__delete:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+@media (min-width: 48rem) {
+  .sheet {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sheet__panel {
+    width: min(46rem, 92vw);
+    max-height: 88svh;
+    border: 1px solid var(--ink);
+  }
+}
+
+/* mesmos campos do form de pedido, agora com select e textarea */
+.text-field select,
+.text-field textarea {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  padding: 0.75em 0.9em;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.text-field select:focus,
+.text-field textarea:focus {
+  border-color: var(--ink);
+  outline: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* campo markdown                                                       */
+/* ------------------------------------------------------------------ */
+.md-field {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.md-field__tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.md-field__toggle {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.md-tab {
+  border: 1px solid var(--rule);
+  padding: 0.45em 0.8em;
+  color: var(--grey);
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.md-tab:hover {
+  border-color: var(--ink);
+}
+
+.md-tab.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.md-field__input {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  padding: 0.85em 0.9em;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  resize: vertical;
+  min-height: 12rem;
+}
+
+.md-field__input:focus {
+  border-color: var(--ink);
+  outline: none;
+}
+
+.md-field__preview {
+  border: 1px solid var(--rule);
+  background: #fafaf8;
+  padding: 1rem 1.1rem;
+  min-height: 12rem;
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------------ */
+/* tipografia do markdown renderizado                                   */
+/* ------------------------------------------------------------------ */
+.markdown > *:first-child {
+  margin-top: 0;
+}
+
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  font-family: var(--font-display);
+  font-variation-settings: "wght" 700, "wdth" 88%;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  margin: 1.3em 0 0.45em;
+}
+
+.markdown h3 {
+  font-size: 1.3rem;
+}
+
+.markdown h4 {
+  font-size: 1.1rem;
+}
+
+.markdown h5,
+.markdown h6 {
+  font-size: 0.95rem;
+}
+
+.markdown p {
+  margin: 0 0 0.85em;
+}
+
+.markdown ul,
+.markdown ol {
+  margin: 0 0 0.9em;
+  padding-left: 1.15em;
+}
+
+.markdown li {
+  margin-bottom: 0.3em;
+}
+
+.markdown li.md-task {
+  position: relative;
+  list-style: none;
+  margin-left: -1.15em;
+  padding-left: 1.6em;
+}
+
+.markdown li.md-task::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  width: 0.62em;
+  height: 0.62em;
+  border: 1px solid var(--grey);
+}
+
+.markdown li.md-task.is-done {
+  color: var(--grey);
+  text-decoration: line-through;
+}
+
+.markdown li.md-task.is-done::before {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.markdown blockquote {
+  margin: 0 0 0.9em;
+  padding-left: 0.9em;
+  border-left: 2px solid var(--accent);
+  color: var(--footer-grey);
+}
+
+.markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(var(--ink-rgb), 0.06);
+  padding: 0.12em 0.35em;
+}
+
+.markdown pre {
+  margin: 0 0 0.9em;
+  padding: 0.9em 1em;
+  background: var(--ink);
+  color: var(--paper);
+  overflow-x: auto;
+}
+
+.markdown pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+.markdown a {
+  color: var(--accent);
+}
+
+.markdown hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 1.3em 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet__panel,
+  .sheet__scrim {
+    animation: none;
+  }
+}

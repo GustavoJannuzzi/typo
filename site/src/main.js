@@ -5,7 +5,6 @@ import { runIntro } from "./modules/intro.js";
 import { assemble } from "./modules/assemble.js";
 import { registerWobble } from "./modules/wobble.js";
 import { initHaltoneCanvas } from "./modules/halftoneCanvas.js";
-import { initProbeCursor } from "./modules/probeCursor.js";
 import { initWipeCompare } from "./modules/wipeCompare.js";
 import { initGallery } from "./modules/gallery.js";
 import { initBriefBuilder } from "./modules/briefBuilder.js";
@@ -41,19 +40,9 @@ document.querySelectorAll("[data-assemble]").forEach((el) => {
   });
 });
 
-// --- hero: canvas vivo + cursor-instrumento ------------------------------
-const heroSection = document.querySelector(".hero");
+// --- hero: canvas vivo (respiracao + rolagem) ----------------------------
 const heroCanvas = document.querySelector("[data-hero-canvas]");
-const probeLabel = document.querySelector("[data-probe]");
-if (heroSection && heroCanvas) {
-  const canvasApi = initHaltoneCanvas(heroCanvas);
-  if (probeLabel) {
-    initProbeCursor(heroSection, probeLabel, {
-      onMove: (nx, ny, active) => canvasApi.setPointer(nx, ny, active),
-      onLeave: () => canvasApi.clearPointer(),
-    });
-  }
-}
+if (heroCanvas) initHaltoneCanvas(heroCanvas);
 
 // --- coleção --------------------------------------------------------------
 const galleryRail = document.querySelector("[data-gallery]");

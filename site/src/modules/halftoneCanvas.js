@@ -4,10 +4,10 @@
  *
  * O motor original varre uma imagem de referencia, mede escuridao local e
  * desenha caracteres em tamanho/peso/rotacao proporcionais. Aqui nao ha
- * foto — a "escuridao local" vem de um campo sintetico (alguns blobs
- * radiais que derivam devagar, como uma chapa de revelacao), e o ponteiro
- * do usuario funciona como uma lupa que intensifica a tinta por perto,
- * reforcando a ideia de "instrumento de leitura".
+ * foto — a "escuridao local" vem de um campo sintetico: blobs radiais que
+ * *respiram* (o raio pulsa devagar, como uma chapa em revelacao) e derivam
+ * conforme a pagina rola. Nao ha interacao com ponteiro: a maioria dos
+ * acessos e mobile, onde ela nao existe e so custa bateria.
  *
  * Mesma matematica de mapeamento do motor:
  *   dk       = darkness^gamma                          (typography.py)
@@ -15,9 +15,16 @@
  *   rotacao  = rotAmp * sin(2*pi*x/rotWave + faseDaLinha), com clamp
  *   baseline = yb + amp * sin(2*pi*x/onda + faseDaLinha)  (ondulacao)
  *
- * Para performance, a GRADE de posicoes e fixa (calculada uma vez por
- * resize, com a ondulacao ja embutida na posicao Y de cada celula); a cada
- * frame so o tamanho/rotacao/cor mudam — nada de medir texto every frame.
+ * Orcamento de desempenho — o gargalo e a quantidade de `fillText` por
+ * segundo, entao tudo que da pra congelar esta congelado:
+ *   - a GRADE (posicao, caractere, seno/cosseno da rotacao) e calculada uma
+ *     vez por resize; a rotacao nao depende do tempo, so de x.
+ *   - a escuridao vira um de LEVELS baldes; fonte e opacidade de cada balde
+ *     sao strings pre-montadas, entao o laco nao formata texto nem aloca.
+ *   - `setTransform` no lugar de save/translate/rotate/restore (1 op no
+ *     lugar de 4) e trocas de estado so quando o balde muda.
+ *   - o desenho e limitado a FPS_CAP: a respiracao e lenta, 60fps nao
+ *     acrescenta nada e dobra o custo.
  */
 const STREAM =
   "ONDE MORAM AS PALAVRAS   UMA IMAGEM FEITA DE MILHARES DE PALAVRAS   " +
@@ -29,7 +36,15 @@ const SIZE_MAX_RATIO = 1.55;
 const BOLD_THRESHOLD = 0.6;
 const ACCENT_THRESHOLD = 0.72;
 const FLOOR = 0.1;
-const MAX_CELLS = 6000;
+const MAX_CELLS = 4200;
+const LEVELS = 24;
+const FRAME_MS = 1000 / 30;
+
+/** quanto o campo sobe e revira ao longo de uma tela de rolagem */
+const SCROLL_RISE = 0.18;
+const SCROLL_SWIRL = 2.6;
+/** deslocamento da malha inteira, em fracao da altura — parallax */
+const SCROLL_PARALLAX = 0.12;
 
 const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -39,62 +54,68 @@ function readColor(varName, fallback) {
 }
 
 export function initHaltoneCanvas(canvas) {
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { alpha: true });
   const ink = readColor("--ink", "#111111");
   const accent = readColor("--accent", "#963a2a");
 
   let cells = [];
   let rectW = 0;
   let rectH = 0;
+  let canvasTop = 0;
   let dpr = Math.min(window.devicePixelRatio || 1, 2);
   let running = false;
   let rafId = null;
   let visible = true;
+  let lastDraw = 0;
+  let scrollY = window.scrollY;
 
-  const pointer = { x: 0.5, y: 0.4, active: 0 };
+  /** fonte e opacidade por balde de escuridao — montadas em buildGrid */
+  let levelFont = [];
+  let levelAlpha = [];
+  let levelBold = [];
 
   const blobs = [
-    { cx: 0.5, cy: 0.42, rx: 0.34, ry: 0.4, amp: 1.0, speed: 0.06, phase: 0, driftX: 0.05, driftY: 0.04 },
-    { cx: 0.28, cy: 0.62, rx: 0.2, ry: 0.22, amp: 0.55, speed: 0.09, phase: 2.1, driftX: 0.06, driftY: 0.05 },
-    { cx: 0.7, cy: 0.58, rx: 0.22, ry: 0.24, amp: 0.5, speed: 0.075, phase: 4.4, driftX: 0.05, driftY: 0.06 },
+    { cx: 0.5, cy: 0.42, rx: 0.34, ry: 0.4, amp: 1.0, speed: 0.06, phase: 0, driftX: 0.05, driftY: 0.04, breath: 0.15 },
+    { cx: 0.28, cy: 0.62, rx: 0.2, ry: 0.22, amp: 0.55, speed: 0.09, phase: 2.1, driftX: 0.06, driftY: 0.05, breath: 0.2 },
+    { cx: 0.7, cy: 0.58, rx: 0.22, ry: 0.24, amp: 0.5, speed: 0.075, phase: 4.4, driftX: 0.05, driftY: 0.06, breath: 0.18 },
   ];
 
-  function fieldValue(nx, ny, t) {
+  /**
+   * `t` faz o campo respirar (pulso lento de raio + deriva); `s` e o
+   * progresso da rolagem dentro do hero (0..1) e faz a massa de tinta subir
+   * e revirar — as duas coisas somadas, nunca uma no lugar da outra.
+   */
+  function fieldValue(nx, ny, t, s) {
     let v = 0;
     for (const b of blobs) {
-      const bx = b.cx + Math.sin(t * b.speed + b.phase) * b.driftX;
-      const by = b.cy + Math.cos(t * b.speed * 0.8 + b.phase) * b.driftY;
-      const dx = (nx - bx) / b.rx;
-      const dy = (ny - by) / b.ry;
+      const breath = 1 + b.breath * Math.sin(t * 0.42 + b.phase);
+      const bx = b.cx + Math.sin(t * b.speed + b.phase) * b.driftX + Math.sin(s * SCROLL_SWIRL + b.phase) * 0.07;
+      const by = b.cy + Math.cos(t * b.speed * 0.8 + b.phase) * b.driftY - s * SCROLL_RISE;
+      const dx = (nx - bx) / (b.rx * breath);
+      const dy = (ny - by) / (b.ry * breath);
       v += b.amp * Math.exp(-(dx * dx + dy * dy) * 2.1);
-    }
-    if (pointer.active > 0.01) {
-      const dx = (nx - pointer.x) * 1.15;
-      const dy = ny - pointer.y;
-      const d2 = dx * dx + dy * dy;
-      v += pointer.active * 0.85 * Math.exp(-d2 * 9);
     }
     return v;
   }
 
   function buildGrid() {
-    const lineH = Math.max(13, Math.min(30, rectW * 0.024));
-    const rowStep = lineH * 0.92;
-    const colStep = lineH * 0.6;
+    const lineH = Math.max(14, Math.min(30, rectW * 0.026));
+    const rowStep = lineH * 0.95;
+    const colStep = lineH * 0.62;
 
-    let rows = Math.ceil(rectH / rowStep);
-    let cols = Math.ceil(rectW / colStep);
-    let total = rows * cols;
-    let scale = 1;
-    if (total > MAX_CELLS) {
-      scale = Math.sqrt(total / MAX_CELLS);
-    }
+    const rows = Math.ceil(rectH / rowStep);
+    const cols = Math.ceil(rectW / colStep);
+    const total = rows * cols;
+    const scale = total > MAX_CELLS ? Math.sqrt(total / MAX_CELLS) : 1;
+
     const finalRowStep = rowStep * scale;
     const finalColStep = colStep * scale;
     const finalLineH = lineH * scale;
 
     const undulationAmp = finalLineH * 0.4;
     const undulationWave = Math.max(120, rectW * 0.5);
+    const rotWave = Math.max(90, rectW * 0.22);
+    const rotClamp = 16;
 
     const next = [];
     let charIdx = 0;
@@ -107,58 +128,82 @@ export function initHaltoneCanvas(canvas) {
         const ch = STREAM[charIdx % STREAM.length];
         charIdx++;
         if (ch === " ") continue;
-        next.push({ x, y, ch, rowPhase: rotPhase, lineH: finalLineH });
+        // a rotacao so depende de x — congela aqui e nunca mais recalcula
+        let ang = rotClamp * Math.sin((2 * Math.PI * x) / rotWave + rotPhase);
+        ang = Math.max(-rotClamp, Math.min(rotClamp, ang));
+        const rad = (ang * Math.PI) / 180;
+        next.push({ x, y, ch, nx: x / rectW, cos: Math.cos(rad), sin: Math.sin(rad) });
       }
     }
     cells = next;
+
+    levelFont = new Array(LEVELS);
+    levelAlpha = new Float32Array(LEVELS);
+    levelBold = new Array(LEVELS);
+    for (let i = 0; i < LEVELS; i++) {
+      const dk = (i + 0.5) / LEVELS;
+      const fs = finalLineH * (SIZE_MIN_RATIO + (SIZE_MAX_RATIO - SIZE_MIN_RATIO) * dk);
+      levelBold[i] = dk > BOLD_THRESHOLD;
+      levelFont[i] = `${levelBold[i] ? 800 : 420} ${fs.toFixed(1)}px "Archivo Variable", sans-serif`;
+      levelAlpha[i] = 0.55 + 0.45 * dk;
+    }
   }
 
   function resize() {
     const rect = canvas.getBoundingClientRect();
     rectW = Math.max(1, Math.round(rect.width));
     rectH = Math.max(1, Math.round(rect.height));
+    canvasTop = rect.top + window.scrollY;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = rectW * dpr;
     canvas.height = rectH * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     buildGrid();
-    if (prefersReduced) draw(0);
+    draw(performance.now());
   }
 
   function draw(tMs) {
     const t = tMs / 1000;
+    const s = Math.max(0, Math.min(1, (scrollY - canvasTop) / rectH));
+    const parallax = s * rectH * SCROLL_PARALLAX;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, rectW, rectH);
     ctx.textBaseline = "alphabetic";
 
-    const rotWave = Math.max(90, rectW * 0.22);
-    const rotClamp = 16;
-
-    for (const cell of cells) {
-      let dark = fieldValue(cell.x / rectW, cell.y / rectH, t);
-      dark = Math.max(0, Math.min(1, dark));
+    let curLevel = -1;
+    let curFill = "";
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      const dark = fieldValue(cell.nx, (cell.y - parallax) / rectH, t, s);
       if (dark < FLOOR) continue;
-      const dk = Math.pow(dark, GAMMA);
+      const dk = Math.pow(dark > 1 ? 1 : dark, GAMMA);
 
-      const fs = cell.lineH * (SIZE_MIN_RATIO + (SIZE_MAX_RATIO - SIZE_MIN_RATIO) * dk);
-      const bold = dk > BOLD_THRESHOLD;
-      const isAccent = dk > ACCENT_THRESHOLD && cell.x / rectW > 0.32 && cell.x / rectW < 0.68;
+      let level = (dk * LEVELS) | 0;
+      if (level >= LEVELS) level = LEVELS - 1;
+      if (level !== curLevel) {
+        curLevel = level;
+        ctx.font = levelFont[level];
+        ctx.globalAlpha = levelAlpha[level];
+      }
 
-      let ang = rotClamp * Math.sin((2 * Math.PI * cell.x) / rotWave + cell.rowPhase);
-      ang = Math.max(-rotClamp, Math.min(rotClamp, ang));
+      const fill = level >= ACCENT_THRESHOLD * LEVELS && cell.nx > 0.32 && cell.nx < 0.68 ? accent : ink;
+      if (fill !== curFill) {
+        curFill = fill;
+        ctx.fillStyle = fill;
+      }
 
-      ctx.save();
-      ctx.translate(cell.x, cell.y);
-      ctx.rotate((ang * Math.PI) / 180);
-      ctx.font = `${bold ? 800 : 420} ${fs.toFixed(1)}px "Archivo Variable", sans-serif`;
-      ctx.fillStyle = isAccent ? accent : ink;
-      ctx.globalAlpha = 0.55 + 0.45 * dk;
+      const y = cell.y - parallax;
+      ctx.setTransform(dpr * cell.cos, dpr * cell.sin, -dpr * cell.sin, dpr * cell.cos, dpr * cell.x, dpr * y);
       ctx.fillText(cell.ch, 0, 0);
-      ctx.restore();
     }
+    ctx.globalAlpha = 1;
   }
 
   function tick(tMs) {
-    draw(tMs);
+    if (tMs - lastDraw >= FRAME_MS) {
+      lastDraw = tMs;
+      draw(tMs);
+    }
     if (running && visible) rafId = requestAnimationFrame(tick);
   }
 
@@ -174,10 +219,8 @@ export function initHaltoneCanvas(canvas) {
     rafId = null;
   }
 
-  function setPointer(nx, ny, active) {
-    pointer.x = nx;
-    pointer.y = ny;
-    pointer.active = active;
+  function onScroll() {
+    scrollY = window.scrollY;
   }
 
   const ro = new ResizeObserver(() => resize());
@@ -204,6 +247,7 @@ export function initHaltoneCanvas(canvas) {
   );
   io.observe(canvas);
 
+  window.addEventListener("scroll", onScroll, { passive: true });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stop();
     else if (visible) start();
@@ -213,27 +257,26 @@ export function initHaltoneCanvas(canvas) {
   start();
 
   const api = {
-    setPointer,
-    clearPointer: () => setPointer(pointer.x, pointer.y, 0),
     destroy: () => {
       stop();
       ro.disconnect();
       io.disconnect();
+      window.removeEventListener("scroll", onScroll);
     },
     _debug: () => {
       const t = performance.now() / 1000;
-      const darks = cells.map((c) => fieldValue(c.x / rectW, c.y / rectH, t));
-      const above = darks.filter((d) => d >= FLOOR).length;
+      const s = Math.max(0, Math.min(1, (scrollY - canvasTop) / rectH));
+      const darks = cells.map((c) => fieldValue(c.nx, c.y / rectH, t, s));
       return {
         running,
         visible,
         rectW,
         rectH,
+        scrollProgress: +s.toFixed(3),
         cellCount: cells.length,
-        centerDark: fieldValue(0.5, 0.42, t),
+        drawnCount: darks.filter((d) => d >= FLOOR).length,
+        centerDark: fieldValue(0.5, 0.42, t, s),
         maxDark: Math.max(...darks),
-        aboveFloorCount: above,
-        blobsSnapshot: blobs.map((b) => ({ cx: b.cx, cy: b.cy, amp: b.amp })),
       };
     },
   };

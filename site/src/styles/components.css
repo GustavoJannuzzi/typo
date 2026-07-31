@@ -56,6 +56,7 @@ body.intro-lock {
   background: rgba(var(--paper-rgb), 0.86);
   backdrop-filter: blur(10px) saturate(1.1);
   border-bottom: 1px solid var(--rule);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .site-header__row {
@@ -125,7 +126,7 @@ body.intro-lock {
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-    padding: var(--space-2) clamp(1.25rem, 4vw, 3rem);
+    padding: var(--space-2) var(--gutter-r) var(--space-2) var(--gutter-l);
     transform: translateY(-8px);
     opacity: 0;
     pointer-events: none;
@@ -217,7 +218,16 @@ body.intro-lock {
   gap: var(--space-2);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 0.5rem clamp(1.25rem, 4vw, 3rem) var(--space-3);
+  /* sem `scroll-padding` o ponto de encaixe do primeiro cartao e' a borda
+     do proprio cartao — ele encosta em x=0 e some o recuo lateral que o
+     resto da pagina tem. Tem que espelhar o padding. */
+  scroll-padding-left: var(--gutter-l);
+  scroll-padding-right: var(--gutter-r);
+  padding: 0.5rem var(--gutter-r) var(--space-3) var(--gutter-l);
+  /* trava o encadeamento: sem isso um arrasto na diagonal sobre o trilho
+     vaza pra pagina (e pro gesto de "voltar" do navegador) e da a
+     impressao de que a pagina inteira escorrega pro lado. */
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
 }
 
@@ -285,7 +295,8 @@ body.intro-lock {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     overflow: visible;
-    padding-inline: clamp(1.25rem, 4vw, 3rem);
+    padding-left: var(--gutter-l);
+    padding-right: var(--gutter-r);
   }
 
   .gallery-card {

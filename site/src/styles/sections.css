@@ -26,17 +26,6 @@ section {
   z-index: -1;
 }
 
-.hero__probe {
-  position: absolute;
-  z-index: 1;
-  padding: 0.3em 0.6em;
-  background: rgba(var(--paper-rgb), 0.88);
-  border: 1px solid var(--rule);
-  pointer-events: none;
-  transform: translate(-50%, -140%);
-  white-space: nowrap;
-}
-
 .hero__content {
   padding-block: var(--space-5) var(--space-4);
   width: 100%;
@@ -232,7 +221,8 @@ section {
 /* rodape                                                               */
 /* ------------------------------------------------------------------ */
 .site-footer {
-  padding-block: var(--space-4) var(--space-3);
+  padding-top: var(--space-4);
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--rule);
 }
 
