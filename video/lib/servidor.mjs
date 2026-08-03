@@ -47,12 +47,19 @@ const MIME = {
 function lerProjeto(yaml) {
   const um = (re) => (yaml.match(re) || [])[1];
   const crop = um(/^\s*crop:\s*\[([^\]]+)\]/m);
+  const semAspas = (v) => (v ? v.replace(/^["']|["']$/g, "") : null);
   return {
     image: um(/^\s*image:\s*(.+?)\s*(?:#.*)?$/m) || null,
     crop: crop ? crop.split(",").map((n) => Number(n.trim())) : null,
     textFile: um(/^\s*file:\s*(.+?)\s*(?:#.*)?$/m) || null,
     fonte: um(/^\s*family:\s*(.+?)\s*(?:#.*)?$/m) || null,
     accent: um(/^\s*color:\s*"?(#[0-9a-fA-F]{6})"?/m) || null,
+    // titulo e subtitulo pro caso da obra nao estar em works.json — que e' o
+    // do `magalenha`: o works.json e' gerado pelo build_site_assets.py, que
+    // precisa da imagem de referencia, e a dele se perdeu. O project.yaml
+    // continua sendo a fonte da verdade dos textos.
+    title: semAspas(um(/^\s*title:\s*(.+?)\s*(?:#.*)?$/m)),
+    subtitle: semAspas(um(/^\s*subtitle:\s*(.+?)\s*(?:#.*)?$/m)),
   };
 }
 

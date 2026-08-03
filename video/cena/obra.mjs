@@ -36,6 +36,8 @@
  * onde o Gustavo edita sem ler codigo.
  */
 
+import { construir, desenhar } from "./malha.mjs";
+
 const params = new URLSearchParams(location.search);
 const SLUG = params.get("obra") || "emicida";
 
@@ -47,6 +49,39 @@ const SLUG = params.get("obra") || "emicida";
  * works.json. So' perde a contagem de palavra, que ninguem consegue adivinhar.
  */
 const COPIA = {
+  /**
+   * `512×` sai de conta, não de chute: a peça tem 188.125 glifos e o trecho do
+   * manifesto tem 735 caracteres, o que dá ~256 voltas do texto dentro da
+   * gravura; "tupi" aparece 2× por volta. As datas são as das duas obras — a
+   * gravura do Debret é de 1834 e o manifesto do Oswald é de 1928 —, e é esse
+   * o assunto da peça: o texto de 1928 comendo a imagem de 1834.
+   */
+  "debret-antropofagia": {
+    frase: ["Tupi,", "or not", "tupi"],
+    glosas: ["De longe,<br>uma gravura de <em>1834</em>.",
+             "De perto,<br>um manifesto de <em>1928</em>."],
+    numero: "512×",
+    contada: "tupi",
+    nota: "é quantas vezes a palavra aparece dentro da gravura. "
+        + "O manifesto dá 256 voltas na imagem até fechá-la.",
+  },
+
+  /**
+   * Aqui o número não é de glifos: o `magalenha` é a única obra da fila cujo
+   * motor não roda mais (a foto de referência se perdeu), então não há
+   * contagem de glifos confiável pra citar. O que dá pra afirmar com o arquivo
+   * na mão é o tamanho do texto — e ele é o dado mais forte da peça de
+   * qualquer jeito: o baile inteiro sai de sete frases.
+   */
+  magalenha: {
+    frase: ["Vem,", "Magalenha", "Rojão"],
+    glosas: ["De longe,<br>é um <em>baile</em>.", "De perto,<br>é o <em>refrão</em>."],
+    numero: "114",
+    contada: "letras",
+    nota: "é a letra inteira da música — sete frases. "
+        + "A imagem toda é isso, repetido até a página fechar.",
+  },
+
   emicida: {
     frase: ["Então", "levanta", "e anda"],
     glosas: ["De longe,<br>é o <em>Emicida</em>.", "De perto,<br>é a <em>música inteira</em>."],
@@ -97,6 +132,8 @@ const el = {
   macro2Img: document.querySelector("[data-macro2]"),
   peca: document.querySelector('[data-camada="peca"]'),
   pecaImg: document.querySelector("[data-peca]"),
+  malha: document.querySelector(".obra__malha"),
+  malhaCanvas: document.querySelector("[data-malha]"),
   enxame: document.querySelector("[data-enxame]"),
   palavra: document.querySelector("[data-palavra]"),
   ficha: document.querySelector("[data-ficha]"),
@@ -198,7 +235,33 @@ function montar(copia, meta) {
 // os atos
 // --------------------------------------------------------------------------
 
-const ATOS = ["abertura", "enxame", "revelacao", "titulo", "mergulho", "contagem", "fecho"];
+const ATOS = ["abertura", "enxame", "montagem", "revelacao", "titulo",
+              "mergulho", "contagem", "fecho"];
+
+/** a malha em glifos, construída uma vez no carregamento (ver malha.mjs) */
+let MALHA = null;
+
+/**
+ * De quanto o ato da montagem começa mais perto.
+ *
+ * Estas peças são largas e o quadro é 9:16: encaixada inteira, a arte ocupa
+ * pouco mais da metade da altura e sobra papel em cima e embaixo. Montar nesse
+ * tamanho desperdiça o quadro e deixa a letra pequena demais pra se ler que é
+ * letra — que é justamente o que o ato existe pra mostrar. Então a montagem
+ * acontece de perto e a câmera recua até o enquadramento da peça, chegando
+ * exatamente em `scale(1)`, que é onde a imagem real assume.
+ */
+const ZOOM_MONTAGEM = 1.9;
+
+/**
+ * Supersample do canvas da malha.
+ *
+ * O canvas é desenhado maior que a tela e reduzido pelo CSS. Sem isso, o zoom
+ * de 1,9× do começo da montagem ampliaria o bitmap e as letras chegariam
+ * borradas justamente no momento em que estão grandes o suficiente pra alguém
+ * reparar nelas.
+ */
+const SUPER = 1.6;
 
 /**
  * Onde a peca fica quando a placa de especime esta' na tela.
@@ -208,8 +271,34 @@ const ATOS = ["abertura", "enxame", "revelacao", "titulo", "mergulho", "contagem
  * propria etiqueta**: encolhe e sobe ate' a placa encostar embaixo dela, e
  * nada se cruza. E' a regra da ficha de especime do poster, so' que animada.
  */
-const FICHA_ESCALA = 0.62;
-const FICHA_SOBE = -21.5;  // cqh
+/**
+ * Os dois foram constantes (0,62 e -21,5cqh) afinadas na mão pro `emicida`, e
+ * quebraram na primeira obra de outro formato: a arte do `magalenha` é larga,
+ * encaixada no quadro ela já é baixa, e encolher mais 38% deixava um buraco
+ * entre ela e a placa. Agora saem de medida — a altura livre acima da placa e a
+ * altura que a arte tem quando encaixada — e valem pra qualquer proporção.
+ */
+let FICHA_ESCALA = 0.62;
+let FICHA_SOBE = -21.5;  // cqh
+
+function medirFicha() {
+  const fw = el.quadro.clientWidth;
+  const fh = el.quadro.clientHeight;
+  const aw = el.pecaImg.naturalWidth;
+  const ah = el.pecaImg.naturalHeight;
+  const placa = document.querySelector(".obra__placa");
+  if (!fw || !fh || !aw || !ah || !placa) return;
+
+  // a placa é medida com o layout já montado: a altura dela depende de em
+  // quantas linhas o título quebrou, e isso muda de obra pra obra
+  const livre = placa.getBoundingClientRect().top;
+  const contida = ah * Math.min(fw / aw, fh / ah);
+
+  // 0,94 deixa uma folga entre a arte e o fio da placa; sem ela as duas
+  // encostam e a peça parece apoiada na etiqueta
+  FICHA_ESCALA = Math.min(1, (livre * 0.94) / contida);
+  FICHA_SOBE = ((livre / 2 - fh / 2) / fh) * 100;
+}
 
 const pecaEm = (escala, sobeCqh) => {
   el.pecaImg.style.transform =
@@ -218,13 +307,14 @@ const pecaEm = (escala, sobeCqh) => {
 
 /** apaga TODA camada. Todo ato comeca daqui — ver a nota de pureza no topo. */
 function zerar() {
-  for (const n of [el.macro, el.peca, el.enxame, el.palavra, el.ficha,
+  for (const n of [el.macro, el.peca, el.malha, el.enxame, el.palavra, el.ficha,
                    el.glosa, el.contagem]) {
     n.style.opacity = "0";
   }
   el.assinatura.style.opacity = "0";
   el.macroImg.style.transform = "scale(1)";
   el.macro2Img.style.transform = "scale(1)";
+  el.malhaCanvas.style.transform = "scale(1)";
   el.ficha.style.transform = "translateY(0)";
   pecaEm(1, 0);
   el.macroImg.style.opacity = "1";
@@ -289,6 +379,43 @@ function enxame(u) {
 
   el.macro.style.opacity = String(suave(janela(u, 0.68, 1)));
   macroEscala(mistura(1.22, 1.0, saida(janela(u, 0.6, 1))), 1);
+}
+
+/**
+ * As letras chegam de fora e assentam até formarem a peça.
+ *
+ * É o ato que o vídeo existe pra mostrar, e o único que não é corte nem
+ * transição: é a peça sendo *escrita*. Cada glifo tem posição, corpo, peso e
+ * tinta calculados pela mesma conta do motor (ver malha.mjs) — a imagem que se
+ * fecha no fim é a arte de verdade, não uma nuvem de partículas que lembra
+ * ela.
+ *
+ * No último quinto a peça REAL entra por cima e substitui a malha da cena. A
+ * malha aqui é mais grossa que a impressa (52 linhas contra as centenas do
+ * arquivo) porque glifo de 1,5 mm num vídeo vertical não se lê; a troca no fim
+ * é o que devolve a densidade verdadeira sem que o corte apareça.
+ */
+function montagem(u) {
+  el.palavra.style.opacity = String(1 - suave(janela(u, 0, 0.16)));
+  for (const s of letras) { s.style.opacity = "1"; s.style.transform = "none"; }
+
+  el.malha.style.opacity = String(suave(janela(u, 0.02, 0.12)));
+  // a câmera recua de ZOOM_MONTAGEM até 1: em 1 a malha cobre exatamente o
+  // mesmo retângulo que a imagem real, e por isso a troca no fim não desliza
+  // `suave`, e não `saida`: com ease-out o recuo acaba no primeiro terço do
+  // ato e as letras passam quase todo o tempo já no tamanho final — o zoom
+  // existe justamente pra elas serem grandes ENQUANTO se montam
+  const z = mistura(ZOOM_MONTAGEM, 1, suave(janela(u, 0.1, 0.96)));
+  el.malhaCanvas.style.transform = `scale(${z.toFixed(4)})`;
+  if (MALHA) {
+    const ctx = el.malhaCanvas.getContext("2d");
+    ctx.clearRect(0, 0, el.malhaCanvas.width, el.malhaCanvas.height);
+    desenhar(ctx, MALHA, janela(u, 0, 0.86), "monta");
+  }
+
+  // a peça real assume no fim — a malha da cena é grossa demais pra terminar nela
+  el.peca.style.opacity = String(suave(janela(u, 0.84, 1)));
+  pecaEm(1, 0);
 }
 
 /**
@@ -378,7 +505,8 @@ function fecho(u) {
   el.assinatura.style.opacity = String(suave(janela(u, 0.55, 0.85)));
 }
 
-const DESENHO = { abertura, enxame, revelacao, titulo, mergulho, contagem, fecho };
+const DESENHO = { abertura, enxame, montagem, revelacao, titulo, mergulho,
+                  contagem, fecho };
 
 function seek(ato, u) {
   zerar();
@@ -401,7 +529,11 @@ function fontes() {
     macro2: [`/social/${SLUG}/avulsas/malha-03.png`,
              `/social/${SLUG}/avulsas/malha-02.png`,
              `/art/${SLUG}-detail.webp`],
-    peca: [`/art/${SLUG}-full.webp`],
+    // `peca.png` das avulsas vem primeiro porque existe pra TODA obra: o
+    // `-full.webp` depende do build_site_assets.py, que precisa da imagem de
+    // referência — e a do `magalenha` se perdeu, então ele não tem asset de
+    // site nenhum.
+    peca: [`/social/${SLUG}/avulsas/peca.png`, `/art/${SLUG}-full.webp`],
   };
 }
 
@@ -426,6 +558,18 @@ const pronto = (async () => {
     .then((lista) => lista.find((e) => e.slug === SLUG) || {})
     .catch(() => ({}));
 
+  // obra fora do works.json (é o caso do `magalenha`): título, subtítulo e
+  // fonte saem do project.yaml, que é a fonte da verdade deles de qualquer
+  // jeito. O que não dá pra recuperar é a contagem de glifos, e a ficha já
+  // sabe sair sem ela.
+  if (!meta.title) {
+    const proj = await fetch("/dados/projetos.json")
+      .then((r) => r.json()).then((t) => t[SLUG] || {}).catch(() => ({}));
+    if (proj.title) meta.title = proj.title;
+    if (proj.subtitle) meta.subtitle = proj.subtitle;
+    if (proj.fonte) meta.font = proj.fonte;
+  }
+
   const copia = { ...padrao(meta), ...(COPIA[SLUG] || {}) };
   montar(copia, meta);
 
@@ -445,6 +589,32 @@ const pronto = (async () => {
   if (!ok1 || !ok2) {
     console.warn(`[cena] sem recorte 1:1 pra ${SLUG} — o macro vai sair mole.`
       + ` Rode: python scripts/build_instagram.py ${SLUG}`);
+  }
+
+  // --- a malha em glifos ---------------------------------------------------
+  // o canvas é dimensionado em pixels de DISPOSITIVO: a captura renderiza num
+  // layout de 430 px e entrega 1080, então desenhar em px de CSS sairia com um
+  // terço da resolução e as letras da malha viram borrão.
+  const dpr = window.devicePixelRatio || 1;
+  const cw = Math.round(el.malhaCanvas.clientWidth * dpr * SUPER);
+  const chh = Math.round(el.malhaCanvas.clientHeight * dpr * SUPER);
+  el.malhaCanvas.width = cw;
+  el.malhaCanvas.height = chh;
+
+  const texto = await fetch(`/texto/${SLUG}`)
+    .then((r) => (r.ok ? r.text() : ""))
+    .then((t) => t.split("\n").filter((l) => !l.trim().startsWith("#")).join(" "))
+    .catch(() => "");
+
+  medirFicha();
+
+  if (el.pecaImg.naturalWidth) {
+    MALHA = construir(el.pecaImg, texto, [0, 0, cw, chh], {
+      fonte: `"${meta.font || "Arial Narrow"}", "Archivo Variable", Georgia, serif`,
+    });
+    console.info(`[cena] malha: ${MALHA.celulas.length} glifos`);
+  } else {
+    console.warn("[cena] sem a peça carregada — o ato `montagem` sai vazio");
   }
 
   seek(ATOS[0], 0);

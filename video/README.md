@@ -221,6 +221,45 @@ cai num texto genérico montado do `works.json`.
 node video/lib/chapa.mjs cena --cena obra --obra emicida
 ```
 
+### O ato `montagem` — as letras formando a arte
+
+`cena/malha.mjs` refaz a conta de `src/typo/typography.py` em canvas: varre a
+peça por linhas, mede a escuridão local em cada parada, mapeia pro corpo da
+letra e avança **pela largura do glifo que acabou de desenhar**. Cada glifo
+entra vindo de fora do quadro, girando e crescendo até o lugar exato.
+
+Isso não é partícula por cima de foto: a imagem que fecha no fim é a arte de
+verdade. Três coisas herdadas do motor, e cada uma se vê quando falta:
+
+- **avanço variável** — com passo de coluna fixo as letras grandes das áreas
+  escuras se atropelam, coisa que a peça impressa não faz;
+- **a tinta sai da própria arte**, amostrada onde o glifo cai — é o que faz o
+  accent terracota do `magalenha` aparecer sem ninguém escrever cor aqui;
+- **a baseline ondula** e o glifo gira junto; reta, a malha vira tabela.
+
+A ordem de chegada é uma onda diagonal com ruído por cima. Aleatório puro pisca
+em pontos soltos, diagonal pura vira cortina de loja; a soma fecha a imagem como
+uma varredura desfocada.
+
+Dois números governam o ato, e os dois têm motivo:
+
+| | |
+|---|---|
+| `ZOOM_MONTAGEM` (1,9) | estas peças são largas e o quadro é 9:16 — encaixada inteira, a arte ocupa pouco mais da metade da altura e a letra fica pequena demais pra se ler que é letra. A montagem acontece de perto e recua até `scale(1)`, que é onde a imagem real assume. |
+| `SUPER` (1,6) | o canvas é desenhado maior que a tela e reduzido pelo CSS; sem isso o zoom de 1,9× ampliaria o bitmap e as letras chegariam borradas. |
+
+No último sexto do ato a peça **real** entra por cima. A malha da cena tem 52
+linhas e a impressa tem centenas: terminar na malha da cena entregaria uma
+versão grosseira da peça como se fosse ela.
+
+```bash
+node video/render.mjs video/roteiros/magalenha-9x16.mjs
+node video/render.mjs video/roteiros/debret-9x16.mjs
+```
+
+Os dois roteiros de 20 s trocam o par `enxame`/`revelacao` do emicida por
+`montagem`: com ela no meio, os outros dois contariam a mesma coisa duas vezes.
+
 A foto de referência sai do `<slug>-before.webp` quando ele existe (é o
 recorte alinhado pixel a pixel com a arte, gerado pelo
 `build_site_assets.py`). Hoje só `ouro-marrom` tem esse par; para as outras a
@@ -235,14 +274,17 @@ video/
 ├── roteiros/             <- É AQUI QUE SE AFINA
 │   ├── tour-9x16.mjs
 │   ├── processo-9x16.mjs
-│   └── emicida-9x16.mjs
+│   ├── emicida-9x16.mjs
+│   ├── magalenha-9x16.mjs
+│   └── debret-9x16.mjs
 ├── cena/
 │   ├── processo.html     a cena de "como nasce uma obra"
 │   ├── processo.css
 │   ├── processo.mjs
 │   ├── obra.html         a cena de "o que é isso" (conceitual)
 │   ├── obra.css
-│   └── obra.mjs
+│   ├── obra.mjs
+│   └── malha.mjs         a arte em glifos + a animação de montagem
 ├── lib/
 │   ├── cdp.mjs           cliente do protocolo do Chrome (sem dependência)
 │   ├── servidor.mjs      serve dist + cena + refs + textos numa origem só

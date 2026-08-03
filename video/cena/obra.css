@@ -58,6 +58,14 @@
   object-fit: contain;
 }
 
+/* --- a malha em canvas ------------------------------------------------- */
+
+.obra__malha canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* --- o enxame: a frase virando malha ----------------------------------- */
 
 .obra__enxame {

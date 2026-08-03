@@ -875,6 +875,24 @@ def avulsa_titulo(obra: Obra, largura: int = 2400) -> Image.Image:
     return img
 
 
+def avulsa_peca(obra: Obra, lado: int = 1800) -> Image.Image:
+    """A peça inteira, crua — sem carta, sem moldura, sem título.
+
+    É a carta 01 menos tudo que a carta 01 acrescenta. Serve pra montagem à mão
+    (o fundo é escolha de quem monta) e é a única fonte de arte limpa que
+    funciona pra **toda** obra: o `site/public/art/<slug>-full.webp` depende do
+    `build_site_assets.py`, que precisa da imagem de referência — e a do
+    `magalenha` se perdeu. Aqui a arte já veio recortada do export.
+
+    Não amplia: obra menor que `lado` sai no tamanho que tem.
+    """
+    escala = min(1.0, lado / max(obra.art.size))
+    if escala >= 1.0:
+        return obra.art.copy()
+    return obra.art.resize((max(1, round(obra.art.width * escala)),
+                            max(1, round(obra.art.height * escala))), Image.LANCZOS)
+
+
 def avulsas_malha(obra: Obra, crit: Criterio, quantas: int = 3,
                   lado: int = 1400) -> list[tuple[str, Image.Image]]:
     """Recortes 1:1 da malha, crus — sem placa, sem etiqueta, sem moldura.
@@ -981,6 +999,7 @@ def montar(slug: str, formatos: list[kit.Format], debug: bool,
     if avulsas:
         destino = OUT_ROOT / slug / "avulsas"
         escritos.append(kit.save(avulsa_titulo(obra), destino / "titulo.png"))
+        escritos.append(kit.save(avulsa_peca(obra), destino / "peca.png"))
         for nome, corte in avulsas_malha(obra, crit, avulsas):
             escritos.append(kit.save(corte, destino / nome))
 

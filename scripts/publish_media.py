@@ -78,6 +78,7 @@ DESCRICOES = {
     # avulsas — matéria-prima, não peça fechada
     "titulo.png": "O título isolado, PNG com FUNDO TRANSPARENTE. Pra montar por "
                   "cima do que você quiser.",
+    "peca.png": "A peça inteira, crua — sem carta, sem moldura e sem título.",
     "malha-01.png": "Recorte 1:1 da malha, cru — sem placa e sem moldura.",
     "malha-02.png": "Outro recorte 1:1, de outra região da peça.",
     "malha-03.png": "Outro recorte 1:1, de outra região da peça.",
@@ -292,7 +293,11 @@ def lista_de_arquivos(anexos: list[Anexo]) -> str:
         if a.group != grupo_atual:
             grupo_atual = a.group
             linhas.append(f"\n**{a.group}**\n")
-        texto = DESCRICOES.get(a.name, "")
+        # o nome do vídeo muda de obra pra obra (é o título dela), então ele não
+        # cabe numa tabela por nome de arquivo — a descrição sai da extensão
+        texto = DESCRICOES.get(a.name) or (
+            "Vídeo vertical 9:16 — serve pra reels e pra story."
+            if a.name.lower().endswith(".mp4") else "")
         linhas.append(f"- [{a.name}]({a.url}) — {texto}" if texto
                       else f"- [{a.name}]({a.url})")
     return "\n".join(linhas)
