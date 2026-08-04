@@ -152,16 +152,53 @@ Quem aparece no seletor de responsável é a lista `ASSIGNEES` em
 [`src/admin/store.js`](src/admin/store.js) — uma linha por pessoa. Não é
 consulta a `auth.users`: dá pra atribuir tarefa a quem ainda não tem conta.
 
+## Selo e certificado
+
+Cada peça vendida pode ganhar um selo — um QR de letras que aponta pra
+`/certificado/<CODE>/`, gerada estaticamente na build, sem banco:
+
+```bash
+cd ..
+.venv/Scripts/python.exe scripts/make_seal.py ouro-marrom --owner Nome --edition 3/5
+.venv/Scripts/python.exe scripts/build_certificates.py
+```
+
+`make_seal.py` registra o selo em [`src/data/seals.json`](src/data/seals.json)
+— ao contrário de `works.json`, **este arquivo não é regerado do zero, é
+acrescentado**: cada `git commit` depois de um selo novo é um registro de
+venda. `build_certificates.py` lê `seals.json` + `works.json` +
+`projects/<slug>/certificado.md` (a carta, escrita à mão — sem ela a obra não
+ganha certificado) e escreve
+[`src/data/certificates.json`](src/data/certificates.json) com a contagem
+("357× *levanta* aparece no retrato") calculada a partir do `.txt` da obra.
+
+Na build, [`build/certificates.js`](build/certificates.js) multiplica
+[`certificado/index.html`](certificado/index.html) numa pasta por selo —
+mesmo esquema de `/en/`, `/es/`, `/it/` e `/admin/`, ver `build/i18n.js`
+abaixo. Sem `vercel.json`, sem rewrite: cada `/certificado/<CODE>/` é um
+`index.html` de verdade no `dist/`.
+
+Detalhes de como a contagem é calculada, por que o ranking de palavras não é
+automático, e o caso especial do `magalenha` (obra sem imagem de referência,
+que ainda assim ganha certificado a partir do PNG já exportado) estão no
+`CLAUDE.md` da raiz, seção "Selo e certificado".
+
 ## Estrutura
 
 ```
 site/
 ├── index.html             pt — fonte da estrutura, marcada com data-i18n
-├── build/i18n.js          plugin Vite: gera /en/, /es/ e /it/ na build
+├── certificado/index.html template do certificado — vira /certificado/<CODE>/ na build
+├── build/
+│   ├── i18n.js            plugin Vite: gera /en/, /es/ e /it/ na build
+│   └── certificates.js    plugin Vite: gera /certificado/<CODE>/ na build
 ├── src/
 │   ├── config.js         contatos, preços e domínio (editar antes do deploy)
 │   ├── main.js            orquestra os módulos abaixo
-│   ├── data/works.json    gerado por scripts/build_site_assets.py
+│   ├── data/
+│   │   ├── works.json         gerado por scripts/build_site_assets.py
+│   │   ├── seals.json         selos emitidos — acrescentado por make_seal.py, VAI pro git
+│   │   └── certificates.json  gerado por scripts/build_certificates.py
 │   ├── i18n/
 │   │   ├── locales.js     lista de idiomas (fonte única)
 │   │   ├── runtime.js     t() — strings que o JS monta

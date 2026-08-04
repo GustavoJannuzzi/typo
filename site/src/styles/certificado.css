@@ -1,0 +1,208 @@
+/**
+ * A pagina do certificado — uma por selo, gerada por build/certificates.js.
+ *
+ * Reusa o vocabulario de base.css/components.css (.label, .readout, .eyebrow,
+ * .display, .framed, .wrap, .mark-squares, .btn) em vez de reinventar — so'
+ * o que e' especifico desta pagina mora aqui. Estrutura espelha o e-mail de
+ * entrega (emails/entrega-emicida.html): titulo > carta > contagem > obra >
+ * autenticidade, mesma hierarquia, agora publica e sem o nome de ninguem.
+ */
+
+.cert-body {
+  background: var(--paper);
+}
+
+/* ------------------------------------------------------------------ */
+/* cabecalho                                                            */
+/* ------------------------------------------------------------------ */
+.cert-header {
+  border-bottom: 1px solid var(--rule);
+}
+
+.cert-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--space-2);
+}
+
+.cert-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  text-decoration: none;
+}
+
+.cert-header__tag {
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* corpo                                                                */
+/* ------------------------------------------------------------------ */
+.cert-main {
+  padding-block: var(--space-4) var(--space-5);
+}
+
+.cert-main > section + section {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule);
+}
+
+.cert-hero__title {
+  font-size: var(--step-h1);
+  margin-top: 0.3em;
+}
+
+.cert-hero__subtitle {
+  margin-top: 0.9em;
+}
+
+/* ------------------------------------------------------------------ */
+/* a carta                                                              */
+/* ------------------------------------------------------------------ */
+.cert-carta {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: var(--step-lead);
+  line-height: 1.62;
+  color: var(--ink-warm);
+  max-width: 42rem;
+}
+
+.cert-carta p + p {
+  margin-top: 1em;
+}
+
+.cert-carta em {
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------ */
+/* a contagem                                                           */
+/* ------------------------------------------------------------------ */
+.cert-contagem__num {
+  font-size: var(--step-hero);
+  color: var(--accent);
+  margin-top: 0.5em;
+  line-height: 1;
+}
+
+.cert-contagem__word {
+  font-size: var(--step-h2);
+  margin-top: 0.1em;
+}
+
+.cert-contagem__hint {
+  margin-top: 0.9em;
+  max-width: 32rem;
+}
+
+.cert-ranking {
+  width: 100%;
+  max-width: 32rem;
+  margin-top: var(--space-3);
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+}
+
+.cert-ranking td {
+  padding: 0.7em 0;
+  border-top: 1px solid var(--rule);
+}
+
+.cert-ranking td:first-child {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cert-ranking td:last-child {
+  text-align: right;
+  color: var(--accent);
+}
+
+.cert-contagem__total {
+  margin-top: var(--space-2);
+}
+
+/* ------------------------------------------------------------------ */
+/* a obra                                                               */
+/* ------------------------------------------------------------------ */
+.cert-art__grid {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.cert-art__figure img {
+  width: 100%;
+  border: 1px solid var(--rule);
+}
+
+.cert-art__figure figcaption {
+  margin-top: 0.6em;
+}
+
+@media (min-width: 48rem) {
+  .cert-art__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* autenticidade                                                        */
+/* ------------------------------------------------------------------ */
+.cert-auth__list {
+  margin: var(--space-3) 0 0;
+  display: grid;
+  gap: 0.9em;
+  max-width: 32rem;
+}
+
+.cert-auth__item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: 0.7em;
+  border-top: 1px solid var(--rule);
+}
+
+/* `display: flex` acima bate por cima da regra padrao do navegador pra
+   `[hidden]` (CSS de autor sempre ganha do UA stylesheet) — sem isto, um
+   item condicional (edicao, dono) continua visivel mesmo escondido. */
+.cert-auth__item[hidden] {
+  display: none;
+}
+
+.cert-auth__item dt,
+.cert-auth__item dd {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* rodape — invertido, como o rodape do e-mail e do poster              */
+/* ------------------------------------------------------------------ */
+.cert-footer {
+  background: var(--ink);
+  padding-block: var(--space-3);
+  text-align: center;
+}
+
+.mark-squares--invert span {
+  background: var(--paper);
+}
+
+.mark-squares--invert span:first-child {
+  background: var(--accent);
+}
+
+.cert-footer__label {
+  color: var(--paper);
+  margin-top: 0.9em;
+}
+
+.cert-footer__fine {
+  color: #8c8c8c;
+  margin-top: 0.4em;
+}

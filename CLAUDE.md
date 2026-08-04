@@ -48,6 +48,7 @@ src/typo/
   export.py       PNG com dpi + PDF via img2pdf no tamanho físico
   project.py      project.yaml -> RenderConfig + scaffold
   presets.py      presets nomeados (magalenha, halftone)
+  seal.py         selo tipografico: QR desenhado com as letras da obra
   cli.py          entry points typo-render / typo-new-project
 app/ui.py         interface Gradio
 ```
@@ -60,6 +61,8 @@ scripts/social_kit.py           tokens do base.css + fontes da identidade + prim
 scripts/build_brand_assets.py   avatar / lockups / capas de destaque -> social/marca/
 scripts/build_instagram.py      carrossel 4:5 e 9:16 por obra      -> social/<slug>/
 scripts/publish_media.py        social/ -> site/public/midia/ + SQL das tarefas
+scripts/make_seal.py            selo (QR de letras) de uma peça vendida -> seals.json
+scripts/build_certificates.py   contagem + carta -> site/src/data/certificates.json
 ```
 
 ### Pipeline — `engine.render(config, mode)`
@@ -150,6 +153,11 @@ e os wrappers `scripts/run_ui.sh` / `scripts/run_ui.ps1`.
 .venv/Scripts/python.exe scripts/build_instagram.py ouro-marrom # carrossel da obra
 ```
 
+```bash
+.venv/Scripts/python.exe scripts/make_seal.py ouro-marrom --owner Nome --edition 3/5
+.venv/Scripts/python.exe scripts/build_certificates.py          # -> site/src/data/certificates.json
+```
+
 ## Divulgação — a camada de Instagram
 
 `build_instagram.py <slug>` lê `projects/<slug>/output/*150dpi.png` e cospe
@@ -190,6 +198,124 @@ Nenhuma cor e nenhum nome de fonte é escrito nesses scripts: `social_kit.py` l�
 terracota lá troca o Instagram junto. As fontes vêm dos mesmos `.woff2` do site,
 convertidos pra `.ttf` uma vez em `scripts/.fontcache/` (precisa de `fonttools`
 e `brotli`; a Archivo é variável e os eixos `wght`/`wdth` são os do CSS).
+
+## Selo e certificado
+
+Cada peça vendida pode ganhar um **selo**: um QR code desenhado com as letras
+da própria obra (`src/typo/seal.py`), que aponta pra uma **página de
+certificado** pública e estática (`/certificado/<CODE>/`) com a ficha de
+autenticidade da peça. Nem toda obra tem selo — normalmente o Gustavo avisa
+qual e com que dono.
+
+```bash
+.venv/Scripts/python.exe scripts/make_seal.py <obra> [--owner Nome] [--edition 3/5]
+.venv/Scripts/python.exe scripts/build_certificates.py
+```
+
+**O selo NÃO é o motor.** `typography.py` desenha com baseline ondulada,
+avanço proporcional ao glifo e rotação livre — nenhuma combinação de sliders
+garante "esta letra não invade o módulo vizinho", e um vazamento mata a
+leitura do QR. `seal.py` é uma primitiva à parte, na família do `display.py`:
+geometria própria (grade rígida, clipe duro por módulo, núcleo sólido nas
+contra-formas), reaproveitando `fonts`/`Scale`/`text_source`. O motor não é
+tocado — `TYPO_PARITY=1 pytest -k parity` continua sendo o juiz.
+
+`core_ratio: float = 0.18` (o diâmetro do núcleo sólido em cada módulo escuro,
+ver `SealSpec`) não é chute: é o menor valor que empata com um QR **liso** de
+controle numa bateria de 23 degradações (redução até 160px, blur, rotação,
+JPEG, contraste lavado). Abaixo disso o selo simplesmente não escaneia; acima,
+só entope a contra-forma do `o`/`e` sem ganhar nada. A medição está na
+docstring de `SealSpec` — não reduza esse número sem repetir a varredura.
+
+`make_seal.py` **não grava o que não lê de volta**: decodifica o próprio PNG
+com `zxing-cpp` (nativo + 800px + 400px) antes de salvar qualquer arquivo. Isso
+é a condição necessária, não a suficiente — o teste real é imprimir e escanear
+de perto e de longe, que só o Gustavo pode fazer.
+
+### O registro — `site/src/data/seals.json`
+
+Ao contrário de `projects/*/output/`, **este arquivo vai pro git**: é o único
+registro de quais selos existem, pra quem e desde quando. Cada selo emitido
+vira um commit — o histórico do git é o livro de registro, sem nada construído
+pra isso. `code` é Crockford base32 (sem I/L/O/U) e globalmente único entre
+todas as obras. `owner`, quando presente, é **só o primeiro nome** — o
+certificado é público e sem senha, então sobrenome numa URL que qualquer um
+que escanear o selo vê é dado de mais. `owner: null` não é um placeholder, é
+uma peça da casa (coleção interna).
+
+### A contagem — `scripts/build_certificates.py`
+
+A parte mais forte da ficha ("357× *levanta* aparece no retrato", como no
+molde de `emails/entrega-emicida.html`) é **calculada**, não escrita à mão:
+
+```
+volta          = uma passagem inteira pelo .txt, no modo real do motor
+                 (text_source.build_stream, repeat=1)
+nao_espacos    = caracteres de `volta` que não são espaço
+voltas         = works.json[slug].glyphs / nao_espacos
+ocorrências(p) = round(quantas vezes `p` aparece numa volta × voltas)
+```
+
+`nao_espacos`, não `len(volta)`: em `typography.py` o cursor do stream **anda**
+no espaço, mas `stats.glyphs` **não conta** espaço (o `continue` antes do
+`stats.glyphs += 1`). Validado contra o e-mail do Emicida como gabarito — as
+10 ocorrências de palavra batem exatas.
+
+**O ranking de palavras não é automático.** A primeira versão tentava "top 10
+por frequência" e não batia com o e-mail: "sou" (3×) ficava de fora enquanto
+"somos" (3×) entrava — duas conjugações do mesmo verbo, sem stopword list que
+separe uma da outra. Foi curadoria manual do Gustavo escrevendo o e-mail, não
+algoritmo. Por isso `projects/<slug>/certificado.md` **declara** a lista
+(frontmatter `palavras:`); o script só faz a conta pra cada uma. A primeira da
+lista é o número-herói da página.
+
+### `certificado.md` — o único conteúdo escrito à mão
+
+```markdown
+---
+palavras: [levanta, anda, vai, sonho, quem, sei, onde, somos, seguir, nossa]
+---
+
+A carta, em markdown mínimo (parágrafos + `*itálico*`).
+```
+
+Sem esse arquivo, a obra **não gera certificado** — e isso é o comportamento
+certo: obra sem carta não devia virar página pela metade. `palavras:` é
+opcional; sem ela, a seção de contagem simplesmente não aparece (ver
+`debret-antropofagia`, cujo `text/*.txt` está marcado como provisório pelo
+próprio Gustavo — computar uma "curadoria" em cima de texto incompleto seria
+inventar um número que muda quando o manifesto for colado por inteiro).
+
+Se `palavras:` está declarada mas a obra não tem `glyphs` em `works.json`
+(caso do `magalenha` — ver "Estado" mais abaixo), o script **falha alto** em
+vez de inventar a contagem. E se um selo já emitido em `seals.json` não tem
+`certificado.md` correspondente, `build_certificates.py` também falha a build
+inteira: um selo impresso aponta pra uma URL que precisa existir.
+
+### A página — `site/certificado/` + `site/build/certificates.js`
+
+Mesmo esquema de `/en/`, `/es/`, `/it/` e `/admin/`: um template estático
+(`certificado/index.html`), multiplicado na build em uma pasta por selo
+(`/certificado/<CODE>/`), via marcadores `data-cert*` no espírito do
+`data-i18n` de `build/i18n.js` — texto, HTML interno (a carta e as linhas do
+ranking, já prontas em `certificates.json`), atributo, e remoção condicional
+de elemento inteiro (`data-cert-if`). **Sem banco, sem `fetch`, sem
+`vercel.json`**: os dados vão inline no HTML, pra carregar instantâneo e pra a
+prévia de link no WhatsApp funcionar (`og:image`/`og:url` só existem com HTML
+já pronto). `noindex` é obrigatório — é artefato pessoal, não vitrine de
+busca. O template cru (com "TÍTULO DA OBRA" de placeholder) nunca fica
+acessível: o plugin apaga `dist/certificado/index.html` depois de gerar as
+pastas por código.
+
+### A imagem — reaproveita `public/art/`, com um fallback pra obra irreproduzível
+
+`ensure_art_assets()` usa os `.webp` que `build_site_assets.py` já gera pra
+galeria. Quando faltam (o `magalenha`, cuja `refs/` sumiu — ver "Estado") e o
+export de 150 dpi checked-in existe, ele recorta a arte pura DAQUELE PNG
+sozinho, sem abrir a imagem de referência: `crop_w`/`crop_h` saem direto da
+tupla `source.crop` do `project.yaml` (que já é exatamente o tamanho do
+recorte, sem precisar medir arquivo nenhum). Mesma geometria de
+`art_bbox_px()`, sem a dependência que faltou.
 
 ## Convenção de projetos
 
@@ -257,7 +383,13 @@ afinação está em `skills/typographic-poster/SKILL.md`.
 - `projects/magalenha/refs/` está **vazio**: a foto original vivia no sandbox
   onde o `print_v4.py` rodou (`/mnt/user-data/uploads/A5613A3C-…png`) e não veio
   junto. O `project.yaml` aponta para `refs/brasileiro.png`. Sem esse arquivo o
-  projeto magalenha não renderiza (erro claro, não silencioso).
+  projeto magalenha não renderiza (erro claro, não silencioso) — e por isso ele
+  também não entra em `works.json` (fora do `ORDER` de `build_site_assets.py`).
+  O certificado dele existe mesmo assim: `ensure_art_assets()` recorta a arte
+  pura direto do PNG de 150 dpi já exportado (que está no git, ver `.gitignore`),
+  sem precisar da referência — mas sem `glyphs` em `works.json`, a seção de
+  contagem não pode ser calculada, então o `certificado.md` dele não declara
+  `palavras:`.
 - `projects/demo/` usa uma referência **sintética** (gerada por
   `tests/fixtures.py`) só para a UI ter algo renderável e para smoke test.
   Pode apagar.

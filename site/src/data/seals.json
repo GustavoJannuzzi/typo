@@ -1,0 +1,32 @@
+[
+  {
+    "code": "NE5A6J",
+    "work": "debret-antropofagia",
+    "payload": "HTTPS://TYPO-JET.VERCEL.APP/CERTIFICADO/NE5A6J",
+    "owner": null,
+    "edition": null,
+    "issuedOn": "2026-08-04",
+    "sizeCm": 6.94,
+    "dpi": 600
+  },
+  {
+    "code": "S8HEX3",
+    "work": "magalenha",
+    "payload": "HTTPS://TYPO-JET.VERCEL.APP/CERTIFICADO/S8HEX3",
+    "owner": null,
+    "edition": null,
+    "issuedOn": "2026-08-04",
+    "sizeCm": 6.94,
+    "dpi": 600
+  },
+  {
+    "code": "XCEXWR",
+    "work": "emicida",
+    "payload": "HTTPS://TYPO-JET.VERCEL.APP/CERTIFICADO/XCEXWR",
+    "owner": "Geovana",
+    "edition": null,
+    "issuedOn": "2026-08-04",
+    "sizeCm": 6.94,
+    "dpi": 600
+  }
+]

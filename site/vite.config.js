@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
+import certificatePages from "./build/certificates.js";
 import i18nPages from "./build/i18n.js";
 import { CONFIG } from "./src/config.js";
 
@@ -18,7 +19,7 @@ const siteUrl = (
 ).replace(/\/$/, "");
 
 export default defineConfig({
-  plugins: [i18nPages({ siteUrl })],
+  plugins: [i18nPages({ siteUrl }), certificatePages({ siteUrl })],
   build: {
     target: "es2020",
     sourcemap: false,
@@ -28,9 +29,13 @@ export default defineConfig({
       // um `index.html` la' dentro — vale pro dev e pro estatico do Vercel.
       // As paginas por idioma (`/en/`, `/es/`, `/it/`) nao entram aqui: sao
       // geradas a partir do `index.html` ja' construido, em `build/i18n.js`.
+      // `certificado/index.html` e' o mesmo esquema: um template so', que
+      // `build/certificates.js` multiplica em `/certificado/<CODE>/` — uma
+      // pasta por selo emitido em src/data/seals.json.
       input: {
         main: entry("./index.html"),
         admin: entry("./admin/index.html"),
+        certificado: entry("./certificado/index.html"),
       },
     },
   },

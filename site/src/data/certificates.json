@@ -1,0 +1,83 @@
+{
+  "debret-antropofagia": {
+    "art": {
+      "detail": "/art/debret-antropofagia-detail.webp",
+      "full": "/art/debret-antropofagia-full.webp"
+    },
+    "carta": "<p>Uma prancha de Jean-Baptiste Debret, de 1834, redesenhada com o texto do Manifesto Antropófago de Oswald de Andrade, de 1928. O Debret veio catalogar o Brasil para o olhar europeu; o manifesto é a resposta — não recusar a referência estrangeira, deglutir. <em>&quot;Tupi, or not tupi, that is the question.&quot;</em></p><p>O cartaz faz isso literalmente: a imagem colonial continua inteira e reconhecível, mas cada grão dela agora é uma letra do texto que a devora. De longe, quatro blocos de tinta soletram TUPI. De perto, é o manifesto inteiro, letra por letra.</p><p>Peça da casa, coleção interna.</p>",
+    "contagem": null,
+    "subtitle": "OSWALD DE ANDRADE · MANIFESTO ANTROPÓFAGO · 1928",
+    "title": "TUPI OR NOT TUPI"
+  },
+  "emicida": {
+    "art": {
+      "detail": "/art/emicida-detail.webp",
+      "full": "/art/emicida-full.webp"
+    },
+    "carta": "<p>Esta arte não foi desenhada com traço — foi escrita. Cada sombra do retrato é uma letra de <em>Levanta e Anda</em>, e as letras mudam de tamanho conforme a foto escurece. Onde o terno é mais fundo, a palavra cresce. Onde a camisa é clara, ela quase some.</p><p>Por isso ela funciona de dois jeitos. De longe, é o Emicida. De perto, é a música inteira.</p>",
+    "contagem": {
+      "frases": 62,
+      "heroi": {
+        "palavra": "levanta",
+        "vezes": 357
+      },
+      "letras": 40413,
+      "palavras": 9516,
+      "ranking": [
+        {
+          "palavra": "levanta",
+          "vezes": 357
+        },
+        {
+          "palavra": "anda",
+          "vezes": 357
+        },
+        {
+          "palavra": "vai",
+          "vezes": 357
+        },
+        {
+          "palavra": "sonho",
+          "vezes": 102
+        },
+        {
+          "palavra": "quem",
+          "vezes": 102
+        },
+        {
+          "palavra": "sei",
+          "vezes": 102
+        },
+        {
+          "palavra": "onde",
+          "vezes": 102
+        },
+        {
+          "palavra": "somos",
+          "vezes": 77
+        },
+        {
+          "palavra": "seguir",
+          "vezes": 77
+        },
+        {
+          "palavra": "nossa",
+          "vezes": 77
+        }
+      ],
+      "voltas": 25.51
+    },
+    "subtitle": "EMICIDA · LEVANTA E ANDA",
+    "title": "O GLORIOSO RETORNO"
+  },
+  "magalenha": {
+    "art": {
+      "detail": "/art/magalenha-detail.webp",
+      "full": "/art/magalenha-full.webp"
+    },
+    "carta": "<p>Esta foi a primeira peça — o retrato que testou se a ideia funcionava antes de virar coleção. As três figuras são desenhadas letra por letra com &quot;Brasileiro&quot;, de Sérgio Mendes: é o mesmo motor que hoje desenha toda a coleção, calibrado bit a bit contra este pôster.</p><p>Peça da casa, sem edição numerada. Fica aqui como referência — a régua contra a qual toda obra nova ainda é medida.</p>",
+    "contagem": null,
+    "subtitle": "SÉRGIO MENDES · BRASILEIRO",
+    "title": "MAGALENHA"
+  }
+}

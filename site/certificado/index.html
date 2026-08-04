@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <!-- Este template e' processado pelo plugin site/build/certificates.js,
+         uma vez por selo emitido — nao existe uma pagina "/certificado/"
+         sozinha, so' "/certificado/<CODE>/". Os marcadores data-cert=*, tal
+         como data-i18n=* em build/i18n.js, sao trocados no writeBundle.
+         Ver a docstring do plugin para o vocabulario completo. -->
+    <!--cert:head-->
+
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Onde Moram as Palavras" />
+
+    <link rel="preload" as="font" href="/fonts/archivo-variable.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/fonts/jetbrains-mono-500.woff2" type="font/woff2" crossorigin />
+
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <link rel="stylesheet" href="/src/styles/components.css" />
+    <link rel="stylesheet" href="/src/styles/certificado.css" />
+  </head>
+  <body class="cert-body">
+    <header class="cert-header">
+      <div class="wrap cert-header__row">
+        <a href="/" class="cert-header__brand">
+          <span class="mark-squares" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+          <span class="label">Onde Moram as Palavras</span>
+        </a>
+        <span class="label cert-header__tag">Certificado</span>
+      </div>
+    </header>
+
+    <main class="cert-main framed">
+      <section class="wrap cert-hero">
+        <p class="label eyebrow">Ficha de autenticidade · espécime único</p>
+        <h1 class="display cert-hero__title" data-cert="title">Título da obra</h1>
+        <p class="readout cert-hero__subtitle" data-cert="subtitle">Artista · Obra</p>
+      </section>
+
+      <section class="wrap cert-carta" data-cert-html="carta">
+        <p>A carta desta obra ainda não foi escrita.</p>
+      </section>
+
+      <section class="wrap cert-contagem" data-cert-if="contagem" hidden>
+        <p class="label eyebrow">A contagem</p>
+        <p class="display cert-contagem__num">
+          <span data-cert="heroi-vezes">0</span><span aria-hidden="true">&nbsp;&times;</span>
+        </p>
+        <p class="display cert-contagem__word" data-cert="heroi-palavra">palavra</p>
+        <p class="readout cert-contagem__hint">é quantas vezes esta palavra aparece dentro do retrato</p>
+
+        <table class="cert-ranking">
+          <tbody data-cert-html="ranking-rows"></tbody>
+        </table>
+
+        <p class="readout cert-contagem__total">
+          <span data-cert="palavras">0</span> palavras · <span data-cert="letras">0</span> letras desenhadas uma a uma
+        </p>
+      </section>
+
+      <section class="wrap cert-art" data-cert-if="art" hidden>
+        <p class="label eyebrow">A obra</p>
+        <div class="cert-art__grid">
+          <figure class="cert-art__figure">
+            <img data-cert-attr="src:art-full" alt="" loading="lazy" />
+            <figcaption class="readout">a peça inteira</figcaption>
+          </figure>
+          <figure class="cert-art__figure">
+            <img data-cert-attr="src:art-detail" alt="" loading="lazy" />
+            <figcaption class="readout">de perto, é feita de letras</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="wrap cert-auth">
+        <p class="label eyebrow">Autenticidade</p>
+        <dl class="cert-auth__list">
+          <div class="cert-auth__item">
+            <dt class="label">Código do selo</dt>
+            <dd class="readout" data-cert="code">000000</dd>
+          </div>
+          <div class="cert-auth__item" data-cert-if="edition" hidden>
+            <dt class="label">Edição</dt>
+            <dd class="readout" data-cert="edition"></dd>
+          </div>
+          <div class="cert-auth__item" data-cert-if="owner" hidden>
+            <dt class="label">Peça de</dt>
+            <dd class="readout" data-cert="owner"></dd>
+          </div>
+          <div class="cert-auth__item" data-cert-if="!owner" hidden>
+            <dt class="label">Coleção</dt>
+            <dd class="readout">Interna — Onde Moram as Palavras</dd>
+          </div>
+          <div class="cert-auth__item">
+            <dt class="label">Emitido em</dt>
+            <dd class="readout" data-cert="issued-on"></dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+
+    <footer class="cert-footer">
+      <div class="wrap cert-footer__inner">
+        <span class="mark-squares mark-squares--invert" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        <p class="label cert-footer__label">Experimento tipográfico</p>
+        <p class="readout cert-footer__fine">Gustavo Jannuzzi · Onde Moram as Palavras</p>
+      </div>
+    </footer>
+  </body>
+</html>

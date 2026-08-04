@@ -20,7 +20,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+# zxing-cpp e' o decodificador INDEPENDENTE do teste do selo: ele le de volta o
+# QR que a gente desenhou. Sem um decodificador de terceiro o teste seria
+# tautologia ("a matriz que desenhei e a matriz que gerei").
+dev = ["pytest>=8.0", "zxing-cpp>=2.2"]
+# so' para scripts/make_seal.py: gerar a matriz do QR. Fora do runtime do motor
+# de proposito — renderizar arte nao precisa disso.
+seal = ["segno>=1.6"]
 # so' para scripts/build_brand_assets.py e scripts/build_instagram.py: converter
 # as fontes .woff2 da identidade para .ttf (o Pillow nao le woff2). Fora do
 # runtime do motor de proposito — nada disso e' preciso pra renderizar arte.
