@@ -60,8 +60,10 @@ CONFIG_JS = ROOT / "site" / "src" / "config.js"
 #: ver `_site_url_from_config()`.
 DEFAULT_BASE_URL = "https://typo-jet.vercel.app"
 
-#: caminho legivel — custa 0 modulos a mais que "/S/": medido com segno,
-#: ambos fecham em V4/33 modulos pra uma URL deste tamanho de dominio.
+#: caminho legivel, minusculo — TEM que bater exatamente com o nome da pasta
+#: em disco (site/certificado/), porque hospedagem estatica e' case-sensitive.
+#: "/CERTIFICADO/" 404 de verdade contra a pasta "certificado/"; confirmado ao
+#: vivo em typo-jet.vercel.app antes de trocar isto de maiuscula pra minuscula.
 CERT_PATH = "certificado"
 
 #: Crockford base32: sem I, L, O e U — nao ha o que confundir lendo em voz alta
@@ -79,14 +81,24 @@ def new_code() -> str:
 
 
 def build_payload(base_url: str, code: str) -> str:
-    """A URL do selo, EM MAIUSCULA.
+    """A URL do selo.
 
-    Maiuscula nao e' estetica: joga o QR para o modo alfanumerico, que cabe em
-    menos modulos que o modo byte — modulo maior no mesmo papel, de graca.
-    Dominio e' case-insensitive por definicao; o path o site resolve sem
-    diferenciar caixa.
+    NAO maiusculiza mais a URL inteira. A primeira versao deste script fazia
+    isso pra ganhar o modo alfanumerico do QR (menos modulos) — mas
+    hospedagem estatica e' CASE-SENSITIVE: `/CERTIFICADO/` deu 404 de
+    verdade contra a pasta `certificado/` em disco, confirmado ao vivo em
+    typo-jet.vercel.app. Um selo que aponta pra 404 e' pior que um selo
+    maior. O `code` continua vindo em maiuscula (assim que e' gerado — ver
+    `new_code()`/`ALPHABET`), que e' o que a pasta de saida usa de verdade
+    (`dist/certificado/<CODE>/`); so' o resto da URL vai como o usuario
+    escreveu (o `base_url` default e' `https://typo-jet.vercel.app`, e o
+    `CERT_PATH` e' sempre minusculo).
+
+    A barra final importa: e' o que evita um redirect 308 (sem barra ->
+    com barra) entre o celular escanear e a pagina abrir — um passo a menos
+    que pode falhar sem rede.
     """
-    return f"{base_url.rstrip('/')}/{CERT_PATH}/{code}".upper()
+    return f"{base_url.rstrip('/')}/{CERT_PATH}/{code}/"
 
 
 def _site_url_from_config() -> str:
