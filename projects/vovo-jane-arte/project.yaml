@@ -1,0 +1,129 @@
+name: vovo-jane-arte
+source:
+  image: refs/arte-ref.png
+  crop:
+  - 0
+  - 0
+  - 3035
+  - 3844
+text:
+  file: text/como-e-grande.txt
+  mode: phrases
+page:
+  mode: fixed
+  width_cm: 59.4
+  height_cm: 84.1
+  margins_cm:
+    top: 11.0
+    bottom: 8.0
+    side: 4.0
+  dpi_export: 150
+  preview_max_px: 1600
+titles:
+  title: JANE E GILBER
+  subtitle: COMO É GRANDE O MEU AMOR POR VOCÊ · ROBERTO CARLOS · 1967
+  footer: EXPERIMENTO TIPOGRÁFICO — GUSTAVO JANNUZZI
+  draw: true
+mask:
+  enabled: false
+landscape:
+  enabled: false
+accent:
+  enabled: false
+palette:
+  enabled: true
+  stops:
+  - - '#2B2929'
+    - '#000000'
+  - - '#666363'
+    - '#000000'
+  - - '#858180'
+    - '#000000'
+  - - '#9D9897'
+    - '#0D0C0C'
+  - - '#B4AFAE'
+    - '#454342'
+  - - '#D1CDCB'
+    - '#8C8988'
+  - - '#EBE9E8'
+    - '#CECCCB'
+  - - '#F5F5F4'
+    - '#E7E6E6'
+  - - '#FAFAF9'
+    - '#F3F2F2'
+  - - '#FFFFFF'
+    - '#FFFFFF'
+  value_weight: 1.0
+display:
+  enabled: true
+  family: Cambria
+  marks:
+  - text: 'como
+
+      é grande'
+    size_cm: 4.05
+    x_cm: 7.78
+    y_cm: 25.58
+    anchor: lt
+    family: Cambria
+    weight: regular
+    color: '#5C5A5A'
+    layer: over
+    leading: 1.18
+  - text: 'o
+
+      meu'
+    size_cm: 5.33
+    x_cm: 8.28
+    y_cm: 63.41
+    anchor: lt
+    family: Cambria
+    weight: regular
+    color: '#5C5A5A'
+    layer: over
+    leading: 1.18
+  - text: AMOR
+    size_cm: 10.08
+    x_cm: 16.91
+    y_cm: 61.45
+    anchor: lt
+    family: Cambria
+    weight: regular
+    color: '#5C5A5A'
+    layer: over
+    leading: 1.18
+  - text: por você
+    size_cm: 3.66
+    x_cm: 31.71
+    y_cm: 69.46
+    anchor: lt
+    family: Cambria
+    weight: regular
+    color: '#5C5A5A'
+    layer: over
+    leading: 1.18
+style_preset: magalenha
+style_overrides:
+  colors:
+    ink: '#2A2422'
+  font:
+    family: Arial Narrow
+    base_line_mm: 3.0
+    size_min_mm: 2.4
+    size_max_ratio: 1.25
+    size_gamma: 1.0
+    bold_threshold: 0.72
+  flow:
+    flex: 0.0
+  text_blocks:
+    title_size_mm: 24
+    title_y_mm: 14
+    subtitle_size_mm: 4.6
+    subtitle_dy_mm: 30
+    squares_dy_mm: 40
+    square_size_mm: 3.4
+    square_gap_mm: 7.4
+    footer_size_mm: 5.0
+    footer_dy_mm: 22
+    frame: false
+    accent_squares: true

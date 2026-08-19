@@ -79,5 +79,15 @@
     "contagem": null,
     "subtitle": "SÉRGIO MENDES · BRASILEIRO",
     "title": "MAGALENHA"
+  },
+  "vovo-jane-arte": {
+    "art": {
+      "detail": "/art/vovo-jane-arte-detail.webp",
+      "full": "/art/vovo-jane-arte-full.webp"
+    },
+    "carta": "<p>Este retrato não tem um traço sequer — é feito inteiro da letra de <em>Como É Grande O Meu Amor Por Você</em>, de Roberto Carlos, 1967. Cada sombra do rosto e cada mecha de cabelo é a música se repetindo, maior onde a imagem escurece, quase invisível onde ela clareia.</p><p>&quot;AMOR&quot; é a única palavra que sai do resto: cresce sozinha, atravessando o retrato, no meio da frase que contorna Jane e Gilber. Presente de família, feito pelo neto.</p>",
+    "contagem": null,
+    "subtitle": "COMO É GRANDE O MEU AMOR POR VOCÊ · ROBERTO CARLOS · 1967",
+    "title": "JANE E GILBER"
   }
 }

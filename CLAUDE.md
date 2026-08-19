@@ -377,6 +377,40 @@ afinação está em `skills/typographic-poster/SKILL.md`.
   (0.25) comprime o eixo de brilho, senão as bordas de anti-aliasing do desenho
   sorteiam cor. O porquê está na docstring de `palette.py`; o uso real em
   `projects/turnstile`.
+- **Quem decide se há glifo é a MÁSCARA, não o tom.** Em `typography.py:117` a
+  escuridão é travada *pra cima* em `interior_fill_min` — não existe "claro
+  demais, não desenha". Com `mask.enabled: false` o motor põe letra em cada
+  posição, **inclusive no branco puro 255**. Para arte de recorte (figura sobre
+  papel limpo) é obrigatório `mask.enabled: true`; com a figura recortada sobre
+  branco, `lum_threshold: 0.95` isola sozinho.
+- **A referência é a partitura.** O motor só lê escuridão local, então forma
+  desenhada em cinza no fundo da referência vira letra: ~215 dá texto fino,
+  ~180 médio, ~100 grande. É assim que se ganha geometria (disco, faixa,
+  quadrado, texto em caminho circular) sem tocar no motor. O teto é
+  `base_line * size_max_ratio` (~7 mm): citação **grande** de verdade só sai de
+  `display.marks`. Ver `scripts/vovo_jane_arte.py`.
+- **A máscara preenche contra-forma.** `mask.build` roda `binary_fill_holes`, e
+  o miolo de um `o`/`a`/`g` desenhado na referência é um branco cercado de
+  tinta: vira máscara e o motor desenha letrinha lá dentro. Pintar de branco não
+  resolve (preenche de novo) — o conserto é topológico, abrir um canal de 2 px
+  do miolo até fora.
+- **Apagar algo da referência para redesenhar por cima é por LUGAR, não por
+  cor.** Em `vovo-jane-arte` o texto da referência precisava sair para ser
+  reescrito em tipo de verdade; nenhuma peneira de luminância ou saturação
+  separava a letra do cabelo do retratado, porque os dois são escuros e neutros
+  e se encostam. O que resolve é medir a caixa de tinta de cada **linha** de
+  texto varrendo coluna a coluna, e só procurar lá dentro. Uma caixa por bloco
+  (em vez de por linha) já é grande demais e encosta no desenho. Ver
+  `TIPO_LINHAS` em `scripts/vovo_jane_arte.py`.
+- **`display.marks` medem da borda da PÁGINA**, não da caixa de arte: sem somar
+  a margem, tudo sai deslocado. E o auto-fit de corpo tem que medir a string
+  **exatamente como vai ser desenhada** — já em caixa alta e passada por
+  `spaced(texto, letter_spacing)`, que enfia um espaço entre cada letra e quase
+  dobra a linha.
+- **Densidade só se julga com `preview_max_px` ≥ 1400.** Em preview pequeno o
+  piso em px de `line_h` (`engine.py:192`) domina o valor em mm e a malha sai
+  mais rala do que vai sair no papel — dá pra escurecer a arte "pra compensar"
+  e descobrir depois que entupiu.
 
 ## Estado
 
